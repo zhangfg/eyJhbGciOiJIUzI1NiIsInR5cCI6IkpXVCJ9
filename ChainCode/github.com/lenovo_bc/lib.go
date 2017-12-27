@@ -81,33 +81,35 @@ type BillingInfo struct {
 
 //PO Key: "PO" + PO Number + Item_no
 type PurchaseOrder struct {
-	PONO           	string   `json:"PONO"`           //PO Number
-	VendorNO       	string   `json:"VendorNO"`       //Vendor Number
-	VendorName     	string   `json:"VendorName"`     //Vendor Name
-	POTYPE         	string   `json:"POTYPE"`         //POTYPE
-	PODate         	string   `json:"PODate"`         //PO date
-	POItemNO       	string   `json:"POItemNO"`       //PO Item Number
-	TRANSDOC       	string   `json:"TRANSDOC"`       //Trans doc type
-	SONUMBER       	string   `json:"SONUMBER"`       //SO Number
-	SOITEM         	string   `json:"SOITEM"`         //SO Item Number
-	PARTSNO        	string   `json:"PARTSNO"`        //Material Number
-	PARTSDESC      	string   `json:"PARTSDESC"`      //Material Description
-	POQty          	string   `json:"POQty"`          //Quantity
-	Unit           	string   `json:"Unit"`           //Unit of Measure
-	Plant          	string   `json:"Plant"`          //Plant
-	POItemChgDate  	string   `json:"POItemChgDate"`  //Item change Date
-	POItemSts      	string   `json:"POItemSts"`      //PO Item status(Delete)
-	ContractNO     	string   `json:"ContractNO"`     //Contract No
-	ContractItemNO 	string   `json:"ContractItemNO"` //Contract Item No
-	IncoTerm       	string   `json:"IncoTerm"`       //Inco Term
-	PaymentTerm    	string   `json:"PaymentTerm"`    //payment
-	UPDATEDAY      	string   `json:"UPDATEDAY"`      //PO UPDATEDAY
-	UPTIME         	string   `json:"UPTIME"`         //PO UPTIME
-	UPNAME         	string   `json:"UPNAME"`         //PO UPNAME
-	GRInfos        	[]GRInfo `json:"GRInfos"`		//GR Info
-	Confirmation	[]Confirmation `json:"Confirmation"`		//Confirmation
-	InboundDelivery	[]InboundDelivery `json:"InboundDelivery"`	//Inbound Delivery
-	Invoice			[]Invoice `json:"Invoice"`		//Invoice
+	PONO       string `json:"PONO"`                               //PO Number
+	VendorNO   string `json:"VendorNO"`                           //Vendor Number
+	VendorName string `json:"VendorName"`                         //Vendor Name
+	OANO       string `json:"OANO"`                               //OA Number
+	OAName     string `json:"OAName"`                             //OA Name
+	POTYPE     string `json:"POTYPE"`                             //POTYPE
+	PODate     string `json:"PODate"`                             //PO date
+	POItemNO   string `json:"POItemNO"`                           //PO Item Number
+	TRANSDOC   string `json:"TRANSDOC"`                           //Trans doc type
+	SONUMBER   string `json:"SONUMBER"`                           //SO Number
+	SOITEM     string `json:"SOITEM"`                             //SO Item Number
+	PARTSNO    string `json:"PARTSNO"`                            //Material Number
+	PARTSDESC  string `json:"PARTSDESC"`                          //Material Description
+	POQty          	string   `json:"POQty"`                    //Quantity
+	Unit           	string   `json:"Unit"`                     //Unit of Measure
+	Plant          	string   `json:"Plant"`                    //Plant
+	POItemChgDate  	string   `json:"POItemChgDate"`            //Item change Date
+	POItemSts      	string   `json:"POItemSts"`                //PO Item status(Delete)
+	ContractNO     	string   `json:"ContractNO"`               //Contract No
+	ContractItemNO 	string   `json:"ContractItemNO"`           //Contract Item No
+	IncoTerm       	string   `json:"IncoTerm"`                 //Inco Term
+	PaymentTerm    	string   `json:"PaymentTerm"`              //payment
+	UPDATEDAY      	string   `json:"UPDATEDAY"`                //PO UPDATEDAY
+	UPTIME         	string   `json:"UPTIME"`                   //PO UPTIME
+	UPNAME         	string   `json:"UPNAME"`                   //PO UPNAME
+	GRInfos        	[]GRInfo `json:"GRInfos"`                  //GR Info
+	Confirmation	[]Confirmation `json:"Confirmation"`          //Confirmation
+	InboundDelivery	[]InboundDelivery `json:"InboundDelivery"` //Inbound Delivery
+	Invoice			[]Invoice `json:"Invoice"`                 //Invoice
 }
 
 type GRInfo struct {
