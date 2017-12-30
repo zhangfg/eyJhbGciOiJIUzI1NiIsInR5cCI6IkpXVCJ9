@@ -143,20 +143,22 @@ type Confirmation struct {
 }
 
 type InboundDelivery struct {
-	DeliveryNO		string       `json:"DeliveryNO"`    //Delivery Number
-	VendorNO      	string       `json:"VendorNO"`      //Vendor Number
-	IDCrtDate       string       `json:"IDCrtDate"`     //Creation  Date
-	IDDlvyDate    	string       `json:"IDDlvyDate"`    //Delivery Date
-	IncoTerm 		string       `json:"IncoTerm"` 		//Inco Term
-	ASNNO 			string       `json:"ASNNO"` 		//Reference Number
-	IDItemNO 		string       `json:"IDItemNO"` 		//Delivery Item Number
-	PARTSNO 		string       `json:"PARTSNO"` 		//Material Number
-	PARTSDESC 		string       `json:"PARTSDESC"` 	//Material Description
-	DlvyQty 		string       `json:"DlvyQty"` 		//Quantity
-	COO 			string       `json:"COO"` 			//COO
-	UPDATEDAY       string       `json:"UPDATEDAY"`     // Confirmation UPDATEDAY
-	UPTIME          string       `json:"UPTIME"`        // Confirmation UPTIME
-	UPNAME          string       `json:"UPNAME"`        // Confirmation UPNAME
+	DeliveryNO		string       `json:"DeliveryNO"` //Delivery Number
+	VendorNO      	string       `json:"VendorNO"`   //Vendor Number
+	IDCrtDate       string       `json:"IDCrtDate"`    //Creation  Date
+	IDDlvyDate string `json:"IDDlvyDate"`              //Delivery Date
+	IncoTerm   string `json:"IncoTerm"`                //Inco Term
+	ASNNO      string `json:"ASNNO"`                   //Reference Number
+	IDItemNO   string `json:"IDItemNO"`                //Delivery Item Number
+	PARTSNO    string `json:"PARTSNO"`                 //Material Number
+	PARTSDESC  string `json:"PARTSDESC"`               //Material Description
+	DlvyQty    string `json:"DlvyQty"`                 //Quantity
+	COO        string `json:"COO"`                     //COO
+	TrackID    string `json:"TrackID"`                 //Carrier Tracking ID
+	MOT        string `json:"MOT"`                     //MOT
+	UPDATEDAY  string `json:"UPDATEDAY"`               // Confirmation UPDATEDAY
+	UPTIME     string `json:"UPTIME"`                  // Confirmation UPTIME
+	UPNAME     string `json:"UPNAME"`                  // Confirmation UPNAME
 }
 
 type GIInfo struct {
