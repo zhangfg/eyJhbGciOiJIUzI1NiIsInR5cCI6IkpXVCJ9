@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"fmt"
 )
 
 //创建，修改SO信息
@@ -48,9 +47,6 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				} else if salesOrder.TRANSDOC == "BL" {
 					oldSalesOrder.BILLINFOS = salesOrder.BILLINFOS
 					b, _ = json.Marshal(oldSalesOrder)
-				//} else if salesOrder.TRANSDOC == "ASN" {
-				//	oldSalesOrder.InboundDelivery = salesOrder.InboundDelivery
-				//	b, _ = json.Marshal(oldSalesOrder)
 				} else if salesOrder.TRANSDOC == "GI" {
 					oldSalesOrder.GIINFOS = salesOrder.GIINFOS
 					b, _ = json.Marshal(oldSalesOrder)
@@ -145,8 +141,6 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 			} else {
 				if obj.TRANSDOC == "PO" {
 					//update SO
-					// fmt.Println("SO no is "+obj.SONUMBER )
-					// fmt.Println("SO item is "+obj.SOITEM )
 					if (obj.SONUMBER != "" && obj.SOITEM != "") {
 						err, soKey := generateKey(stub, SO_KEY, []string{obj.SONUMBER, obj.SOITEM})
 						if err != nil {

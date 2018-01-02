@@ -53,7 +53,6 @@ type SalesOrder struct {
 	DELFLAG    string        `json:"DELETEFLAG"` //DELETEFLAG
 	BILLINFOS  []BillingInfo `json:"BILLINFOS"`  //Billing info
 	GIINFOS    []GIInfo      `json:"GIINFOS"`    //GIINFOS
-	//InboundDelivery	[]InboundDelivery `json:"InboundDelivery"`	//Inbound Delivery
 	PONO       string        `json:"PONO"`       //PO  no
 	POITEM     string        `json:"POITEM"`     //PO  item no
 }
@@ -81,35 +80,35 @@ type BillingInfo struct {
 
 //PO Key: "PO" + PO Number + Item_no
 type PurchaseOrder struct {
-	PONO       string `json:"PONO"`                               //PO Number
-	VendorNO   string `json:"VendorNO"`                           //Vendor Number
-	VendorName string `json:"VendorName"`                         //Vendor Name
-	OANO       string `json:"OANO"`                               //OA Number
-	OAName     string `json:"OAName"`                             //OA Name
-	POTYPE     string `json:"POTYPE"`                             //POTYPE
-	PODate     string `json:"PODate"`                             //PO date
-	POItemNO   string `json:"POItemNO"`                           //PO Item Number
-	TRANSDOC   string `json:"TRANSDOC"`                           //Trans doc type
-	SONUMBER   string `json:"SONUMBER"`                           //SO Number
-	SOITEM     string `json:"SOITEM"`                             //SO Item Number
-	PARTSNO    string `json:"PARTSNO"`                            //Material Number
-	PARTSDESC  string `json:"PARTSDESC"`                          //Material Description
-	POQty          	string   `json:"POQty"`                    //Quantity
-	Unit           	string   `json:"Unit"`                     //Unit of Measure
-	Plant          	string   `json:"Plant"`                    //Plant
-	POItemChgDate  	string   `json:"POItemChgDate"`            //Item change Date
-	POItemSts      	string   `json:"POItemSts"`                //PO Item status(Delete)
-	ContractNO     	string   `json:"ContractNO"`               //Contract No
-	ContractItemNO 	string   `json:"ContractItemNO"`           //Contract Item No
-	IncoTerm       	string   `json:"IncoTerm"`                 //Inco Term
-	PaymentTerm    	string   `json:"PaymentTerm"`              //payment
-	UPDATEDAY      	string   `json:"UPDATEDAY"`                //PO UPDATEDAY
-	UPTIME         	string   `json:"UPTIME"`                   //PO UPTIME
-	UPNAME         	string   `json:"UPNAME"`                   //PO UPNAME
-	GRInfos        	[]GRInfo `json:"GRInfos"`                  //GR Info
-	Confirmation	[]Confirmation `json:"Confirmation"`          //Confirmation
-	InboundDelivery	[]InboundDelivery `json:"InboundDelivery"` //Inbound Delivery
-	Invoice			[]Invoice `json:"Invoice"`                 //Invoice
+	PONO            string            `json:"PONO"`            //PO Number
+	VendorNO        string            `json:"VendorNO"`        //Vendor Number
+	VendorName      string            `json:"VendorName"`      //Vendor Name
+	OANO            string            `json:"OANO"`            //OA Number
+	OAName          string            `json:"OAName"`          //OA Name
+	POTYPE          string            `json:"POTYPE"`          //POTYPE
+	PODate          string            `json:"PODate"`          //PO date
+	POItemNO        string            `json:"POItemNO"`        //PO Item Number
+	TRANSDOC        string            `json:"TRANSDOC"`        //Trans doc type
+	SONUMBER        string            `json:"SONUMBER"`        //SO Number
+	SOITEM          string            `json:"SOITEM"`          //SO Item Number
+	PARTSNO         string            `json:"PARTSNO"`         //Material Number
+	PARTSDESC       string            `json:"PARTSDESC"`       //Material Description
+	POQty           string            `json:"POQty"`           //Quantity
+	Unit            string            `json:"Unit"`            //Unit of Measure
+	Plant           string            `json:"Plant"`           //Plant
+	POItemChgDate   string            `json:"POItemChgDate"`   //Item change Date
+	POItemSts       string            `json:"POItemSts"`       //PO Item status(Delete)
+	ContractNO      string            `json:"ContractNO"`      //Contract No
+	ContractItemNO  string            `json:"ContractItemNO"`  //Contract Item No
+	IncoTerm        string            `json:"IncoTerm"`        //Inco Term
+	PaymentTerm     string            `json:"PaymentTerm"`     //payment
+	UPDATEDAY       string            `json:"UPDATEDAY"`       //PO UPDATEDAY
+	UPTIME          string            `json:"UPTIME"`          //PO UPTIME
+	UPNAME          string            `json:"UPNAME"`          //PO UPNAME
+	GRInfos         []GRInfo          `json:"GRInfos"`         //GR Info
+	Confirmation    []Confirmation    `json:"Confirmation"`    //Confirmation
+	InboundDelivery []InboundDelivery `json:"InboundDelivery"` //Inbound Delivery
+	Invoice         []Invoice         `json:"Invoice"`         //Invoice
 }
 
 type GRInfo struct {
@@ -143,22 +142,22 @@ type Confirmation struct {
 }
 
 type InboundDelivery struct {
-	DeliveryNO		string       `json:"DeliveryNO"` //Delivery Number
-	VendorNO      	string       `json:"VendorNO"`   //Vendor Number
-	IDCrtDate       string       `json:"IDCrtDate"`    //Creation  Date
-	IDDlvyDate string `json:"IDDlvyDate"`              //Delivery Date
-	IncoTerm   string `json:"IncoTerm"`                //Inco Term
-	ASNNO      string `json:"ASNNO"`                   //Reference Number
-	IDItemNO   string `json:"IDItemNO"`                //Delivery Item Number
-	PARTSNO    string `json:"PARTSNO"`                 //Material Number
-	PARTSDESC  string `json:"PARTSDESC"`               //Material Description
-	DlvyQty    string `json:"DlvyQty"`                 //Quantity
-	COO        string `json:"COO"`                     //COO
-	TrackID    string `json:"TrackID"`                 //Carrier Tracking ID
-	MOT        string `json:"MOT"`                     //MOT
-	UPDATEDAY  string `json:"UPDATEDAY"`               // Confirmation UPDATEDAY
-	UPTIME     string `json:"UPTIME"`                  // Confirmation UPTIME
-	UPNAME     string `json:"UPNAME"`                  // Confirmation UPNAME
+	DeliveryNO string `json:"DeliveryNO"` //Delivery Number
+	VendorNO   string `json:"VendorNO"`   //Vendor Number
+	IDCrtDate  string `json:"IDCrtDate"`  //Creation  Date
+	IDDlvyDate string `json:"IDDlvyDate"` //Delivery Date
+	IncoTerm   string `json:"IncoTerm"`   //Inco Term
+	ASNNO      string `json:"ASNNO"`      //Reference Number
+	IDItemNO   string `json:"IDItemNO"`   //Delivery Item Number
+	PARTSNO    string `json:"PARTSNO"`    //Material Number
+	PARTSDESC  string `json:"PARTSDESC"`  //Material Description
+	DlvyQty    string `json:"DlvyQty"`    //Quantity
+	COO        string `json:"COO"`        //COO
+	TrackID    string `json:"TrackID"`    //Carrier Tracking ID
+	MOT        string `json:"MOT"`        //MOT
+	UPDATEDAY  string `json:"UPDATEDAY"`  // InboundDelivery UPDATEDAY
+	UPTIME     string `json:"UPTIME"`     // InboundDelivery UPTIME
+	UPNAME     string `json:"UPNAME"`     // InboundDelivery UPNAME
 }
 
 type GIInfo struct {
