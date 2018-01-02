@@ -114,22 +114,22 @@ type PurchaseOrder struct {
 }
 
 type GRInfo struct {
-	GRNO            string       `json:"GRNO"`            //GR Number
-	FiscalYear      string       `json:"FiscalYear"`      //Fiscal Year
-	GRDate          string       `json:"GRDate"`          //GR Posting Date
-	ComCode         string       `json:"ComCode"`         //Company Code
-	SupDeliveryNote string       `json:"SupDeliveryNote"` //Supplier Delivery Note
-	GRItemNO        string       `json:"GRItemNO"`        //Item Number
-	PARTSNO         string       `json:"PARTSNO"`         //Material Number
-	PARTSDESC       string       `json:"PARTSDESC"`       //Material Description
-	GRQty           string       `json:"GRQty"`           //Quantity
-	Unit            string       `json:"Unit"`            //Unit of Measure
-	Plant           string       `json:"Plant"`           //Plant
-	SupNO           string       `json:"SupNO"`           //Supplier NO
-	UPDATEDAY       string       `json:"UPDATEDAY"`       // PO UPDATEDAY
-	UPTIME          string       `json:"UPTIME"`          // PO UPTIME
-	UPNAME          string       `json:"UPNAME"`          // PO UPNAME
-	Attachments     []Attachment `json:"Attachments"`     //Attachments
+	GRNO            string `json:"GRNO"`              //GR Number
+	FiscalYear      string `json:"FiscalYear"`        //Fiscal Year
+	GRDate          string `json:"GRDate"`            //GR Posting Date
+	ComCode         string `json:"ComCode"`           //Company Code
+	SupDeliveryNote string `json:"SupDeliveryNote"`   //Supplier Delivery Note --> ASN NO
+	GRItemNO        string `json:"GRItemNO"`          //Item Number
+	PARTSNO         string `json:"PARTSNO"`           //Material Number
+	PARTSDESC       string `json:"PARTSDESC"`         //Material Description
+	GRQty           string `json:"GRQty"`             //Quantity
+	Unit            string `json:"Unit"`              //Unit of Measure
+	Plant           string `json:"Plant"`             //Plant
+	SupNO           string `json:"SupNO"`             //Supplier NO
+	UPDATEDAY       string `json:"UPDATEDAY"`         // PO UPDATEDAY
+	UPTIME          string       `json:"UPTIME"`      // PO UPTIME
+	UPNAME          string       `json:"UPNAME"`      // PO UPNAME
+	Attachments     []Attachment `json:"Attachments"` //Attachments
 }
 
 type Confirmation struct {
@@ -178,24 +178,24 @@ type GIInfo struct {
 }
 
 type Invoice  struct {
-	InvNO  		string `json:"InvNO"`  		//Invoice Number
-	FiscalYear  string `json:"FiscalYear"` 	//Fiscal Year
-	InvType   	string `json:"InvType"`   	//Document Type
-	DocDate     string `json:"DocDate"`     //Document Date
-	PostDate    string `json:"PostDate"`   	//Posting Date
-	BaseDate  	string `json:"BaseDate"`  	//Baseline Date
-	VenInvNO 	string `json:"VenInvNO"` 	//Vendor Invoice Number
-	comCode  	string `json:"comCode"`  	//Company Code
-	VendorNO    string `json:"VendorNO"`    //Vendor Number
-	InvStatus   string `json:"InvStatus"`   //Inv. Status
-	InvItemNO   string `json:"InvItemNO"`  	//Item Number
-	PARTNO      string `json:"PARTNO"`      //Part Number
-	InvQty  	string `json:"InvQty"`  	//Quantity
-	Unit 		string `json:"Unit"` 		//Unit of Measure
-	GRNO 		string `json:"GRNO"` 		//GR Document
-	UPDATEDAY 	string `json:"UPDATEDAY"` 	//GI UPDATEDAY
-	UPTIME    	string `json:"UPTIME"`    	//GI UPTIME
-	UPNAME    	string `json:"UPNAME"`    	//GI UPNAME
+	InvNO  		string `json:"InvNO"`   //Invoice Number
+	FiscalYear  string `json:"FiscalYear"` //Fiscal Year
+	InvType   	string `json:"InvType"`  //Document Type
+	DocDate     string `json:"DocDate"`    //Document Date
+	PostDate    string `json:"PostDate"`   //Posting Date
+	BaseDate  string `json:"BaseDate"`     //Baseline Date
+	VenInvNO  string `json:"VenInvNO"`     //Vendor Invoice Number
+	comCode   string `json:"comCode"`      //Company Code
+	VendorNO  string `json:"VendorNO"`     //Vendor Number
+	InvStatus string `json:"InvStatus"`    //Inv. Status
+	InvItemNO string `json:"InvItemNO"`    //Item Number
+	PARTNO    string `json:"PARTNO"`       //Part Number
+	InvQty    string `json:"InvQty"`       //Quantity
+	Unit      string `json:"Unit"`         //Unit of Measure
+	GRNO      string `json:"GRNO"`         //GR Document -->GR
+	UPDATEDAY string `json:"UPDATEDAY"`    //GI UPDATEDAY
+	UPTIME    string `json:"UPTIME"`       //GI UPTIME
+	UPNAME    string `json:"UPNAME"`       //GI UPNAME
 }
 
 //生成Key
