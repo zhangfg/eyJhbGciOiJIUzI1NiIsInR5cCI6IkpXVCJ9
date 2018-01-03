@@ -8,8 +8,54 @@ import (
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric/common/cauthdsl"
 )
 
+//修改 CPO信息
+func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting json to create/update SO")
+	}
+	jsonStr := args[0]
+	var cPOrders [] ODMInfoReq
+
+	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, order := range cPOrders {
+		if order.CPONO != "" {
+			err, cpo_key := generateKey(stub, CPO_KEY, []string{order.CPONO})
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			cpoObjAsbytes, err := stub.GetState(cpo_key)
+			var c []byte
+			cPOOrder := ODMPurchaseOrder{}
+			err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			if order.TRANSDOC == "GR" {
+				var index = len(cPOOrder.GRInfo)
+				var cpoGrObj = ODMGRInfo{}
+				cpoGrObj.PARTNUM = order.PARTNUM
+				cpoGrObj.GRQTY = order.GRQTY
+				cPOOrder.GRInfo[index] = cpoGrObj
+			} else if order.TRANSDOC == "BL" {
+				for _, blobj := range cPOOrder.ODMPayments {
+					if blobj.BILLINGNO == order.INVOICENUM {
+						blobj.INVOICESTATUS = order.INVOICESTATUS
+						blobj.PAYMENTDATE = order.PAYMENTDATE
+					}
+				}
+			}
+			c, _ = json.Marshal(cPOOrder)
+			stub.PutState(cpo_key, c)
+		}
+	}
+	return shim.Success(nil)
+}
 //创建，修改SO信息
 func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 1 {
@@ -28,16 +74,31 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 			if err != nil {
 				return shim.Error(err.Error())
 			}
+			err, cpo_key := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
+			if err != nil {
+				return shim.Error(err.Error())
+			}
 			//business control
 			//get SO object from ledger
 			valAsbytes, err := stub.GetState(key)
+
+			//get CPO object from ledger
+			cpoObjAsbytes, err := stub.GetState(cpo_key)
+
 			var b []byte
+			var c []byte
+			cPOOrder := ODMPurchaseOrder{}
 			if err == nil && valAsbytes != nil {
 				var oldSalesOrder = SalesOrder{}
 				err = json.Unmarshal(valAsbytes, &oldSalesOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
+				err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+
 				if salesOrder.TRANSDOC == "SO" {
 					salesOrder.PONO = oldSalesOrder.PONO
 					salesOrder.POITEM = oldSalesOrder.POITEM
@@ -47,12 +108,36 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				} else if salesOrder.TRANSDOC == "BL" {
 					oldSalesOrder.BILLINFOS = salesOrder.BILLINFOS
 					b, _ = json.Marshal(oldSalesOrder)
+
+					for _, blobj := range salesOrder.BILLINFOS {
+						var cpoBlObj = ODMPayment{}
+						cpoBlObj.BILLINGITEM = blobj.BILLINGITEM
+						cpoBlObj.BILLINGNO = blobj.BILLINGNO
+						cpoBlObj.BILLINGTYPE = blobj.BILLINGTYPE
+						var index = len(cPOOrder.ODMPayments)
+						cPOOrder.ODMPayments[index] = cpoBlObj
+					}
+					c, _ = json.Marshal(cPOOrder)
+					stub.PutState(cpo_key, c)
+
 				} else if salesOrder.TRANSDOC == "GI" {
 					oldSalesOrder.GIINFOS = salesOrder.GIINFOS
 					b, _ = json.Marshal(oldSalesOrder)
 				}
 			} else {
 				b, _ = json.Marshal(salesOrder)
+				cPOOrder.CPONO = salesOrder.CPONO
+				cPOOrder.SONUMBER = salesOrder.SONUMBER
+				cPOOrder.SOITEM = salesOrder.SOITEM
+				cPOOrder.SOCDATE = salesOrder.SOCDATE
+				cPOOrder.SOCTIME = salesOrder.SOCTIME
+				cPOOrder.PARTSNO = salesOrder.PARTSNO
+				cPOOrder.SOQTY = salesOrder.SOQTY
+				cPOOrder.UNIT = salesOrder.UNIT
+				//cPOOrder.ODMPayments = salesOrder.ODMPayments
+				//cPOOrder.CPONO = salesOrder.CPONO
+				c, _ = json.Marshal(cPOOrder)
+				stub.PutState(cpo_key, c)
 			}
 			stub.PutState(key, b)
 		} else {

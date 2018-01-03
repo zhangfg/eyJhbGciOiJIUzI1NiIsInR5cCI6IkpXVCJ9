@@ -18,28 +18,65 @@ type QueryParam struct {
 	KeysEnd   []string `json:"keysEnd"`   //keys end
 }
 
+//Request Data
+type ODMInfoReq struct {
+	CPONO         string `json:"CPONO"`
+	TRANSDOC      string `json:"TRANSDOC"`
+	PARTNUM       string `json:"PARTNUM"` //PART No
+	GRQTY         string `json:"GRQTY"`   // received qty
+	INVOICENUM    string `json:"INVOICENUM"`
+	INVOICESTATUS string `json:"INVOICESTATUS"`
+	PAYMENTDATE   string `json:"PAYMENTDATE"`
+}
+
+//ODM PO   Key: "CPO"+ CPO No
+type ODMPurchaseOrder struct {
+	CPONO    string `json:"CPONO"`    //Customer purchase order number  index  --ODM
+	SONUMBER string `json:"SONUMBER"` //Sales document number  --ODM
+	SOITEM   string `json:"SOITEM"`   //Sales document Item    --ODM
+	//TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type         --ODM
+	SOCDATE     string       `json:"SOCDATE"`     //Created date           --ODM
+	SOCTIME     string       `json:"SOCTIME"`     //Created time           --ODM
+	PARTSNO     string       `json:"PARTSNO"`     //Material Number        --ODM
+	SOQTY       string       `json:"SOQTY"`       //Order quantity         --ODM
+	UNIT        string       `json:"UNIT"`        //Sales unit             --ODM
+	ODMPayments []ODMPayment `json:"ODMPayments"` //Billing info
+	GRInfo      []ODMGRInfo  `json:"GRInfo"`      //GR info
+}
+
+type ODMPayment struct {
+	BILLINGNO     string `json:"BILLINGNO"`     //Billing Document
+	BILLINGITEM   string `json:"BILLINGITEM"`   //Billing item
+	BILLINGTYPE   string `json:"BILLINGTYPE"`   //Billing Type
+	INVOICESTATUS string `json:"INVOICESTATUS"` //invoice status
+	PAYMENTDATE   string `json:"PAYMENTDATE"`   // date of approval
+}
+type ODMGRInfo struct {
+	PARTNUM string `json:"PARTNUM"` //PART No
+	GRQTY   string `json:"GRQTY"`   // received qty
+}
 //SalesOrder   Key: "SO"+So number + Item_no
 type SalesOrder struct {
-	SONUMBER   string        `json:"SONUMBER"`   //Sales document number
-	SOITEM     string        `json:"SOITEM"`     //Sales document Item
-	TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type
-	SOTYPE     string        `json:"SOTYPE"`     //Sales document type
-	SOCDATE    string        `json:"SOCDATE"`    //Created date
-	SOCTIME    string        `json:"SOCTIME"`    //Created time
-	CRAD       string        `json:"CRAD"`       //Request delivery date
-	PARTSNO    string        `json:"PARTSNO"`    //Material Number
-	PARTSDESC  string        `json:"PARTSDESC"`  //Material desc
-	SOQTY      string        `json:"SOQTY"`      //Order quantity
-	UNIT       string        `json:"UNIT"`       //Sales unit
-	CPONO      string        `json:"CPONO"`      //Customer purchase order number  index
-	VENDORNO   string        `json:"VENDORNO"`   //Vendor  Account Number
-	SOLDTO     string        `json:"SOLDTO"`     //Sold to party
-	NAME1_AG   string        `json:"NAME1_AG"`   //Sold to party Name1
-	NAME2_AG   string        `json:"NAME2_AG"`   //Sold to party Name2
-	COUNTRY_AG string        `json:"COUNTRY_AG"` //Sold to party Country
-	CITY_AG    string        `json:"CITY_AG"`    //Sold to party City
-	SHIPTO     string        `json:"SHIPTO"`     //Ship to party
-	NAME1_WE   string        `json:"NAME1_WE"`   //Ship to party Name1
+	SONUMBER   string `json:"SONUMBER"`          //Sales document number  --ODM
+	SOITEM     string `json:"SOITEM"`            //Sales document Item    --ODM
+	TRANSDOC   string `json:"TRANSDOC"`          //Trans doc type         --ODM
+	SOTYPE     string `json:"SOTYPE"`            //Sales document type
+	SOCDATE    string `json:"SOCDATE"`           //Created date           --ODM
+	SOCTIME    string `json:"SOCTIME"`           //Created time           --ODM
+	CRAD       string `json:"CRAD"`              //Request delivery date
+	PARTSNO    string `json:"PARTSNO"`           //Material Number        --ODM
+	PARTSDESC  string `json:"PARTSDESC"`         //Material desc
+	SOQTY      string `json:"SOQTY"`             //Order quantity                    --ODM
+	UNIT       string `json:"UNIT"`              //Sales unit                        --ODM
+	CPONO      string `json:"CPONO"`             //Customer purchase order number  index  --ODM
+	VENDORNO   string `json:"VENDORNO"`          //Vendor  Account Number
+	SOLDTO     string `json:"SOLDTO"`            //Sold to party
+	NAME1_AG   string `json:"NAME1_AG"`          //Sold to party Name1
+	NAME2_AG   string `json:"NAME2_AG"`          //Sold to party Name2
+	COUNTRY_AG string `json:"COUNTRY_AG"`        //Sold to party Country
+	CITY_AG    string `json:"CITY_AG"`           //Sold to party City
+	SHIPTO     string `json:"SHIPTO"`            //Ship to party
+	NAME1_WE   string `json:"NAME1_WE"`          //Ship to party Name1
 	NAME2_WE   string        `json:"NAME2_WE"`   //Ship to party Name2
 	COUNTRY_WE string        `json:"COUNTRY_WE"` //Ship to party Country
 	CITY_WE    string        `json:"CITY_WE"`    //Ship to party City
@@ -67,17 +104,19 @@ type BillingInfo struct {
 	BPOSTDATE    string `json:"BPOSTDATE"`    //Billing date
 	BILLINGCDATE string `json:"BILLINGCDATE"` //Billing created date
 	BILLINGTIME  string `json:"BILLINGTIME"`  //Billing created time
-	BCANCELNO    string `json:"BCANCELNO"`    //Cancelled billing document number
-	PARTSNO      string `json:"PARTSNO"`      //Material Number
-	PARTSDESC    string `json:"PARTSDESC"`    //Material description
-	BILLINGQTY   string `json:"BILLINGQTY"`   //Actual Invoiced Quantity
-	UNIT         string `json:"UNIT"`         //Sales unit
-	TAXAMOUNT    string `json:"TAXAMOUNT"`    //Tax amount in document currency
-	NETVALUE     string `json:"NETVALUE"`     //Net value
-	CURRENCY     string `json:"CURRENCY"`     //Currency
-	UPDATE       string `json:"UPDATEDAY"`    //Changed On
-	UPTIME       string `json:"UPTIME"`       //Changed time
-	UPNAME       string `json:"UPNAME"`       //Changed name
+	BCANCELNO  string `json:"BCANCELNO"`      //Cancelled billing document number
+	PARTSNO    string `json:"PARTSNO"`        //Material Number
+	PARTSDESC  string `json:"PARTSDESC"`      //Material description
+	BILLINGQTY string `json:"BILLINGQTY"`     //Actual Invoiced Quantity
+	UNIT       string `json:"UNIT"`           //Sales unit
+	TAXAMOUNT  string `json:"TAXAMOUNT"`      //Tax amount in document currency
+	NETVALUE   string `json:"NETVALUE"`       //Net value
+	CURRENCY   string `json:"CURRENCY"`       //Currency
+	DNNUMBER   string `json:"DNNUMBER"`       //DNNUMBER
+	DNITEM     string `json:"DNITEM"`         //DNITEM
+	UPDATE     string `json:"UPDATEDAY"`      //Changed On
+	UPTIME     string `json:"UPTIME"`         //Changed time
+	UPNAME     string `json:"UPNAME"`         //Changed name
 }
 
 //PO Key: "PO" + PO Number + Item_no
@@ -118,7 +157,7 @@ type GRInfo struct {
 	FiscalYear      string `json:"FiscalYear"`        //Fiscal Year
 	GRDate          string `json:"GRDate"`            //GR Posting Date
 	ComCode         string `json:"ComCode"`           //Company Code
-	SupDeliveryNote string `json:"SupDeliveryNote"`   //Supplier Delivery Note --> ASN NO
+	SupDeliveryNote string `json:"SupDeliveryNote"`   //Supplier Delivery Note --> INBD ASN NO
 	GRItemNO        string `json:"GRItemNO"`          //Item Number
 	PARTSNO         string `json:"PARTSNO"`           //Material Number
 	PARTSDESC       string `json:"PARTSDESC"`         //Material Description
