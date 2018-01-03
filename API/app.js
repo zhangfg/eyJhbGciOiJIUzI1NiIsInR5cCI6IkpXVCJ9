@@ -355,7 +355,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     }
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
-    reqData.forEach(item => {
+    reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO').forEach(item => {
         cloudant.insertSearchDocument(role, item, function (err, body) {
             if (err) {
                 logger.error('Error creating document - ', err.message);
@@ -408,7 +408,6 @@ app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req,
     args = args.replace(/'/g, '"');
     args = JSON.parse(args);
     logger.debug(args);
-
 
     query.queryChaincode(peer, channelName, chaincodeName, args, fcn, req.username, req.orgname)
         .then(function (message) {

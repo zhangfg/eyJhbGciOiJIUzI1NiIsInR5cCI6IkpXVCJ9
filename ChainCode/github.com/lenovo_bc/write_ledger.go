@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	"github.com/hyperledger/fabric/common/cauthdsl"
 )
 
 //修改 CPO信息

@@ -21,7 +21,7 @@
     "org2": {
       "name": "PeerOrg2",
       "mspid": "PeerOrg2",
-      "ca": "https://tko-zbc02a.4.secure.blockchain.ibm.com:21099",
+      "ca": "https://tko-zbc02a.4.secure.blockchain.ibm.com:21958",
       "peers": {
         "peer1": {
           "requests": "grpcs://tko-zbc02c.4.secure.blockchain.ibm.com:23718",
@@ -34,7 +34,7 @@
     "org3": {
       "name": "PeerOrg3",
       "mspid": "PeerOrg3",
-      "ca": "https://tko-zbc02a.4.secure.blockchain.ibm.com:21099",
+      "ca": "https://tko-zbc02a.4.secure.blockchain.ibm.com:22109",
       "peers": {
         "peer1": {
           "requests": "grpcs://tko-zbc02c.4.secure.blockchain.ibm.com:25409",
