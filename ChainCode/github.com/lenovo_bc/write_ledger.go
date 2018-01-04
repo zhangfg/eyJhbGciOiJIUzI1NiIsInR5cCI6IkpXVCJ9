@@ -42,6 +42,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				cpoGrObj.GRQTY = order.GRQTY
 				cPOOrder.GRInfo = append(cPOOrder.GRInfo, cpoGrObj)
 			} else if order.TRANSDOC == "BL" {
+
 				for _, blobj := range cPOOrder.ODMPayments {
 					if blobj.BILLINGNO == order.INVOICENUM {
 						blobj.INVOICESTATUS = order.INVOICESTATUS
@@ -102,7 +103,6 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				fmt.Println("write data, for5 - " + salesOrder.TRANSDOC)
 				if salesOrder.TRANSDOC == "SO" {
 					salesOrder.PONO = oldSalesOrder.PONO
 					salesOrder.POITEM = oldSalesOrder.POITEM
@@ -119,7 +119,6 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 						cpoBlObj.BILLINGTYPE = blobj.BILLINGTYPE
 						cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBlObj)
 					}
-					fmt.Println(cPOOrder)
 					c, _ = json.Marshal(cPOOrder)
 					stub.PutState(cpo_key, c)
 
@@ -133,6 +132,7 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				if err != nil {
 					return shim.Error(err.Error())
 				}
+				fmt.Println("write data, for - " + cpo_key)
 				cPOOrder.CPONO = salesOrder.CPONO
 				cPOOrder.SONUMBER = salesOrder.SONUMBER
 				cPOOrder.SOITEM = salesOrder.SOITEM
@@ -146,7 +146,6 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpo_key, c)
 			}
-			fmt.Println("save data, for6 - " + salesOrder.TRANSDOC)
 			stub.PutState(key, b)
 		} else {
 			return shim.Error("SalesOrder's number and item no is required")
@@ -229,7 +228,6 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 
 				} else if obj.TRANSDOC == "INDN" {
 					oldPoObj.InboundDelivery = obj.InboundDelivery
-					fmt.Println(oldPoObj)
 					b, _ = json.Marshal(oldPoObj)
 				}
 			} else {

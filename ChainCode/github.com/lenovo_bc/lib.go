@@ -29,7 +29,7 @@ type ODMInfoReq struct {
 	PAYMENTDATE   string `json:"PAYMENTDATE"`
 }
 
-//ODM PO   Key: "CPO"+ CPO No
+//ODM PO   Key: "CPO"+ CPONo
 type ODMPurchaseOrder struct {
 	CPONO    string `json:"CPONO"`    //Customer purchase order number  index  --ODM
 	SONUMBER string `json:"SONUMBER"` //Sales document number  --ODM
