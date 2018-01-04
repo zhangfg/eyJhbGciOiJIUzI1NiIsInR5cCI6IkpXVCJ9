@@ -2,7 +2,7 @@ package main
 
 import (
 	// "bytes"
-	// "fmt"
+	"fmt"
 	// "encoding/pem"
 	// "crypto/x509"
 	"encoding/json"
@@ -25,6 +25,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	for _, order := range cPOrders {
 		if order.CPONO != "" {
 			err, cpo_key := generateKey(stub, CPO_KEY, []string{order.CPONO})
+			fmt.Println("write data, for - " + cpo_key)
 			if err != nil {
 				return shim.Error(err.Error())
 			}
@@ -36,11 +37,10 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				return shim.Error(err.Error())
 			}
 			if order.TRANSDOC == "GR" {
-				var index = len(cPOOrder.GRInfo)
 				var cpoGrObj = ODMGRInfo{}
 				cpoGrObj.PARTNUM = order.PARTNUM
 				cpoGrObj.GRQTY = order.GRQTY
-				cPOOrder.GRInfo[index] = cpoGrObj
+				cPOOrder.GRInfo = append(cPOOrder.GRInfo, cpoGrObj)
 			} else if order.TRANSDOC == "BL" {
 				for _, blobj := range cPOOrder.ODMPayments {
 					if blobj.BILLINGNO == order.INVOICENUM {
@@ -73,31 +73,36 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 			if err != nil {
 				return shim.Error(err.Error())
 			}
-			err, cpo_key := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
-			if err != nil {
-				return shim.Error(err.Error())
-			}
+			fmt.Println("write data, for - " + key)
+
 			//business control
 			//get SO object from ledger
 			valAsbytes, err := stub.GetState(key)
-
-			//get CPO object from ledger
-			cpoObjAsbytes, err := stub.GetState(cpo_key)
 
 			var b []byte
 			var c []byte
 			cPOOrder := ODMPurchaseOrder{}
 			if err == nil && valAsbytes != nil {
+
 				var oldSalesOrder = SalesOrder{}
 				err = json.Unmarshal(valAsbytes, &oldSalesOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
+				fmt.Println("write data, for3 - " + oldSalesOrder.CPONO)
+				err, cpo_key := generateKey(stub, CPO_KEY, []string{oldSalesOrder.CPONO})
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				fmt.Println("write data, for2 - " + cpo_key)
+				//get CPO object from ledger
+				cpoObjAsbytes, err := stub.GetState(cpo_key)
+
 				err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-
+				fmt.Println("write data, for5 - " + salesOrder.TRANSDOC)
 				if salesOrder.TRANSDOC == "SO" {
 					salesOrder.PONO = oldSalesOrder.PONO
 					salesOrder.POITEM = oldSalesOrder.POITEM
@@ -107,15 +112,14 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				} else if salesOrder.TRANSDOC == "BL" {
 					oldSalesOrder.BILLINFOS = salesOrder.BILLINFOS
 					b, _ = json.Marshal(oldSalesOrder)
-
 					for _, blobj := range salesOrder.BILLINFOS {
 						var cpoBlObj = ODMPayment{}
 						cpoBlObj.BILLINGITEM = blobj.BILLINGITEM
 						cpoBlObj.BILLINGNO = blobj.BILLINGNO
 						cpoBlObj.BILLINGTYPE = blobj.BILLINGTYPE
-						var index = len(cPOOrder.ODMPayments)
-						cPOOrder.ODMPayments[index] = cpoBlObj
+						cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBlObj)
 					}
+					fmt.Println(cPOOrder)
 					c, _ = json.Marshal(cPOOrder)
 					stub.PutState(cpo_key, c)
 
@@ -125,6 +129,10 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				}
 			} else {
 				b, _ = json.Marshal(salesOrder)
+				err, cpo_key := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
+				if err != nil {
+					return shim.Error(err.Error())
+				}
 				cPOOrder.CPONO = salesOrder.CPONO
 				cPOOrder.SONUMBER = salesOrder.SONUMBER
 				cPOOrder.SOITEM = salesOrder.SOITEM
@@ -138,6 +146,7 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpo_key, c)
 			}
+			fmt.Println("save data, for6 - " + salesOrder.TRANSDOC)
 			stub.PutState(key, b)
 		} else {
 			return shim.Error("SalesOrder's number and item no is required")
@@ -164,7 +173,7 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 			if err != nil {
 				return shim.Error(err.Error())
 			}
-			//fmt.Println("query data, for - " + key)
+			fmt.Println("write data, for - " + key)
 			//business control
 			//get SO object from ledger
 			valAsbytes, err := stub.GetState(key)
@@ -175,7 +184,7 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 				if err != nil {
 					shim.Error(err.Error())
 				}
-				//fmt.Println("query data, for obj.TRANSDOC- " + obj.TRANSDOC)
+				fmt.Println("write data, for obj.TRANSDOC- " + obj.TRANSDOC)
 				//fmt.Println(obj)
 
 				if obj.TRANSDOC == "PO" {
@@ -220,6 +229,7 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 
 				} else if obj.TRANSDOC == "INDN" {
 					oldPoObj.InboundDelivery = obj.InboundDelivery
+					fmt.Println(oldPoObj)
 					b, _ = json.Marshal(oldPoObj)
 				}
 			} else {
