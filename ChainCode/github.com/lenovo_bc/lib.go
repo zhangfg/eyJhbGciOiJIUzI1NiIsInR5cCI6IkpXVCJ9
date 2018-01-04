@@ -9,6 +9,7 @@ import (
 //附件
 type Attachment struct {
 	FileId   string `json:"ID"`       //地址
+	FileName string `json:"Name"`     //文件名
 	FileType string `json:"FileType"` //文件类型
 }
 
@@ -27,6 +28,21 @@ type ODMInfoReq struct {
 	INVOICENUM    string `json:"INVOICENUM"`
 	INVOICESTATUS string `json:"INVOICESTATUS"`
 	PAYMENTDATE   string `json:"PAYMENTDATE"`
+}
+
+//Supplier PO   Key: "SUP"+ ASNNumber
+type SupplierOrder struct {
+	ASNNumber           string       `json:"ASNNumber"`           //PO Number
+	PONumber            string       `json:"PONumber"`            //PO Number
+	POItem              string       `json:"POItem"`              //PO Number
+	ShippedQty          string       `json:"ShippedQty"`          //PO Number
+	ASNDate             string       `json:"ASNDate"`             //PO Number
+	PromisedDate        string       `json:"PromisedDate"`        //PO Number
+	CarrierID           string       `json:"CarrierID"`           //PO Number
+	CarrierTrackID      string       `json:"CarrierTrackID"`      //PO Number
+	TransporatationMode string       `json:"TransporatationMode"` //PO Number
+	CountryOfOrigin     string       `json:"CountryOfOrigin"`     //PO Number
+	PackingList         []Attachment `json:"PackingList"`         //Attachments
 }
 
 //ODM PO   Key: "CPO"+ CPONo

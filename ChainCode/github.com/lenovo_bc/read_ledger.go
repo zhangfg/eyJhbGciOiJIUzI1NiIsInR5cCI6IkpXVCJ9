@@ -19,7 +19,7 @@ func filterByUserRole(valAsbytes []byte, KeyPrefix string, userRole string) (err
 		return filterSalesOrder(valAsbytes, userRole);
 	} else if KeyPrefix == "PO" {
 		return filterPurchaseOrder(valAsbytes, userRole);
-	} else if KeyPrefix == "CPO" {
+	} else {
 		return nil, valAsbytes
 	}
 	return errors.New("Unknown query type '" + KeyPrefix + "'"), nil
