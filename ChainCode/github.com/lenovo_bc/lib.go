@@ -99,14 +99,16 @@ type SalesOrder struct {
 type BillingInfo struct {
 	BILLINGNO    string `json:"BILLINGNO"`    //Billing Document
 	BILLINGITEM  string `json:"BILLINGITEM"`  //Billing item
+	PROINV       string `json:"PROINV"`       //Billing item
+	PROINVITEM   string `json:"PROINVITEM"`   //Billing item
 	BILLINGTYPE  string `json:"BILLINGTYPE"`  //Billing Type
 	CATEGORY     string `json:"CATEGORY"`     //SD document Category
 	BPOSTDATE    string `json:"BPOSTDATE"`    //Billing date
 	BILLINGCDATE string `json:"BILLINGCDATE"` //Billing created date
 	BILLINGTIME  string `json:"BILLINGTIME"`  //Billing created time
-	BCANCELNO  string `json:"BCANCELNO"`      //Cancelled billing document number
-	PARTSNO    string `json:"PARTSNO"`        //Material Number
-	PARTSDESC  string `json:"PARTSDESC"`      //Material description
+	BCANCELNO    string `json:"BCANCELNO"`    //Cancelled billing document number
+	PARTSNO      string `json:"PARTSNO"`      //Material Number
+	PARTSDESC    string `json:"PARTSDESC"`    //Material description
 	BILLINGQTY string `json:"BILLINGQTY"`     //Actual Invoiced Quantity
 	UNIT       string `json:"UNIT"`           //Sales unit
 	TAXAMOUNT  string `json:"TAXAMOUNT"`      //Tax amount in document currency
