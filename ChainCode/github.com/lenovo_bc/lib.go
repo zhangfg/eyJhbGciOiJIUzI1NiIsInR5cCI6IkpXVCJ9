@@ -30,19 +30,19 @@ type ODMInfoReq struct {
 	PAYMENTDATE   string `json:"PAYMENTDATE"`
 }
 
-//Supplier PO   Key: "SUP"+ ASNNumber
+//Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
 type SupplierOrder struct {
-	ASNNumber           string       `json:"ASNNumber"`           //PO Number
-	PONumber            string       `json:"PONumber"`            //PO Number
-	POItem              string       `json:"POItem"`              //PO Number
-	ShippedQty          string       `json:"ShippedQty"`          //PO Number
-	ASNDate             string       `json:"ASNDate"`             //PO Number
-	PromisedDate        string       `json:"PromisedDate"`        //PO Number
-	CarrierID           string       `json:"CarrierID"`           //PO Number
-	CarrierTrackID      string       `json:"CarrierTrackID"`      //PO Number
-	TransporatationMode string       `json:"TransporatationMode"` //PO Number
-	CountryOfOrigin     string       `json:"CountryOfOrigin"`     //PO Number
-	PackingList         []Attachment `json:"PackingList"`         //Attachments
+	ASNNumber           string     `json:"ASNNumber"`           //PO Number   -> Supplier ASN, Inbound Delivery/GR  Reference
+	PONumber            string     `json:"PONumber"`            //PO Number
+	POItem              string     `json:"POItem"`              //PO Number
+	ShippedQty          string     `json:"ShippedQty"`          //PO Number
+	ASNDate             string     `json:"ASNDate"`             //PO Number
+	PromisedDate        string     `json:"PromisedDate"`        //PO Number
+	CarrierID           string     `json:"CarrierID"`           //PO Number
+	CarrierTrackID      string     `json:"CarrierTrackID"`      //PO Number
+	TransporatationMode string     `json:"TransporatationMode"` //PO Number
+	CountryOfOrigin     string     `json:"CountryOfOrigin"`     //PO Number
+	PackingList         Attachment `json:"PackingList"`         //Attachments
 }
 
 //ODM PO   Key: "CPO"+ CPONo
@@ -69,72 +69,90 @@ type ODMPayment struct {
 }
 type ODMGRInfo struct {
 	PARTNUM string `json:"PARTNUM"` //PART No
+	LenDNNO string `json:"LenDNNO"` //Lenovo DN NO.
 	GRQTY   string `json:"GRQTY"`   // received qty
 }
 //SalesOrder   Key: "SO"+So number + Item_no
 type SalesOrder struct {
-	SONUMBER   string `json:"SONUMBER"`          //Sales document number  --ODM
-	SOITEM     string `json:"SOITEM"`            //Sales document Item    --ODM
-	TRANSDOC   string `json:"TRANSDOC"`          //Trans doc type         --ODM
-	SOTYPE     string `json:"SOTYPE"`            //Sales document type
-	SOCDATE    string `json:"SOCDATE"`           //Created date           --ODM
-	SOCTIME    string `json:"SOCTIME"`           //Created time           --ODM
-	CRAD       string `json:"CRAD"`              //Request delivery date
-	PARTSNO    string `json:"PARTSNO"`           //Material Number        --ODM
-	PARTSDESC  string `json:"PARTSDESC"`         //Material desc
-	SOQTY      string `json:"SOQTY"`             //Order quantity                    --ODM
-	UNIT       string `json:"UNIT"`              //Sales unit                        --ODM
-	CPONO      string `json:"CPONO"`             //Customer purchase order number  index  --ODM
-	VENDORNO   string `json:"VENDORNO"`          //Vendor  Account Number
-	SOLDTO     string `json:"SOLDTO"`            //Sold to party
-	NAME1_AG   string `json:"NAME1_AG"`          //Sold to party Name1
-	NAME2_AG   string `json:"NAME2_AG"`          //Sold to party Name2
-	COUNTRY_AG string `json:"COUNTRY_AG"`        //Sold to party Country
-	CITY_AG    string `json:"CITY_AG"`           //Sold to party City
-	SHIPTO     string `json:"SHIPTO"`            //Ship to party
-	NAME1_WE   string `json:"NAME1_WE"`          //Ship to party Name1
+	SONUMBER   string        `json:"SONUMBER"`   //Sales document number  --ODM
+	SOITEM     string        `json:"SOITEM"`     //Sales document Item    --ODM
+	TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type         --ODM
+	SOTYPE     string        `json:"SOTYPE"`     //Sales document type
+	SOCDATE    string        `json:"SOCDATE"`    //Created date           --ODM
+	SOCTIME    string        `json:"SOCTIME"`    //Created time           --ODM
+	CRAD       string        `json:"CRAD"`       //Request delivery date
+	PARTSNO    string        `json:"PARTSNO"`    //Material Number        --ODM
+	PARTSDESC  string        `json:"PARTSDESC"`  //Material desc
+	SOQTY      string        `json:"SOQTY"`      //Order quantity                    --ODM
+	UNIT       string        `json:"UNIT"`       //Sales unit                        --ODM
+	CPONO      string        `json:"CPONO"`      //Customer purchase order number  index  --ODM
+	VENDORNO   string        `json:"VENDORNO"`   //Vendor  Account Number  ----Search condition
+	VENDORNAME string        `json:"VENDORNAME"` //Vendor Name
+	SOLDTO     string        `json:"SOLDTO"`     //Sold to party
+	NAME1_AG   string        `json:"NAME1_AG"`   //Sold to party Name1
+	NAME2_AG   string        `json:"NAME2_AG"`   //Sold to party Name2
+	COUNTRY_AG string        `json:"COUNTRY_AG"` //Sold to party Country
+	CITY_AG    string        `json:"CITY_AG"`    //Sold to party City
+	SHIPTO     string        `json:"SHIPTO"`     //Ship to party
+	NAME1_WE   string        `json:"NAME1_WE"`   //Ship to party Name1
 	NAME2_WE   string        `json:"NAME2_WE"`   //Ship to party Name2
 	COUNTRY_WE string        `json:"COUNTRY_WE"` //Ship to party Country
 	CITY_WE    string        `json:"CITY_WE"`    //Ship to party City
-	PRIORITY  string        `json:"PRIORITY"`    //Delivery Priority
-	NETPRICE  string        `json:"NETPRICE"`    //Net price
-	NETVALUE  string        `json:"NETVALUE"`    //Net value
-	CURRENCY  string        `json:"CURRENCY"`    //Currency
-	UPDATE    string        `json:"UPDATEDAY"`   //Changed On
-	UPTIME    string        `json:"UPTIME"`      //Changed time
-	UPNAME    string        `json:"UPNAME"`      //Changed name
-	DELFLAG   string        `json:"DELETEFLAG"`  //DELETEFLAG
-	PRNO      string        `json:"PRNO"`        //PR No
-	PRITEM    string        `json:"PRITEM"`      //PR Item NO
-	BILLINFOS []BillingInfo `json:"BILLINFOS"`   //Billing info
-	GIINFOS   []GIInfo      `json:"GIINFOS"`     //GIINFOS
-	PONO      string        `json:"PONO"`        //PO  no
-	POITEM    string        `json:"POITEM"`      //PO  item no
+	PRIORITY   string        `json:"PRIORITY"`   //Delivery Priority
+	NETPRICE   string        `json:"NETPRICE"`   //Net price
+	NETVALUE   string        `json:"NETVALUE"`   //Net value
+	CURRENCY   string        `json:"CURRENCY"`   //Currency
+	UPDATE     string        `json:"UPDATEDAY"`  //Changed On
+	UPTIME     string        `json:"UPTIME"`     //Changed time
+	UPNAME     string        `json:"UPNAME"`     //Changed name
+	DELFLAG    string        `json:"DELETEFLAG"` //DELETEFLAG
+	PRNO       string        `json:"PRNO"`       //PR No ---Search condition
+	PRITEM     string        `json:"PRITEM"`     //PR Item NO
+	BILLINFOS  []BillingInfo `json:"BILLINFOS"`  //Billing info
+	GIINFOS    []GIInfo      `json:"GIINFOS"`    //GIINFOS
+	PONO       string        `json:"PONO"`       //PO  no
+	POITEM     string        `json:"POITEM"`     //PO  item no
 }
 
 type BillingInfo struct {
-	BILLINGNO    string `json:"BILLINGNO"`    //Billing Document
-	BILLINGITEM  string `json:"BILLINGITEM"`  //Billing item
-	PROINV       string `json:"PROINV"`       //Billing item
-	PROINVITEM   string `json:"PROINVITEM"`   //Billing item
+	BILLINGNO   string `json:"BILLINGNO"`     //Billing Document
+	BILLINGITEM string `json:"BILLINGITEM"`   //Billing item
+	PROINV      string `json:"PROINV"`        //Billing item
+	PROINVITEM  string `json:"PROINVITEM"`    //Billing item
 	BILLINGTYPE  string `json:"BILLINGTYPE"`  //Billing Type
 	CATEGORY     string `json:"CATEGORY"`     //SD document Category
 	BPOSTDATE    string `json:"BPOSTDATE"`    //Billing date
 	BILLINGCDATE string `json:"BILLINGCDATE"` //Billing created date
 	BILLINGTIME  string `json:"BILLINGTIME"`  //Billing created time
-	BCANCELNO    string `json:"BCANCELNO"`    //Cancelled billing document number
-	PARTSNO      string `json:"PARTSNO"`      //Material Number
-	PARTSDESC    string `json:"PARTSDESC"`    //Material description
-	BILLINGQTY string `json:"BILLINGQTY"`     //Actual Invoiced Quantity
-	UNIT       string `json:"UNIT"`           //Sales unit
-	TAXAMOUNT  string `json:"TAXAMOUNT"`      //Tax amount in document currency
-	NETVALUE   string `json:"NETVALUE"`       //Net value
-	CURRENCY   string `json:"CURRENCY"`       //Currency
-	DNNUMBER   string `json:"DNNUMBER"`       //DNNUMBER
-	DNITEM     string `json:"DNITEM"`         //DNITEM
-	UPDATE     string `json:"UPDATEDAY"`      //Changed On
-	UPTIME     string `json:"UPTIME"`         //Changed time
-	UPNAME     string `json:"UPNAME"`         //Changed name
+	BCANCELNO   string `json:"BCANCELNO"`     //Cancelled billing document number
+	PARTSNO     string `json:"PARTSNO"`       //Material Number
+	PARTSDESC   string `json:"PARTSDESC"`     //Material description
+	BILLINGQTY  string `json:"BILLINGQTY"`    //Actual Invoiced Quantity
+	UNIT        string `json:"UNIT"`          //Sales unit
+	TAXAMOUNT   string `json:"TAXAMOUNT"`     //Tax amount in document currency
+	NETVALUE    string `json:"NETVALUE"`      //Net value
+	CURRENCY    string `json:"CURRENCY"`      //Currency
+	DNNUMBER    string `json:"DNNUMBER"`      //DNNUMBER      ->GI DN Number
+	DNITEM      string `json:"DNITEM"`        //DNITEM
+	UPDATE      string `json:"UPDATEDAY"`     //Changed On
+	UPTIME      string `json:"UPTIME"`        //Changed time
+	UPNAME      string `json:"UPNAME"`        //Changed name
+}
+
+// outbound .
+type GIInfo struct {
+	DNNUMBER   string `json:"DNNUMBER"`   //DN Number
+	DNITEM     string `json:"DNITEM"`     //DN Item
+	PARTSNO    string `json:"PARTSNO"`    //Material Number
+	DNQTY      string `json:"DNQTY"`      //Actual quantity delivered
+	UNIT       string `json:"UNIT"`       //Sales unit
+	GISTATUS   string `json:"GISTATUS"`   //GI status
+	PARTSDESC  string `json:"PARTSDESC"`  //GI PARTSDESC
+	IBDNNUMBER string `json:"IBDNNUMBER"` //Inbound Delivery NO    -> PO Inbound Delivery NOTE
+	IBDNITEM   string `json:"IBDNITEM"`   //Inbound Delivery Item No
+	UPDATEDAY  string `json:"UPDATEDAY"`  //GI UPDATEDAY
+	UPTIME     string `json:"UPTIME"`     //GI UPTIME
+	UPNAME     string `json:"UPNAME"`     //GI UPNAME
 }
 
 //PO Key: "PO" + PO Number + Item_no
@@ -175,7 +193,7 @@ type GRInfo struct {
 	FiscalYear      string `json:"FiscalYear"`        //Fiscal Year
 	GRDate          string `json:"GRDate"`            //GR Posting Date
 	ComCode         string `json:"ComCode"`           //Company Code
-	SupDeliveryNote string `json:"SupDeliveryNote"`   //Supplier Delivery Note --> INBD ASN NO
+	SupDeliveryNote string `json:"SupDeliveryNote"`   //Supplier Delivery Note --> INBD ASN NO 匹配
 	GRItemNO        string `json:"GRItemNO"`          //Item Number
 	PARTSNO         string `json:"PARTSNO"`           //Material Number
 	PARTSDESC       string `json:"PARTSDESC"`         //Material Description
@@ -206,7 +224,7 @@ type InboundDelivery struct {
 	IDCrtDate  string `json:"IDCrtDate"`  //Creation  Date
 	IDDlvyDate string `json:"IDDlvyDate"` //Delivery Date
 	IncoTerm   string `json:"IncoTerm"`   //Inco Term
-	ASNNO      string `json:"ASNNO"`      //Reference Number
+	ASNNO      string `json:"ASNNO"`      //Reference Number    ->   Supplier ASN NO
 	IBDNITEM   string `json:"IBDNITEM"`   //Delivery Item Number
 	PARTSNO    string `json:"PARTSNO"`    //Material Number
 	PARTSDESC  string `json:"PARTSDESC"`  //Material Description
@@ -217,21 +235,6 @@ type InboundDelivery struct {
 	UPDATEDAY  string `json:"UPDATEDAY"`  // InboundDelivery UPDATEDAY
 	UPTIME     string `json:"UPTIME"`     // InboundDelivery UPTIME
 	UPNAME     string `json:"UPNAME"`     // InboundDelivery UPNAME
-}
-
-type GIInfo struct {
-	DNNUMBER   string `json:"DNNUMBER"`   //DN Number
-	DNITEM     string `json:"DNITEM"`     //DN Item
-	PARTSNO    string `json:"PARTSNO"`    //Material Number
-	DNQTY      string `json:"DNQTY"`      //Actual quantity delivered
-	UNIT       string `json:"UNIT"`       //Sales unit
-	GISTATUS   string `json:"GISTATUS"`   //GI status
-	PARTSDESC  string `json:"PARTSDESC"`  //GI PARTSDESC
-	IBDNNUMBER string `json:"IBDNNUMBER"` //Inbound Delivery NO
-	IBDNITEM   string `json:"IBDNITEM"`   //Inbound Delivery Item No
-	UPDATEDAY  string `json:"UPDATEDAY"`  //GI UPDATEDAY
-	UPTIME     string `json:"UPTIME"`     //GI UPTIME
-	UPNAME     string `json:"UPNAME"`     //GI UPNAME
 }
 
 type Invoice  struct {
@@ -249,7 +252,7 @@ type Invoice  struct {
 	PARTNO    string `json:"PARTNO"`       //Part Number
 	InvQty    string `json:"InvQty"`       //Quantity
 	Unit      string `json:"Unit"`         //Unit of Measure
-	GRNO      string `json:"GRNO"`         //GR Document -->GR
+	GRNO      string `json:"GRNO"`         //GR Document 		-->GR Number
 	UPDATEDAY string `json:"UPDATEDAY"`    //GI UPDATEDAY
 	UPTIME    string `json:"UPTIME"`       //GI UPTIME
 	UPNAME    string `json:"UPNAME"`       //GI UPNAME
