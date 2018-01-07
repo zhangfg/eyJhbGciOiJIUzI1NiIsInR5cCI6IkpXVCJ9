@@ -33,8 +33,13 @@ type ODMInfoReq struct {
 //Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
 type SupplierOrder struct {
 	ASNNumber           string     `json:"ASNNumber"`           //PO Number   -> Supplier ASN, Inbound Delivery/GR  Reference
+	VendorNO            string     `json:"VendorNO"`            //Vendor Number
+	VendorName          string     `json:"VendorName"`          //Vendor Name
 	PONumber            string     `json:"PONumber"`            //PO Number
 	POItem              string     `json:"POItem"`              //PO Number
+	PODate              string     `json:"PODate"`              //PO date
+	PARTSNO             string     `json:"PARTSNO"`             //Material Number
+	PARTSDESC           string     `json:"PARTSDESC"`           //Material Description
 	ShippedQty          string     `json:"ShippedQty"`          //PO Number
 	ASNDate             string     `json:"ASNDate"`             //PO Number
 	PromisedDate        string     `json:"PromisedDate"`        //PO Number
@@ -47,15 +52,25 @@ type SupplierOrder struct {
 
 //ODM PO   Key: "CPO"+ CPONo
 type ODMPurchaseOrder struct {
-	CPONO    string `json:"CPONO"`    //Customer purchase order number  index  --ODM
-	SONUMBER string `json:"SONUMBER"` //Sales document number  --ODM
-	SOITEM   string `json:"SOITEM"`   //Sales document Item    --ODM
-	//TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type         --ODM
-	SOCDATE     string       `json:"SOCDATE"`     //Created date           --ODM
-	SOCTIME     string       `json:"SOCTIME"`     //Created time           --ODM
-	PARTSNO     string       `json:"PARTSNO"`     //Material Number        --ODM
-	SOQTY       string       `json:"SOQTY"`       //Order quantity         --ODM
-	UNIT        string       `json:"UNIT"`        //Sales unit             --ODM
+	CPONO      string `json:"CPONO"`      //Customer purchase order number  index
+	SONUMBER   string `json:"SONUMBER"`   //Sales document number
+	SOITEM     string `json:"SOITEM"`     //Sales document Item
+	SOTYPE     string `json:"SOTYPE"`     //Sales document type
+	PONO       string `json:"PONO"`       //PO  no
+	POITEM     string `json:"POITEM"`     //PO  item no
+	VENDORNO   string `json:"VENDORNO"`   //Vendor  Account Number  ----Search condition
+	VENDORNAME string `json:"VENDORNAME"` //Vendor Name
+	//TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type
+	SOCDATE     string       `json:"SOCDATE"`     //Created date
+	SOCTIME     string       `json:"SOCTIME"`     //Created time
+	PARTSNO     string       `json:"PARTSNO"`     //Material Number
+	PARTSDESC   string       `json:"PARTSDESC"`   //Material desc
+	SOQTY       string       `json:"SOQTY"`       //Order quantity
+	UNIT        string       `json:"UNIT"`        //Sales unit
+	CRAD        string       `json:"CRAD"`        //Request delivery date
+	CITY_WE     string       `json:"CITY_WE"`     //Ship to party City
+	OANO        string       `json:"OANO"`        //OA Number
+	OAName      string       `json:"OAName"`      //OA Name
 	ODMPayments []ODMPayment `json:"ODMPayments"` //Billing info
 	GRInfo      []ODMGRInfo  `json:"GRInfo"`      //GR info
 }
@@ -74,27 +89,27 @@ type ODMGRInfo struct {
 }
 //SalesOrder   Key: "SO"+So number + Item_no
 type SalesOrder struct {
-	SONUMBER   string        `json:"SONUMBER"`   //Sales document number  --ODM
-	SOITEM     string        `json:"SOITEM"`     //Sales document Item    --ODM
-	TRANSDOC   string        `json:"TRANSDOC"`   //Trans doc type         --ODM
-	SOTYPE     string        `json:"SOTYPE"`     //Sales document type
-	SOCDATE    string        `json:"SOCDATE"`    //Created date           --ODM
-	SOCTIME    string        `json:"SOCTIME"`    //Created time           --ODM
-	CRAD       string        `json:"CRAD"`       //Request delivery date
-	PARTSNO    string        `json:"PARTSNO"`    //Material Number        --ODM
-	PARTSDESC  string        `json:"PARTSDESC"`  //Material desc
-	SOQTY      string        `json:"SOQTY"`      //Order quantity                    --ODM
-	UNIT       string        `json:"UNIT"`       //Sales unit                        --ODM
-	CPONO      string        `json:"CPONO"`      //Customer purchase order number  index  --ODM
-	VENDORNO   string        `json:"VENDORNO"`   //Vendor  Account Number  ----Search condition
-	VENDORNAME string        `json:"VENDORNAME"` //Vendor Name
-	SOLDTO     string        `json:"SOLDTO"`     //Sold to party
-	NAME1_AG   string        `json:"NAME1_AG"`   //Sold to party Name1
-	NAME2_AG   string        `json:"NAME2_AG"`   //Sold to party Name2
-	COUNTRY_AG string        `json:"COUNTRY_AG"` //Sold to party Country
-	CITY_AG    string        `json:"CITY_AG"`    //Sold to party City
-	SHIPTO     string        `json:"SHIPTO"`     //Ship to party
-	NAME1_WE   string        `json:"NAME1_WE"`   //Ship to party Name1
+	SONUMBER   string `json:"SONUMBER"`          //Sales document number
+	SOITEM     string `json:"SOITEM"`            //Sales document Item
+	TRANSDOC   string `json:"TRANSDOC"`          //Trans doc type
+	SOTYPE     string `json:"SOTYPE"`            //Sales document type
+	SOCDATE    string `json:"SOCDATE"`           //Created date
+	SOCTIME    string `json:"SOCTIME"`           //Created time
+	CRAD       string `json:"CRAD"`              //Request delivery date
+	PARTSNO    string `json:"PARTSNO"`           //Material Number
+	PARTSDESC  string `json:"PARTSDESC"`         //Material desc
+	SOQTY      string `json:"SOQTY"`             //Order quantity
+	UNIT       string `json:"UNIT"`              //Sales unit
+	CPONO      string `json:"CPONO"`             //Customer purchase order number  index
+	VENDORNO   string `json:"VENDORNO"`          //Vendor  Account Number
+	VENDORNAME string `json:"VENDORNAME"`        //Vendor Name
+	SOLDTO     string `json:"SOLDTO"`            //Sold to party
+	NAME1_AG   string `json:"NAME1_AG"`          //Sold to party Name1
+	NAME2_AG   string `json:"NAME2_AG"`          //Sold to party Name2
+	COUNTRY_AG string `json:"COUNTRY_AG"`        //Sold to party Country
+	CITY_AG    string `json:"CITY_AG"`           //Sold to party City
+	SHIPTO     string `json:"SHIPTO"`            //Ship to party
+	NAME1_WE   string `json:"NAME1_WE"`          //Ship to party Name1
 	NAME2_WE   string        `json:"NAME2_WE"`   //Ship to party Name2
 	COUNTRY_WE string        `json:"COUNTRY_WE"` //Ship to party Country
 	CITY_WE    string        `json:"CITY_WE"`    //Ship to party City
@@ -157,15 +172,15 @@ type GIInfo struct {
 
 //PO Key: "PO" + PO Number + Item_no
 type PurchaseOrder struct {
-	PONO            string            `json:"PONO"`            //PO Number
-	VendorNO        string            `json:"VendorNO"`        //Vendor Number
-	VendorName      string            `json:"VendorName"`      //Vendor Name
-	OANO            string            `json:"OANO"`            //OA Number
-	OAName          string            `json:"OAName"`          //OA Name
-	POTYPE          string            `json:"POTYPE"`          //POTYPE
-	PODate          string            `json:"PODate"`          //PO date
-	POItemNO        string            `json:"POItemNO"`        //PO Item Number
-	TRANSDOC        string            `json:"TRANSDOC"`        //Trans doc type
+	PONO       string `json:"PONO"`                            //PO Number
+	POItemNO   string `json:"POItemNO"`                        //PO Item Number
+	VendorNO   string `json:"VendorNO"`                        //Vendor Number
+	VendorName string `json:"VendorName"`                      //Vendor Name
+	OANO       string `json:"OANO"`                            //OA Number
+	OAName     string `json:"OAName"`                          //OA Name
+	POTYPE     string `json:"POTYPE"`                          //POTYPE
+	PODate     string `json:"PODate"`                          //PO date
+	TRANSDOC   string `json:"TRANSDOC"`                        //Trans doc type
 	SONUMBER        string            `json:"SONUMBER"`        //SO Number
 	SOITEM          string            `json:"SOITEM"`          //SO Item Number
 	PARTSNO         string            `json:"PARTSNO"`         //Material Number
