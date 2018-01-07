@@ -3,6 +3,7 @@ package main
 import (
 	// "bytes"
 	"fmt"
+	"errors"
 	// "encoding/pem"
 	// "crypto/x509"
 	"encoding/json"
@@ -10,60 +11,67 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-//修改 CPO信息
-func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting json to create/update SO")
-	}
-	jsonStr := args[0]
-	var cPOrders [] ODMInfoReq
-
-	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
+// update PO
+func updatePurchaseOrderBySupplier(stub shim.ChaincodeStubInterface, valAsbytes []byte) (error, string, []byte) {
+	supOrder := SupplierOrder{}
+	err := json.Unmarshal(valAsbytes, &supOrder)
 	if err != nil {
-		return shim.Error(err.Error())
+		return err, "", valAsbytes
 	}
-	for _, order := range cPOrders {
-		if order.CPONO != "" {
-			err, cpo_key := generateKey(stub, CPO_KEY, []string{order.CPONO})
-			fmt.Println("write data, for - " + cpo_key)
-			if err != nil {
-				return shim.Error(err.Error())
-			}
-			cpoObjAsbytes, err := stub.GetState(cpo_key)
-			var c []byte
-			cPOOrder := ODMPurchaseOrder{}
-			err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
-			if err != nil {
-				return shim.Error(err.Error())
-			}
-			if order.TRANSDOC == "GR" {
-				var cpoGrObj = ODMGRInfo{}
-				cpoGrObj.PARTNUM = order.PARTNUM
-				cpoGrObj.GRQTY = order.GRQTY
-				cPOOrder.GRInfo = append(cPOOrder.GRInfo, cpoGrObj)
-			} else if order.TRANSDOC == "BL" {
-
-				for _, blobj := range cPOOrder.ODMPayments {
-					if blobj.BILLINGNO == order.INVOICENUM {
-						blobj.INVOICESTATUS = order.INVOICESTATUS
-						blobj.PAYMENTDATE = order.PAYMENTDATE
-					}
-				}
-			}
-			c, _ = json.Marshal(cPOOrder)
-			stub.PutState(cpo_key, c)
+	err, key := generateKey(stub, PO_KEY, []string{supOrder.PONumber, supOrder.POItem})
+	if err != nil {
+		return err, "", valAsbytes
+	}
+	fmt.Println("write data,SUP - PO for - " + key)
+	//business control
+	//get SO object from ledger
+	poAsbytes, err := stub.GetState(key)
+	var b []byte
+	if err == nil && poAsbytes != nil {
+		var oldPoObj = PurchaseOrder{}
+		err = json.Unmarshal(poAsbytes, &oldPoObj)
+		if err != nil {
+			return err, "", valAsbytes
 		}
+		exist := false
+		for _, order := range oldPoObj.SupplierOrders {
+			if order.ASNNumber == supOrder.ASNNumber && order.VendorNO == supOrder.VendorNO {
+				exist = true
+				fmt.Println("update data,SUP - PO for - " + key)
+				order.ShippedQty = supOrder.ShippedQty
+				order.ASNDate = supOrder.ASNDate
+				order.PromisedDate = supOrder.PromisedDate
+				order.CarrierID = supOrder.CarrierID
+				order.CarrierTrackID = supOrder.CarrierTrackID
+				order.TransporatationMode = supOrder.TransporatationMode
+				order.CountryOfOrigin = supOrder.CountryOfOrigin
+				order.PackingList = supOrder.PackingList
+			}
+		}
+		if !exist {
+			fmt.Println("insert data,SUP - PO for - " + key)
+			oldPoObj.SupplierOrders = append(oldPoObj.SupplierOrders, supOrder)
+		}
+		b, _ = json.Marshal(oldPoObj)
+		return nil, key, b
+	} else {
+		return errors.New(err.Error()), "", nil
 	}
-	return shim.Success(nil)
+
 }
+
 //创建，修改SO信息
 func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 1 {
+	fmt.Println(" update SO crSalesOrderInfo  ")
+	fmt.Println("write data, crSalesOrderInfo for - ", args)
+	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update SO")
 	}
 	jsonStr := args[0]
-	var salesOrders [] SalesOrder
+	vendorNo := args[1]
+	fmt.Println("write data, SO data - "+vendorNo, jsonStr)
 
+	var salesOrders [] SalesOrder
 	err := json.Unmarshal([]byte(jsonStr), &salesOrders)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -74,35 +82,20 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 			if err != nil {
 				return shim.Error(err.Error())
 			}
-			fmt.Println("write data, for - " + key)
+			fmt.Println("write data, SO for - " + key)
 
 			//business control
 			//get SO object from ledger
 			valAsbytes, err := stub.GetState(key)
 
 			var b []byte
-			var c []byte
-			cPOOrder := ODMPurchaseOrder{}
 			if err == nil && valAsbytes != nil {
-
 				var oldSalesOrder = SalesOrder{}
 				err = json.Unmarshal(valAsbytes, &oldSalesOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				fmt.Println("write data, for3 - " + oldSalesOrder.CPONO)
-				err, cpo_key := generateKey(stub, CPO_KEY, []string{oldSalesOrder.CPONO})
-				if err != nil {
-					return shim.Error(err.Error())
-				}
-				fmt.Println("write data, for2 - " + cpo_key)
-				//get CPO object from ledger
-				cpoObjAsbytes, err := stub.GetState(cpo_key)
 
-				err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
-				if err != nil {
-					return shim.Error(err.Error())
-				}
 				if salesOrder.TRANSDOC == "SO" {
 					salesOrder.PONO = oldSalesOrder.PONO
 					salesOrder.POITEM = oldSalesOrder.POITEM
@@ -112,39 +105,24 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				} else if salesOrder.TRANSDOC == "BL" {
 					oldSalesOrder.BILLINFOS = salesOrder.BILLINFOS
 					b, _ = json.Marshal(oldSalesOrder)
-					for _, blobj := range salesOrder.BILLINFOS {
-						var cpoBlObj = ODMPayment{}
-						cpoBlObj.BILLINGITEM = blobj.BILLINGITEM
-						cpoBlObj.BILLINGNO = blobj.BILLINGNO
-						cpoBlObj.BILLINGTYPE = blobj.BILLINGTYPE
-						cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBlObj)
-					}
-					c, _ = json.Marshal(cPOOrder)
-					stub.PutState(cpo_key, c)
-
 				} else if salesOrder.TRANSDOC == "GI" {
 					oldSalesOrder.GIINFOS = salesOrder.GIINFOS
 					b, _ = json.Marshal(oldSalesOrder)
 				}
 			} else {
 				b, _ = json.Marshal(salesOrder)
-				err, cpo_key := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
+				var c []byte
+				cPOOrder := ODMPurchaseOrder{}
+				err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				fmt.Println("write data, for - " + cpo_key)
+				fmt.Println("write data, SO-CPO for - " + cpoKey)
 				cPOOrder.CPONO = salesOrder.CPONO
 				cPOOrder.SONUMBER = salesOrder.SONUMBER
 				cPOOrder.SOITEM = salesOrder.SOITEM
-				cPOOrder.SOCDATE = salesOrder.SOCDATE
-				cPOOrder.SOCTIME = salesOrder.SOCTIME
-				cPOOrder.PARTSNO = salesOrder.PARTSNO
-				cPOOrder.SOQTY = salesOrder.SOQTY
-				cPOOrder.UNIT = salesOrder.UNIT
-				//cPOOrder.ODMPayments = salesOrder.ODMPayments
-				//cPOOrder.CPONO = salesOrder.CPONO
 				c, _ = json.Marshal(cPOOrder)
-				stub.PutState(cpo_key, c)
+				stub.PutState(cpoKey, c)
 			}
 			stub.PutState(key, b)
 		} else {
@@ -156,10 +134,12 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 
 //创建，修改PO信息
 func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Response {
-	if len(args) != 1 {
+	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update farm")
 	}
 	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, PO data - "+vendorNo, jsonStr)
 	var objs []PurchaseOrder
 	// obj := PurchaseOrder{}
 	err := json.Unmarshal([]byte(jsonStr), &objs)
@@ -172,7 +152,7 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 			if err != nil {
 				return shim.Error(err.Error())
 			}
-			fmt.Println("write data, for - " + key)
+			fmt.Println("write data,PO for - " + key)
 			//business control
 			//get SO object from ledger
 			valAsbytes, err := stub.GetState(key)
@@ -238,7 +218,7 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 						if err != nil {
 							return shim.Error(err.Error())
 						}
-						// fmt.Println("SO soKey is "+soKey )
+						fmt.Println("SO soKey is " + soKey)
 						valAsbytes, err = stub.GetState(soKey)
 						// fmt.Println("valAsbytesSO  is "+string(valAsbytes) )
 						if err == nil && valAsbytes != nil {
@@ -249,6 +229,25 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 								oldSalesOrder.POITEM = obj.POItemNO
 								soByte, _ := json.Marshal(oldSalesOrder)
 								stub.PutState(soKey, soByte)
+
+								//update CPO Info
+								var c []byte
+								cPOOrder := ODMPurchaseOrder{}
+								err, cpoKey := generateKey(stub, CPO_KEY, []string{oldSalesOrder.CPONO})
+								if err != nil {
+									return shim.Error(err.Error())
+								}
+								fmt.Println("CPO Key is " + cpoKey)
+								cpoObjAsbytes, err := stub.GetState(cpoKey)
+								err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+								if err == nil {
+									fmt.Println("write data, PO-SO-CPO for - " + cpoKey)
+									cPOOrder.PONO = oldSalesOrder.PONO
+									cPOOrder.POITEM = oldSalesOrder.POITEM
+									c, _ = json.Marshal(cPOOrder)
+									stub.PutState(cpoKey, c)
+								}
+
 							}
 						}
 					}
@@ -258,6 +257,114 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 			stub.PutState(key, b)
 		} else {
 			return shim.Error("PurchaseOrder's number and  item no is required")
+		}
+	}
+	return shim.Success(nil)
+}
+
+//修改 CPO信息
+func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting json to create/update CPO")
+	}
+	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, CPONO data - "+vendorNo, jsonStr)
+	var cPOrders [] ODMInfoReq
+
+	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, order := range cPOrders {
+		if order.CPONO != "" {
+			err, cpoKey := generateKey(stub, CPO_KEY, []string{order.CPONO})
+			fmt.Println("write data, CPO for - " + cpoKey)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			cpoObjAsbytes, err := stub.GetState(cpoKey)
+			if err == nil && cpoObjAsbytes != nil {
+				var c []byte
+				cPOOrder := ODMPurchaseOrder{}
+				err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				if order.TRANSDOC == "GR" {
+					var cpoGrObj = ODMGRInfo{}
+					cpoGrObj.LenDNNO = order.LenDNNO
+					cpoGrObj.PARTNUM = order.PARTNUM
+					cpoGrObj.GRQTY = order.GRQTY
+					cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, cpoGrObj)
+				} else if order.TRANSDOC == "BL" {
+					var cpoBLObj = ODMPayment{}
+					cpoBLObj.BILLINGNO = order.INVOICENUM
+					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
+					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
+					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
+				}
+				c, _ = json.Marshal(cPOOrder)
+				stub.PutState(cpoKey, c)
+			} else {
+				return shim.Error("PO data doesn't exist!")
+			}
+		} else {
+			return shim.Error("PO number is required")
+		}
+	}
+	return shim.Success(nil)
+}
+
+//修改 Supplier信息
+func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting json to create/update Supplier Object")
+	}
+	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, SO data - "+vendorNo, jsonStr)
+
+	var supOrders [] SupplierOrder
+
+	err := json.Unmarshal([]byte(jsonStr), &supOrders)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, order := range supOrders {
+		order.VendorNO = vendorNo
+		if order.VendorNO != "" && order.ASNNumber != "" {
+			err, sup_key := generateKey(stub, SUPPLIER_KEY, []string{order.VendorNO, order.ASNNumber})
+			fmt.Println("write data, Suplier part for - " + sup_key)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			supObjAsbytes, err := stub.GetState(sup_key)
+			var c []byte
+			if err == nil && supObjAsbytes != nil {
+				supOrder := SupplierOrder{}
+				err = json.Unmarshal(supObjAsbytes, &supOrder)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				if order.TRANSDOC == "UL" { // upload
+					supOrder.PackingList = order.PackingList
+				}
+				c, _ = json.Marshal(supOrder)
+			} else {
+				c, _ = json.Marshal(order)
+			}
+			err, poKey, b := updatePurchaseOrderBySupplier(stub, c)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			if b == nil {
+				return shim.Error("PO item NO is not correct")
+			}
+			stub.PutState(sup_key, c)
+			stub.PutState(poKey, b)
+		} else {
+			return shim.Error("ASNNumber is required")
 		}
 	}
 	return shim.Success(nil)

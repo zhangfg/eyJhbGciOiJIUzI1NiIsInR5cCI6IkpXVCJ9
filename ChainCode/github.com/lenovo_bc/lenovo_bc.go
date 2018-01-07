@@ -25,7 +25,7 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	function, args := stub.GetFunctionAndParameters()
 	fmt.Println(" ")
 	fmt.Println("starting invoke, for - " + function)
-	
+	fmt.Println("starting invoke, args - ", args)
 	if function=="init" {
 		return t.Init(stub)
 	}else if function == "crSalesOrderInfo"{
@@ -34,6 +34,8 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return crCPurchaseOrderInfo(stub, args)
 	}else if function == "crPurchaseOrderInfo"{
 		return crPurchaseOrderInfo(stub,args)
+	} else if function == "crSupplierOrderInfo" {
+		return crSupplierOrderInfo(stub, args)
 	}else if function == "queryById"{
 		return queryById(stub,args)
 	}else if function == "queryHistoryById"{

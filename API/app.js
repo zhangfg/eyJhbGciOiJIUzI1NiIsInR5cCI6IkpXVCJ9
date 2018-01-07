@@ -43,7 +43,8 @@ var query = require('./app/query.js');
 var host = process.env.HOST || hfc.getConfigSetting('host');
 var port = process.env.PORT || appEnv.port;
 var cloudant = require('./app/cloudant');
-var mutipart= require('connect-multiparty');
+var ledgerData = require('./app/ledgerData');
+var mutipart = require('connect-multiparty');
 
 var mutipartMiddeware = mutipart();
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,8 +87,10 @@ app.use(function (req, res, next) {
             req.username = decoded.username;
             req.orgname = decoded.orgName;
             req.company = decoded.company;
-            logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s, company - %s',
-                decoded.username, decoded.orgName, decoded.company));
+            req.vendorNo = decoded.vendorNo;
+
+            logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s, company - %s, vendorNo - %s',
+                decoded.username, decoded.orgName, decoded.company, decoded.vendorNo));
             return next();
         }
     });
@@ -167,32 +170,36 @@ function prepareArgs(args, userRole) {
 // Register and enroll user
 app.post('/users', function (req, res) {
     var username = req.body.username;
-    var orgName = req.body.orgName;
+    // var orgName = req.body.orgName;
     var password = req.body.password;
     logger.debug('End point : /users');
     logger.debug('User name : ' + username);
-    logger.debug('Org name  : ' + orgName);
+    // logger.debug('Org name  : ' + orgName);
     if (!username) {
         res.json(getErrorMessage('\'username\''));
         return;
     }
-    if (!orgName) {
-        res.json(getErrorMessage('\'orgName\''));
+    if (!password) {
+        res.json(getErrorMessage('\'password\''));
         return;
     }
     cloudant.login(username, password, function (data) {
         if (data && data.length > 0) {
             logger.info("login success!!!");
+            var orgName = data[0].rows.orgName;
             var company = data[0].rows.company;
+            var vendorNo = data[0].rows.vendorNo;
             var token = jwt.sign({
                 exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
                 username: username,
                 orgName: orgName,
-                company: company
+                company: company,
+                vendorNo: vendorNo
             }, app.get('secret'));
             helper.getRegisteredUsers(username, orgName, true).then(function (response) {
                 if (response && typeof response !== 'string') {
                     response.token = token;
+                    response.roleId = company;
                     res.json(response);
                 } else {
                     res.json({
@@ -329,9 +336,11 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     var fcn = req.body.fcn;
     var args = req.body.args;
     var str = JSON.stringify(args);
-    var rstArgs = [];
-    rstArgs.push(str);
-    args = rstArgs;
+    args = prepareArgs(req.vendorNo, str);
+    // var rstArgs = [];
+    // rstArgs.push(str);
+    // rstArgs.push(req.vendorNo);
+    // args = rstArgs;
 
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
@@ -356,14 +365,65 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
     reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO').forEach(item => {
-        cloudant.insertSearchDocument(role, item, function (err, body) {
+        cloudant.insertSearchDocument(role, item, req.vendorNo, function (err, body) {
             if (err) {
                 logger.error('Error creating document - ', err.message);
                 return;
             }
             logger.debug('all records inserted.');
         });
-        ;
+    });
+
+    reqData.filter(item => item.TRANSDOC === 'SUP').forEach(item => {
+        let queryFcn = 'queryByIds';
+        var queryData = [];
+
+        var keyObj = {
+            KeyPrefix: 'PO',
+            KeysStart: [],
+            KeysEnd: []
+        };
+        if (item.PONumber && item.PONumber !== '') {
+            keyObj.KeysStart.push(item.PONumber);
+            keyObj.KeysStart.push(item.POItem);
+            queryData.push(keyObj);
+        }
+
+        var pojsonStr = JSON.stringify(queryData);
+        var poArgsArr = [];
+        poArgsArr.push(pojsonStr);
+        var poArgsStr = prepareArgs(poArgsArr, role);
+        // logger.debug('poArgsStr', poArgsStr);
+        query.queryChaincode(peer, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
+            .then(function (pomessage) {
+                // logger.debug('pomessage', pomessage);
+                if (pomessage && typeof pomessage === 'string' && pomessage.includes(
+                        'Error:')) {
+                    // res.json(getInvokeErrorMessage(pomessage));
+                } else {
+                    var respPoObj;
+                    if (typeof pomessage !== 'string') {
+                        respPoObj = pomessage;
+                    } else {
+                        respPoObj = JSON.parse(pomessage);
+                    }
+                    respPoObj.forEach(poitem => {
+                        item.poitem = poitem;
+                        cloudant.insertSearchDocument(role, item, req.vendorNo, function (err, body) {
+                            if (err) {
+                                logger.error('Error creating document - ', err.message);
+                                return;
+                            }
+                            logger.debug('all records inserted.');
+                        });
+                    });
+
+                }
+            }, (err) => {
+                logger.debug('error is ' + err);
+                // res.json(getInvokeErrorMessage(err));
+            });
+
     });
 
     invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
@@ -461,8 +521,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', functio
         }, (err) => {
             logger.debug('error is ' + err);
             res.json(getInvokeErrorMessage(err));
-        })
-    ;
+        });
 });
 
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/search', function (req, res) {
@@ -501,7 +560,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
         res.json(getNoAccessMessage());
         return;
     }
-    cloudant.queryItemNo(args, function (resp) {
+    cloudant.queryItemNo(args, req.vendorNo, function (resp) {
         // logger.debug('resp', resp);
         var jsonStr = JSON.stringify(resp);
         // logger.debug(jsonStr);
@@ -516,61 +575,20 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                     res.json(getInvokeErrorMessage(message));
                 } else {
                     var respObj;
-                    // logger.debug('message string', message);
+
                     if (typeof message !== 'string') {
                         respObj = message;
                     } else {
                         respObj = JSON.parse(message);
                     }
-
-                    var queryData = [];
-
-                    respObj.forEach(soitem => {
-                        var keyObj = {
-                            KeyPrefix: 'PO',
-                            KeysStart: [],
-                            KeysEnd: []
-                        };
-                        if (soitem.PONO && soitem.PONO !== '') {
-                            keyObj.KeysStart.push(soitem.PONO);
-                            keyObj.KeysStart.push(soitem.POITEM);
-                            queryData.push(keyObj);
-                        }
+                    logger.debug('get response', respObj);
+                    var response = [];
+                    respObj.forEach(soItem => {
+                        var resp = ledgerData.prepareSearchData(keyprefix, soItem);
+                        logger.debug('get--- response', resp);
+                        response.push(resp);
                     });
-                    var pojsonStr = JSON.stringify(queryData);
-                    var poArgsArr = [];
-                    poArgsArr.push(pojsonStr);
-                    var poArgsStr = prepareArgs(poArgsArr, role);
-                    // logger.debug('poArgsStr', poArgsStr);
-                    query.queryChaincode(peer, channelName, chaincodeName, poArgsStr, fcn, req.username, req.orgname)
-                        .then(function (pomessage) {
-                            // logger.debug('pomessage', pomessage);
-                            if (pomessage && typeof pomessage === 'string' && pomessage.includes(
-                                    'Error:')) {
-                                // res.json(getInvokeErrorMessage(pomessage));
-                            } else {
-                                var respPoObj;
-                                if (typeof pomessage !== 'string') {
-                                    respPoObj = pomessage;
-                                } else {
-                                    respPoObj = JSON.parse(pomessage);
-                                }
-                                // logger.debug('respPoObj', respPoObj);
-                                respObj.map(item => {
-                                    respPoObj.forEach(poitem => {
-                                        // logger.debug('POmessage', item.PONO, item.POITEM, poitem.PONO, poitem.POItemNO);
-                                        if (item.PONO === poitem.PONO && item.POITEM === poitem.POItemNO) {
-                                            item.GRInfos = poitem.GRInfos;
-                                        }
-                                    })
-                                });
-
-                            }
-                            res.json(getQuerySuccessMessage(respObj));
-                        }, (err) => {
-                            logger.debug('error is ' + err);
-                            res.json(getInvokeErrorMessage(err));
-                        });
+                    res.json(getQuerySuccessMessage(response));
                 }
 
             }, (err) => {
