@@ -37,7 +37,7 @@ var prepareSOSearchData = function (data) {
     res.CITY_WE = data.CITY_WE;
     res.PRNO = data.PRNO;
     res.PONO = data.PONO;
-    res.POItemNO = data.POItemNO;
+    res.POITEM = data.POITEM;
     res.data = [];
     if (data.GIINFOS) {
         data.GIINFOS.forEach(giItem => {
