@@ -19,6 +19,15 @@ type QueryParam struct {
 	KeysEnd   []string `json:"keysEnd"`   //keys end
 }
 
+type POAndSOOrder struct {
+	SONUMBER      string        `json:"SONUMBER"`      //Sales document number
+	SOITEM        string        `json:"SOITEM"`        //Sales document Item
+	PONO          string        `json:"PONO"`          //PO  no
+	POITEM        string        `json:"POITEM"`        //PO  item no
+	SalesOrder    SalesOrder    `json:"SalesOrder"`    //Sales Order info, only for search
+	PurchaseOrder PurchaseOrder `json:"PurchaseOrder"` //Purchase Order info,only for search
+}
+
 //Request Data
 type ODMInfoReq struct {
 	CPONO         string `json:"CPONO"`
@@ -115,8 +124,8 @@ type SalesOrder struct {
 	GIINFOS     []GIInfo      `json:"GIINFOS"`     //GIINFOS
 	PONO        string        `json:"PONO"`        //PO  no
 	POITEM      string        `json:"POITEM"`      //PO  item no
-	ODMPayments []ODMPayment  `json:"ODMPayments"` //Billing info
-	ODMGRInfos  []ODMGRInfo   `json:"ODMGRInfos"`  //GR info
+	ODMPayments []ODMPayment  `json:"ODMPayments"` //Billing info only for search
+	ODMGRInfos  []ODMGRInfo   `json:"ODMGRInfos"`  //GR info only for search
 }
 
 type BillingInfo struct {

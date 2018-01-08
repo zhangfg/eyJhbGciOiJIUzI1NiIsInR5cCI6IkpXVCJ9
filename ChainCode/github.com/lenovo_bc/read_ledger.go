@@ -27,21 +27,16 @@ func filterByUserRole(valAsbytes []byte, KeyPrefix string, userRole string) (err
 }
 
 func filterSalesOrder(valAsbytes []byte, userRole string) (error, []byte) {
-	fmt.Println("filterSalesOrder,userRole=" + userRole)
-	fmt.Println("filterSalesOrder,userRole1=" + string(valAsbytes))
 	salesOrder := SalesOrder{}
 	err := json.Unmarshal(valAsbytes, &salesOrder)
-	fmt.Println("filterSalesOrder,userRole1-=", salesOrder)
 	if err != nil {
 		return errors.New(err.Error()), nil
 	}
-	fmt.Println("filterSalesOrder,userRole2=" + userRole)
 	if userRole != "lenovo" {
 		salesOrder.NETPRICE = STAR;
 		salesOrder.NETVALUE = STAR;
 	}
 	b, err := json.Marshal(salesOrder)
-	fmt.Println("filterSalesOrder,userRole3=" + userRole)
 	if err != nil {
 		return errors.New(err.Error()), nil
 	}
@@ -82,11 +77,17 @@ func integrateLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, KeyPre
 }
 
 func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, userRole string) (error, []byte) {
+
 	salesOrder := SalesOrder{}
 	err := json.Unmarshal(valAsbytes, &salesOrder)
 	if err != nil {
 		return errors.New(err.Error()), nil
 	}
+	order := POAndSOOrder{}
+	order.SONUMBER = salesOrder.SONUMBER
+	order.SOITEM = salesOrder.SOITEM
+	order.PONO = salesOrder.PONO
+	order.POITEM = salesOrder.POITEM
 	var c []byte
 	cPOOrder := ODMPurchaseOrder{}
 	err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
@@ -99,11 +100,48 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 			salesOrder.ODMGRInfos = cPOOrder.ODMGRInfos
 		}
 	}
-	c, _ = json.Marshal(salesOrder)
+	POOrder := PurchaseOrder{}
+	err, poKey := generateKey(stub, PO_KEY, []string{salesOrder.PONO, salesOrder.POITEM})
+	fmt.Println("get PO object in SO,PO key:" + poKey)
+	if err == nil {
+		poObjAsbytes, err := stub.GetState(poKey)
+		if err == nil {
+			err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
+			err = json.Unmarshal(poObjAsbytes, &POOrder)
+			order.PurchaseOrder = POOrder
+		}
+	}
+	order.SalesOrder = salesOrder
+	c, _ = json.Marshal(order)
 	return nil, c
 }
 func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, userRole string) (error, []byte) {
-	return nil, valAsbytes
+	purchaseOrder := PurchaseOrder{}
+	err := json.Unmarshal(valAsbytes, &purchaseOrder)
+	if err != nil {
+		return errors.New(err.Error()), nil
+	}
+	var c []byte
+	order := POAndSOOrder{}
+	order.SONUMBER = purchaseOrder.SONUMBER
+	order.SOITEM = purchaseOrder.SOITEM
+	order.PONO = purchaseOrder.PONO
+	order.POITEM = purchaseOrder.POItemNO
+
+	salesOrder := SalesOrder{}
+	err, soKey := generateKey(stub, SO_KEY, []string{purchaseOrder.SONUMBER, purchaseOrder.SOITEM})
+	fmt.Println("get SO object in PO,SO key:" + soKey)
+	if err == nil {
+		soObjAsbytes, err := stub.GetState(soKey)
+		if err == nil {
+			err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
+			err = json.Unmarshal(soObjAsbytes, &salesOrder)
+			order.SalesOrder = salesOrder
+		}
+	}
+	order.PurchaseOrder = purchaseOrder
+	c, _ = json.Marshal(order)
+	return nil, c
 }
 func integrateCustomerPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, userRole string) (error, []byte) {
 	cPoOrder := ODMPurchaseOrder{}
