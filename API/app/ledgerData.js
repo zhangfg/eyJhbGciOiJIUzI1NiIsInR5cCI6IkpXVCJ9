@@ -36,7 +36,8 @@ var prepareSOSearchData = function (data) {
         res.VENDORNAME = soData.VENDORNAME;
         res.CRAD = soData.CRAD;
         res.SOLDTO = soData.SOLDTO;
-        res.NAME1_AG = soData.NAME1_AG;
+        res.NAME_AG = soData.NAME1_AG;
+        res.NAME1_AG = soData.NAME1_AG + ' ' + soData.NAME2_AG;
         res.NAME2_AG = soData.NAME2_AG;
         res.CPONO = soData.CPONO;
         res.CITY_WE = soData.CITY_WE;
@@ -64,11 +65,73 @@ var prepareSOSearchData = function (data) {
     }
 
     res.data = [];
-    if (data.SalesOrder) {
+    if (data.PurchaseOrder) {
+        var poData = data.PurchaseOrder;
+        if (poData.InboundDelivery) {
+            poData.InboundDelivery.forEach(indnItem => {
+                var item = {};
+                item.OAName = poData.OAName;
+                item.OANO = poData.OANO;
+                item.PONO = data.PONO;
+                item.DlvyQty = indnItem.DlvyQty;
+                item.ASNNO = indnItem.ASNNO;
+                item.IBDNNUMBER = indnItem.IBDNNUMBER;
+                item.IDDlvyDate = indnItem.IDDlvyDate;
+                if (poData.GRInfos) {
+                    poData.GRInfos.filter(grItem => indnItem.ASNNO === grItem.SupDeliveryNote).forEach(grItem => {
+                        item.GRNO = grItem.GRNO;
+                    });
+                }
+                if (poData.SupplierOrders) {
+                    poData.SupplierOrders.filter(supItem => supItem.ASNNumber === indnItem.ASNNO).forEach(supItem => {
+                        item.PackingList = supItem.PackingList;
+                    });
+                }
+
+                if (data.SalesOrder) {
+                    var soData = data.SalesOrder;
+                    item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
+                    item.SONUMBER = data.SONUMBER;
+                    item.PARTSNO = soData.PARTSNO;
+                    item.PARTSDESC = soData.PARTSDESC;
+                    item.CRAD = soData.CRAD;
+                    if (soData.GIINFOS) {
+                        soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)
+                            .forEach(giItem => {
+                                item.DNNUMBER = giItem.DNNUMBER;
+                                item.DNDATE = giItem.DNDATE;
+                                if (soData.BILLINFOS) {
+                                    soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER).forEach(blItem => {
+                                        item.PROINV = blItem.PROINV;
+                                        item.PROINVITEM = blItem.PROINVITEM;
+                                        item.BILLINGNO = blItem.BILLINGNO;
+                                        item.BILLINGITEM = blItem.BILLINGITEM;
+                                        if (soData.ODMPayments) {
+                                            soData.ODMPayments.filter(odmItem => blItem.BILLINGNO === odmItem.BILLINGNO)
+                                                .forEach(odmItem => {
+                                                    item.INVOICESTATUS = odmItem.INVOICESTATUS;
+                                                    item.PAYMENTDATE = odmItem.PAYMENTDATE;
+                                                });
+                                        }
+                                    });
+                                }
+                            });
+                    }
+                }
+                res.data.push(item);
+            });
+        }
+    } else if (data.SalesOrder) {
         var soData = data.SalesOrder;
         if (soData.GIINFOS) {
             soData.GIINFOS.forEach(giItem => {
                 var item = {};
+                item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
+                item.SONUMBER = data.SONUMBER;
+                item.PARTSNO = soData.PARTSNO;
+                item.PARTSDESC = soData.PARTSDESC;
+                item.CRAD = soData.CRAD;
+
                 item.DNNUMBER = giItem.DNNUMBER;
                 item.DNDATE = giItem.DNDATE;
                 if (soData.BILLINFOS) {
@@ -87,6 +150,9 @@ var prepareSOSearchData = function (data) {
                 }
                 if (data.PurchaseOrder) {
                     var poData = data.PurchaseOrder;
+                    item.OAName = poData.OAName;
+                    item.OANO = poData.OANO;
+                    item.PONO = data.PONO;
                     if (poData.InboundDelivery) {
                         poData.InboundDelivery.filter(inbdItem => giItem.IBDNNUMBER === inbdItem.IBDNNUMBER)
                             .forEach(inbdItem => {
@@ -133,8 +199,8 @@ var preparePOSearchData = function (data) {
         res.Unit = poData.Unit;
         res.PARTSDESC = poData.PARTSDESC;
         res.PARTSNO = poData.PARTSNO;
-        res.VENDORNO = poData.VENDORNO;
-        res.VENDORNAME = poData.VENDORNAME;
+        res.VENDORNO = poData.VendorNO;
+        res.VENDORNAME = poData.VendorName;
         res.OANO = poData.OANO;
         res.OAName = poData.OAName;
         res.ContractNO = poData.ContractNO;
@@ -155,6 +221,7 @@ var preparePOSearchData = function (data) {
         // res.VENDORNAME = soData.VENDORNAME;
         res.CRAD = soData.CRAD;
         res.SOLDTO = soData.SOLDTO;
+        res.NAME_AG = soData.NAME1_AG + ' ' + soData.NAME2_AG;
         res.NAME1_AG = soData.NAME1_AG;
         res.NAME2_AG = soData.NAME2_AG;
         res.CPONO = soData.CPONO;
@@ -167,6 +234,10 @@ var preparePOSearchData = function (data) {
         if (poData.InboundDelivery) {
             poData.InboundDelivery.forEach(indnItem => {
                 var item = {};
+                item.OAName = poData.OAName;
+                item.OANO = poData.OANO;
+                item.PONO = data.PONO;
+
                 item.DlvyQty = indnItem.DlvyQty;
                 item.ASNNO = indnItem.ASNNO;
                 item.IBDNNUMBER = indnItem.IBDNNUMBER;
@@ -184,6 +255,11 @@ var preparePOSearchData = function (data) {
 
                 if (data.SalesOrder) {
                     var soData = data.SalesOrder;
+                    item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
+                    item.SONUMBER = data.SONUMBER;
+                    item.PARTSNO = soData.PARTSNO;
+                    item.PARTSDESC = soData.PARTSDESC;
+                    item.CRAD = soData.CRAD;
                     if (soData.GIINFOS) {
                         soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)
                             .forEach(giItem => {
@@ -298,6 +374,7 @@ var prepareSupplierSearchData = function (data) {
     res.SOITEM = data.PurchaseOrder.SOITEM;
 
     res.CRAD = data.SalesOrder.CRAD;
+    res.NAME_AG = data.NAME1_AG + ' ' + data.NAME2_AG;
     res.NAME1_AG = data.SalesOrder.NAME1_AG;
     res.NAME2_AG = data.SalesOrder.NAME2_AG;
     res.CPONO = data.SalesOrder.CPONO;
