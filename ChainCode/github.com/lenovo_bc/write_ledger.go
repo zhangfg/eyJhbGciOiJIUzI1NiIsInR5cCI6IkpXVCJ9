@@ -293,13 +293,13 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				}
 				if order.TRANSDOC == "GR" {
 					var cpoGrObj = ODMGRInfo{}
-					cpoGrObj.LenDNNO = order.LenDNNO
+					cpoGrObj.GRNO = order.GRNO
 					cpoGrObj.PARTNUM = order.PARTNUM
 					cpoGrObj.GRQTY = order.GRQTY
 					cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, cpoGrObj)
-				} else if order.TRANSDOC == "BL" {
+				} else if order.TRANSDOC == "PY" {
 					var cpoBLObj = ODMPayment{}
-					cpoBLObj.BILLINGNO = order.INVOICENUM
+					cpoBLObj.BILLINGNO = order.BILLINGNO
 					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
 					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
 					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)

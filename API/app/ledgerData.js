@@ -117,6 +117,14 @@ var prepareSOSearchData = function (data) {
                                                 .forEach(odmItem => {
                                                     item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                                     item.PAYMENTDATE = odmItem.PAYMENTDATE;
+                                                    item.CGRNO = odmItem.GRNO;
+                                                    item.GRQty = 0;
+                                                    if (soData.ODMGRInfos) {
+                                                        soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                                            .forEach(odmgr => {
+                                                                item.GRQty += odmgr.GRQTY;
+                                                            });
+                                                    }
                                                 });
                                         }
                                     });
@@ -150,6 +158,14 @@ var prepareSOSearchData = function (data) {
                             soData.ODMPayments.filter(odmItem => blItem.BILLINGNO === odmItem.BILLINGNO).forEach(odmItem => {
                                 item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                 item.PAYMENTDATE = odmItem.PAYMENTDATE;
+                                item.CGRNO = odmItem.GRNO;
+                                item.GRQty = 0;
+                                if (soData.ODMGRInfos) {
+                                    soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                        .forEach(odmgr => {
+                                            item.GRQty += odmgr.GRQTY;
+                                        });
+                                }
                             });
                         }
                     });
@@ -284,7 +300,8 @@ var preparePOSearchData = function (data) {
                                 item.DNNUMBER = giItem.DNNUMBER;
                                 item.DNDATE = giItem.DNDATE;
                                 if (soData.BILLINFOS) {
-                                    soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER).forEach(blItem => {
+                                    soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER)
+                                        .forEach(blItem => {
                                         item.PROINV = blItem.PROINV;
                                         item.PROINVITEM = blItem.PROINVITEM;
                                         item.BILLINGNO = blItem.BILLINGNO;
@@ -294,6 +311,14 @@ var preparePOSearchData = function (data) {
                                                 .forEach(odmItem => {
                                                     item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                                     item.PAYMENTDATE = odmItem.PAYMENTDATE;
+                                                    item.CGRNO = odmItem.GRNO;
+                                                    item.GRQty = 0;
+                                                    if (soData.ODMGRInfos) {
+                                                        soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                                            .forEach(odmgr => {
+                                                                item.GRQty += odmgr.GRQTY;
+                                                            });
+                                                    }
                                                 });
                                         }
                                     });
@@ -355,6 +380,14 @@ var prepareODMSearchData = function (data) {
             item.INVOICESTATUS = odmItem.INVOICESTATUS;
             item.PAYMENTDATE = odmItem.PAYMENTDATE;
             item.BILLINGNO = odmItem.BILLINGNO;
+            item.CGRNO = odmItem.GRNO;
+            item.GRQty = 0;
+            if (data.ODMGRInfos) {
+                data.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                    .forEach(odmgr => {
+                        item.GRQty += odmgr.GRQTY;
+                    });
+            }
             if (data.SalesOrder && data.SalesOrder.BILLINFOS) {
                 data.SalesOrder.BILLINFOS.filter(blItem => blItem.BILLINGNO === odmItem.BILLINGNO).forEach(blItem => {
                     item.PROINV = blItem.PROINV;
