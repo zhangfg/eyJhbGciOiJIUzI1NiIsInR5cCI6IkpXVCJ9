@@ -80,6 +80,12 @@ var prepareSOSearchData = function (data) {
                 if (poData.GRInfos) {
                     poData.GRInfos.filter(grItem => indnItem.ASNNO === grItem.SupDeliveryNote).forEach(grItem => {
                         item.GRNO = grItem.GRNO;
+                        if (poData.Invoice) {
+                            poData.Invoice.filter(invoiceItem => invoiceItem.GRNO === grItem.GRNO)
+                                .forEach(invoiceItem => {
+                                    item.INVOICE = invoiceItem.InvNO + ' ' + invoiceItem.FiscalYear;
+                                });
+                        }
                     });
                 }
                 if (poData.SupplierOrders) {
@@ -165,6 +171,12 @@ var prepareSOSearchData = function (data) {
                                     poData.GRInfos.filter(grItem => inbdItem.ASNNO === grItem.SupDeliveryNote)
                                         .forEach(grItem => {
                                             item.GRNO = grItem.GRNO;
+                                            if (poData.Invoice) {
+                                                poData.Invoice.filter(invoiceItem => invoiceItem.GRNO === grItem.GRNO)
+                                                    .forEach(invoiceItem => {
+                                                        item.INVOICE = invoiceItem.InvNO + ' ' + invoiceItem.FiscalYear;
+                                                    });
+                                            }
                                         });
                                 }
                                 if (poData.SupplierOrders) {
@@ -245,6 +257,12 @@ var preparePOSearchData = function (data) {
                 if (poData.GRInfos) {
                     poData.GRInfos.filter(grItem => indnItem.ASNNO === grItem.SupDeliveryNote).forEach(grItem => {
                         item.GRNO = grItem.GRNO;
+                        if (poData.Invoice) {
+                            poData.Invoice.filter(invoiceItem => invoiceItem.GRNO === grItem.GRNO)
+                                .forEach(invoiceItem => {
+                                    item.INVOICE = invoiceItem.InvNO + ' ' + invoiceItem.FiscalYear;
+                                });
+                        }
                     });
                 }
                 if (poData.SupplierOrders) {

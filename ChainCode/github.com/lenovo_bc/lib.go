@@ -73,15 +73,18 @@ type ODMPurchaseOrder struct {
 }
 
 type ODMPayment struct {
+	FlexInvoiceNO string `json:"FlexInvoiceNO"` //Flex Invoice Document
 	BILLINGNO     string `json:"BILLINGNO"`     //Billing Document
 	//BILLINGITEM   string `json:"BILLINGITEM"`   //Billing item
 	//BILLINGTYPE   string `json:"BILLINGTYPE"`   //Billing Type
 	INVOICESTATUS string `json:"INVOICESTATUS"` //invoice status
 	PAYMENTDATE   string `json:"PAYMENTDATE"`   // date of approval
+	GRNO          string `json:"GRNO"`          //FLEX GR No
 }
 type ODMGRInfo struct {
+	GRNO    string `json:"GRNO"`    //FLEX GR No
 	PARTNUM string `json:"PARTNUM"` //PART No
-	LenDNNO string `json:"LenDNNO"` //Lenovo DN NO.
+	//LenDNNO string `json:"LenDNNO"` //Lenovo DN NO. ----
 	GRQTY   string `json:"GRQTY"`   // received qty
 }
 //SalesOrder   Key: "SO"+So number + Item_no

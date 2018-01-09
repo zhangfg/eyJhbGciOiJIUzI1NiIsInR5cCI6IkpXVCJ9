@@ -394,7 +394,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         poArgsArr.push(pojsonStr);
         var poArgsStr = prepareArgs(poArgsArr, role);
         // logger.debug('poArgsStr', poArgsStr);
-        query.queryChaincode(peer, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
+        query.queryChaincode(peers, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
             .then(function (pomessage) {
                 // logger.debug('pomessage', pomessage);
                 if (pomessage && typeof pomessage === 'string' && pomessage.includes(
