@@ -302,6 +302,8 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					cpoBLObj.BILLINGNO = order.BILLINGNO
 					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
 					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
+					cpoBLObj.GRNO = order.GRNO
+					cpoBLObj.FlexInvoiceNO = order.FlexInvoiceNO
 					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
 				}
 				c, _ = json.Marshal(cPOOrder)
