@@ -96,8 +96,8 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 		cpoObjAsbytes, err := stub.GetState(cpoKey)
 		if err == nil {
 			err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
-			salesOrder.ODMPayments = cPOOrder.ODMPayments
-			salesOrder.ODMGRInfos = cPOOrder.ODMGRInfos
+			salesOrder.ODMPayments = cPOOrder.Payments
+			salesOrder.ODMGRInfos = cPOOrder.GRInfos
 		}
 	}
 	POOrder := PurchaseOrder{}

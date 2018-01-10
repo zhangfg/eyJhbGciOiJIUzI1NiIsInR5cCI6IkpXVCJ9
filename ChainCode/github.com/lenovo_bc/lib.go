@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"text/template/parse"
 )
 
 //附件

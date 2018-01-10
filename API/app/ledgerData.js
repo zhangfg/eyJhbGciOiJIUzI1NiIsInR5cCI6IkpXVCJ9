@@ -362,8 +362,8 @@ var prepareODMSearchData = function (data) {
 
 
     res.data = [];
-    if (data.ODMPayments) {
-        data.ODMPayments.forEach(odmItem => {
+    if (data.Payments) {
+        data.Payments.forEach(odmItem => {
             var item = {};
             item.CPONO = data.CPONO;
             item.SONUMBER = data.SONUMBER;
@@ -382,8 +382,8 @@ var prepareODMSearchData = function (data) {
             item.BILLINGNO = odmItem.BILLINGNO;
             item.CGRNO = odmItem.GRNO;
             item.GRQty = 0;
-            if (data.ODMGRInfos) {
-                data.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+            if (data.GRInfos) {
+                data.GRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
                     .forEach(odmgr => {
                         item.GRQty += odmgr.GRQTY;
                     });

@@ -313,11 +313,33 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				}
 				if order.TRANSDOC == "GR" {
 					for _, subObject := range order.GRInfos {
-						cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
+						//cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
+						var exist = false
+						for i, child := range cPOOrder.GRInfos {
+							if child.GRNO == subObject.GRNO {
+								cPOOrder.GRInfos[i] = subObject
+								exist = true
+							}
+						}
+						if (exist == false) {
+							cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
+						}
+
 					}
 				} else if order.TRANSDOC == "PY" {
+
 					for _, subObject := range order.Payments {
-						cPOOrder.Payments = append(cPOOrder.Payments, subObject)
+						//cPOOrder.Payments = append(cPOOrder.Payments, subObject)
+						var exist = false
+						for i, child := range cPOOrder.Payments {
+							if child.FlexInvoiceNO == subObject.FlexInvoiceNO {
+								cPOOrder.Payments[i] = subObject
+								exist = true
+							}
+						}
+						if (!exist) {
+							cPOOrder.Payments = append(cPOOrder.Payments, subObject)
+						}
 					}
 				} else if order.TRANSDOC == "LP" {
 					for _, subObject := range order.LOIMaterials {
