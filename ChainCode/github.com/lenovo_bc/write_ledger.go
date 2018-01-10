@@ -290,7 +290,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	jsonStr := args[0]
 	//vendorNo := args[1]
 	fmt.Println("write data, CPONO data - ", jsonStr)
-	var cPOrders [] ODMInfoReq
+	var cPOrders [] ODMPurchaseOrder
 
 	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
 	if err != nil {
@@ -312,76 +312,54 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					return shim.Error(err.Error())
 				}
 				if order.TRANSDOC == "GR" {
-					var cpoGrObj = ODMGRInfo{}
-					cpoGrObj.GRNO = order.GRNO
-					cpoGrObj.PARTNUM = order.PARTNUM
-					cpoGrObj.GRQTY = order.GRQTY
-					cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, cpoGrObj)
+					for _, subObject := range order.GRInfos {
+						cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
+					}
 				} else if order.TRANSDOC == "PY" {
-					var cpoBLObj = ODMPayment{}
-					cpoBLObj.BILLINGNO = order.BILLINGNO
-					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
-					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
-					cpoBLObj.GRNO = order.GRNO
-					cpoBLObj.FlexInvoiceNO = order.FlexInvoiceNO
-					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
-				} else if order.TRANSDOC == "PullMLOI" {
-					var cpoMPLObj = ODMLOIMaterial{}
-					cpoMPLObj.RefNo = order.RefNo
-					cpoMPLObj.PullType = order.PullType
-					cpoMPLObj.Week = order.Week
-					cpoMPLObj.PullDate = order.PullDate
-					cpoMPLObj.PN = order.PN
-					cpoMPLObj.Qty = order.Qty
-					cpoMPLObj.IntelShipTo = order.IntelShipTo
-					cpoMPLObj.NotesToReceiver = order.NotesToReceiver
-					cpoMPLObj.ItemNumber = order.ItemNumber
-					cpoMPLObj.Product = order.Product
-
-					cpoMPLObj.Quantity = order.Quantity
-					cpoMPLObj.DlvryDate = order.DlvryDate
-					cpoMPLObj.RequestedDate = order.RequestedDate
-					cpoMPLObj.ShipmentInstruction = order.ShipmentInstruction
-					cPOOrder.ODMLOIMaterials = append(cPOOrder.ODMLOIMaterials, cpoMPLObj)
+					for _, subObject := range order.Payments {
+						cPOOrder.Payments = append(cPOOrder.Payments, subObject)
+					}
+				} else if order.TRANSDOC == "LP" {
+					for _, subObject := range order.LOIMaterials {
+						cPOOrder.LOIMaterials = append(cPOOrder.LOIMaterials, subObject)
+					}
+				} else if order.TRANSDOC == "LI" {
+					for _, subObject := range order.LOIInventorys {
+						cPOOrder.LOIInventorys = append(cPOOrder.LOIInventorys, subObject)
+					}
+				} else if order.TRANSDOC == "SP" {
+					for _, subObject := range order.SOIPulls {
+						cPOOrder.SOIPulls = append(cPOOrder.SOIPulls, subObject)
+					}
+				} else if order.TRANSDOC == "SI" {
+					for _, subObject := range order.SOIInventorys {
+						cPOOrder.SOIInventorys = append(cPOOrder.SOIInventorys, subObject)
+					}
+				} else if order.TRANSDOC == "LG" {
+					for _, subObject := range order.LOIGRInfos {
+						cPOOrder.LOIGRInfos = append(cPOOrder.LOIGRInfos, subObject)
+					}
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
 			} else {
-				// TODO insert....
+				fmt.Println("insert CPO object", order)
 				var c []byte
 				cPOOrder := ODMPurchaseOrder{}
 				if order.TRANSDOC == "GR" {
-					var cpoGrObj = ODMGRInfo{}
-					cpoGrObj.GRNO = order.GRNO
-					cpoGrObj.PARTNUM = order.PARTNUM
-					cpoGrObj.GRQTY = order.GRQTY
-					cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, cpoGrObj)
+					cPOOrder.GRInfos = order.GRInfos
 				} else if order.TRANSDOC == "PY" {
-					var cpoBLObj = ODMPayment{}
-					cpoBLObj.BILLINGNO = order.BILLINGNO
-					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
-					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
-					cpoBLObj.GRNO = order.GRNO
-					cpoBLObj.FlexInvoiceNO = order.FlexInvoiceNO
-					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
-				} else if order.TRANSDOC == "PullMLOI" {
-					var cpoMPLObj = ODMLOIMaterial{}
-					cpoMPLObj.RefNo = order.RefNo
-					cpoMPLObj.PullType = order.PullType
-					cpoMPLObj.Week = order.Week
-					cpoMPLObj.PullDate = order.PullDate
-					cpoMPLObj.PN = order.PN
-					cpoMPLObj.Qty = order.Qty
-					cpoMPLObj.IntelShipTo = order.IntelShipTo
-					cpoMPLObj.NotesToReceiver = order.NotesToReceiver
-					cpoMPLObj.ItemNumber = order.ItemNumber
-					cpoMPLObj.Product = order.Product
-
-					cpoMPLObj.Quantity = order.Quantity
-					cpoMPLObj.DlvryDate = order.DlvryDate
-					cpoMPLObj.RequestedDate = order.RequestedDate
-					cpoMPLObj.ShipmentInstruction = order.ShipmentInstruction
-					cPOOrder.ODMLOIMaterials = append(cPOOrder.ODMLOIMaterials, cpoMPLObj)
+					cPOOrder.Payments = order.Payments
+				} else if order.TRANSDOC == "LP" {
+					cPOOrder.LOIMaterials = order.LOIMaterials
+				} else if order.TRANSDOC == "LI" {
+					cPOOrder.LOIInventorys = order.LOIInventorys
+				} else if order.TRANSDOC == "SP" {
+					cPOOrder.SOIPulls = order.SOIPulls
+				} else if order.TRANSDOC == "SI" {
+					cPOOrder.SOIInventorys = order.SOIInventorys
+				} else if order.TRANSDOC == "LG" {
+					cPOOrder.LOIGRInfos = order.LOIGRInfos
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
