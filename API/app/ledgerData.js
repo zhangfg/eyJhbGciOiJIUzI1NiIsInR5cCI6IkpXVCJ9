@@ -9,9 +9,9 @@ var prepareSearchData = function (keyprefix, respObj) {
         return prepareSOSearchData(respObj);
     } else if (keyprefix === 'PO') {
         return preparePOSearchData(respObj);
-    } else if (keyprefix === 'ODM') {
+    } else if (keyprefix === 'CPO') {
         return prepareODMSearchData(respObj);
-    } else if (keyprefix === 'SUPPLIER') {
+    } else if (keyprefix === 'SUP') {
         return prepareSupplierSearchData(respObj);
     }
 

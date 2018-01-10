@@ -63,7 +63,7 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users']
+    path: ['/users', 'upload']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
@@ -87,7 +87,7 @@ app.use(function (req, res, next) {
             req.username = decoded.username;
             req.orgname = decoded.orgName;
             req.company = decoded.company;
-            req.vendorNo = decoded.vendorNo;
+            req.vendorNo = decoded.vendorNo + '';
 
             logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s, company - %s, vendorNo - %s',
                 decoded.username, decoded.orgName, decoded.company, decoded.vendorNo));
@@ -161,6 +161,13 @@ function prepareArgs(args, userRole) {
     var rstArgs = [];
     rstArgs.push(userRole);
     rstArgs.push(args[0]);
+    return rstArgs;
+}
+
+function prepareVendor(args, vendorNo) {
+    var rstArgs = [];
+    rstArgs.push(args);
+    rstArgs.push(vendorNo);
     return rstArgs;
 }
 
@@ -336,7 +343,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     var fcn = req.body.fcn;
     var args = req.body.args;
     var str = JSON.stringify(args);
-    args = prepareArgs(req.vendorNo, str);
+    args = prepareVendor(str, req.vendorNo);
     // var rstArgs = [];
     // rstArgs.push(str);
     // rstArgs.push(req.vendorNo);
@@ -344,6 +351,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
 
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
+    logger.debug('req.vendorNo : ' + req.vendorNo);
     logger.debug('fcn  : ' + fcn);
     logger.debug('args  : ' + args);
     if (!chaincodeName) {
@@ -417,7 +425,6 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
                             logger.debug('all records inserted.');
                         });
                     });
-
                 }
             }, (err) => {
                 logger.debug('error is ' + err);
@@ -477,6 +484,30 @@ app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req,
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', mutipartMiddeware, function (req, res) {
     logger.debug('==================== upload ON CHAINCODE ==================');
     console.log(req.files);
+    console.log('req.body', req.body);
+    var ASNNO = req.body.ASNNO;
+    var peers = req.body.peers;
+    var chaincodeName = req.params.chaincodeName;
+    var channelName = req.params.channelName;
+    var role = req.params.role;
+
+    // var fcn = req.body.fcn;
+    // var args = req.body.args;
+    var fcn = 'crSupplierOrderInfo';
+    var args = [{
+        "TRANSDOC": "UL",
+        "ASNNumber": ASNNO,
+        "PackingList":
+            {
+                "FileId": "",
+                "FileName": "",
+                "FileType": "",
+            }
+    }];
+    var str = JSON.stringify(args);
+    args = prepareVendor(str, req.vendorNo);
+
+
 
 });
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', function (req, res) {

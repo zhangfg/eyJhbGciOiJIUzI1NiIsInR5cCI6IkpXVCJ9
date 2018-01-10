@@ -257,6 +257,7 @@ func queryByIds(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var params []QueryParam
 	jsonStr := args[1]
 	userRole := args[0]
+	fmt.Println("userRole:" + userRole)
 	err := json.Unmarshal([]byte(jsonStr), &params)
 	if err != nil {
 		return shim.Error(err.Error())

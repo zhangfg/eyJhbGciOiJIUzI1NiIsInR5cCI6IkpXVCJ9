@@ -111,18 +111,31 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 				}
 			} else {
 				b, _ = json.Marshal(salesOrder)
-				var c []byte
-				cPOOrder := ODMPurchaseOrder{}
-				err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
-				if err != nil {
-					return shim.Error(err.Error())
+				if (salesOrder.CPONO != "") {
+					var c []byte
+					cPOOrder := ODMPurchaseOrder{}
+					err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
+					cpoObjAsbytes, err := stub.GetState(cpoKey)
+					if err != nil {
+						return shim.Error(err.Error())
+					}
+					if err == nil && cpoObjAsbytes != nil {
+						fmt.Println("write data, update SO-CPO for - " + cpoKey)
+						err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+						cPOOrder.CPONO = salesOrder.CPONO
+						cPOOrder.SONUMBER = salesOrder.SONUMBER
+						cPOOrder.SOITEM = salesOrder.SOITEM
+						c, _ = json.Marshal(cPOOrder)
+					} else {
+						fmt.Println("write data, insert SO-CPO for - " + cpoKey)
+						cPOOrder.CPONO = salesOrder.CPONO
+						cPOOrder.SONUMBER = salesOrder.SONUMBER
+						cPOOrder.SOITEM = salesOrder.SOITEM
+						c, _ = json.Marshal(cPOOrder)
+					}
+					stub.PutState(cpoKey, c)
 				}
-				fmt.Println("write data, SO-CPO for - " + cpoKey)
-				cPOOrder.CPONO = salesOrder.CPONO
-				cPOOrder.SONUMBER = salesOrder.SONUMBER
-				cPOOrder.SOITEM = salesOrder.SOITEM
-				c, _ = json.Marshal(cPOOrder)
-				stub.PutState(cpoKey, c)
+
 			}
 			stub.PutState(key, b)
 		} else {
@@ -231,23 +244,30 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 								stub.PutState(soKey, soByte)
 
 								//update CPO Info
-								var c []byte
-								cPOOrder := ODMPurchaseOrder{}
-								err, cpoKey := generateKey(stub, CPO_KEY, []string{oldSalesOrder.CPONO})
-								if err != nil {
-									return shim.Error(err.Error())
-								}
-								fmt.Println("CPO Key is " + cpoKey)
-								cpoObjAsbytes, err := stub.GetState(cpoKey)
-								err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
-								if err == nil {
-									fmt.Println("write data, PO-SO-CPO for - " + cpoKey)
-									cPOOrder.PONO = oldSalesOrder.PONO
-									cPOOrder.POITEM = oldSalesOrder.POITEM
-									c, _ = json.Marshal(cPOOrder)
+								if (oldSalesOrder.CPONO != "") {
+									var c []byte
+									cPOOrder := ODMPurchaseOrder{}
+									err, cpoKey := generateKey(stub, CPO_KEY, []string{oldSalesOrder.CPONO})
+									cpoObjAsbytes, err := stub.GetState(cpoKey)
+									if err != nil {
+										return shim.Error(err.Error())
+									}
+									if err == nil && cpoObjAsbytes != nil {
+										fmt.Println("write data, update SO-CPO for - " + cpoKey)
+										err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
+										cPOOrder.CPONO = oldSalesOrder.CPONO
+										cPOOrder.PONO = oldSalesOrder.PONO
+										cPOOrder.POITEM = oldSalesOrder.POITEM
+										c, _ = json.Marshal(cPOOrder)
+									} else {
+										fmt.Println("write data, insert SO-CPO for - " + cpoKey)
+										cPOOrder.CPONO = oldSalesOrder.CPONO
+										cPOOrder.PONO = oldSalesOrder.PONO
+										cPOOrder.POITEM = oldSalesOrder.POITEM
+										c, _ = json.Marshal(cPOOrder)
+									}
 									stub.PutState(cpoKey, c)
 								}
-
 							}
 						}
 					}
@@ -268,8 +288,8 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update CPO")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, CPONO data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	fmt.Println("write data, CPONO data - ", jsonStr)
 	var cPOrders [] ODMInfoReq
 
 	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
@@ -305,11 +325,66 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					cpoBLObj.GRNO = order.GRNO
 					cpoBLObj.FlexInvoiceNO = order.FlexInvoiceNO
 					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
+				} else if order.TRANSDOC == "PullMLOI" {
+					var cpoMPLObj = ODMLOIMaterial{}
+					cpoMPLObj.RefNo = order.RefNo
+					cpoMPLObj.PullType = order.PullType
+					cpoMPLObj.Week = order.Week
+					cpoMPLObj.PullDate = order.PullDate
+					cpoMPLObj.PN = order.PN
+					cpoMPLObj.Qty = order.Qty
+					cpoMPLObj.IntelShipTo = order.IntelShipTo
+					cpoMPLObj.NotesToReceiver = order.NotesToReceiver
+					cpoMPLObj.ItemNumber = order.ItemNumber
+					cpoMPLObj.Product = order.Product
+
+					cpoMPLObj.Quantity = order.Quantity
+					cpoMPLObj.DlvryDate = order.DlvryDate
+					cpoMPLObj.RequestedDate = order.RequestedDate
+					cpoMPLObj.ShipmentInstruction = order.ShipmentInstruction
+					cPOOrder.ODMLOIMaterials = append(cPOOrder.ODMLOIMaterials, cpoMPLObj)
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
 			} else {
-				return shim.Error("PO data doesn't exist!")
+				// TODO insert....
+				var c []byte
+				cPOOrder := ODMPurchaseOrder{}
+				if order.TRANSDOC == "GR" {
+					var cpoGrObj = ODMGRInfo{}
+					cpoGrObj.GRNO = order.GRNO
+					cpoGrObj.PARTNUM = order.PARTNUM
+					cpoGrObj.GRQTY = order.GRQTY
+					cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, cpoGrObj)
+				} else if order.TRANSDOC == "PY" {
+					var cpoBLObj = ODMPayment{}
+					cpoBLObj.BILLINGNO = order.BILLINGNO
+					cpoBLObj.INVOICESTATUS = order.INVOICESTATUS
+					cpoBLObj.PAYMENTDATE = order.PAYMENTDATE
+					cpoBLObj.GRNO = order.GRNO
+					cpoBLObj.FlexInvoiceNO = order.FlexInvoiceNO
+					cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, cpoBLObj)
+				} else if order.TRANSDOC == "PullMLOI" {
+					var cpoMPLObj = ODMLOIMaterial{}
+					cpoMPLObj.RefNo = order.RefNo
+					cpoMPLObj.PullType = order.PullType
+					cpoMPLObj.Week = order.Week
+					cpoMPLObj.PullDate = order.PullDate
+					cpoMPLObj.PN = order.PN
+					cpoMPLObj.Qty = order.Qty
+					cpoMPLObj.IntelShipTo = order.IntelShipTo
+					cpoMPLObj.NotesToReceiver = order.NotesToReceiver
+					cpoMPLObj.ItemNumber = order.ItemNumber
+					cpoMPLObj.Product = order.Product
+
+					cpoMPLObj.Quantity = order.Quantity
+					cpoMPLObj.DlvryDate = order.DlvryDate
+					cpoMPLObj.RequestedDate = order.RequestedDate
+					cpoMPLObj.ShipmentInstruction = order.ShipmentInstruction
+					cPOOrder.ODMLOIMaterials = append(cPOOrder.ODMLOIMaterials, cpoMPLObj)
+				}
+				c, _ = json.Marshal(cPOOrder)
+				stub.PutState(cpoKey, c)
 			}
 		} else {
 			return shim.Error("PO number is required")

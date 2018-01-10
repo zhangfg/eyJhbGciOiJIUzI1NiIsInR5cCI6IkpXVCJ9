@@ -30,15 +30,30 @@ type POAndSOOrder struct {
 
 //Request Data
 type ODMInfoReq struct {
-	CPONO         string `json:"CPONO"`
-	TRANSDOC      string `json:"TRANSDOC"`
-	GRNO          string `json:"GRNO"`
-	PARTNUM       string `json:"PARTNUM"`   //PART No
-	GRQTY         string `json:"GRQTY"`     // received qty
-	BILLINGNO     string `json:"BILLINGNO"` //Lenovo DN NO.
-	FlexInvoiceNO string `json:"FlexInvoiceNO"`
-	INVOICESTATUS string `json:"INVOICESTATUS"`
-	PAYMENTDATE   string `json:"PAYMENTDATE"`
+	CPONO               string `json:"CPONO"`
+	TRANSDOC            string `json:"TRANSDOC"`
+	GRNO                string `json:"GRNO"`
+	PARTNUM             string `json:"PARTNUM"`   //PART No
+	GRQTY               string `json:"GRQTY"`     // received qty
+	BILLINGNO           string `json:"BILLINGNO"` //Lenovo DN NO.
+	FlexInvoiceNO       string `json:"FlexInvoiceNO"`
+	INVOICESTATUS       string `json:"INVOICESTATUS"`
+	PAYMENTDATE         string `json:"PAYMENTDATE"`
+	RefNo               string `json:"RefNo"`               //Pull Reference No
+	PullType            string `json:"PullType"`            //Pull type
+	Week                string `json:"Week"`                //Week
+	PullDate            string `json:"PullDate"`            //Actual Pull Date
+	PN                  string `json:"PN"`                  //Pull Reference No
+	Qty                 string `json:"Qty"`                 //Qty
+	IntelShipTo         string `json:"IntelShipTo"`         //IntelShipTo
+	NotesToReceiver     string `json:"NotesToReceiver"`     //NotesToReceiver
+	ItemNumber          string `json:"ItemNumber"`          //Pull Reference No
+	Product             string `json:"Product"`             //Product
+	Quantity            string `json:"Quantity"`            //Quantity
+	DlvryDate           string `json:"DlvryDate"`           //RequestedDeliveryDate
+	RequestedDate       string `json:"RequestedDate"`       //RequestedDate
+	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
+
 }
 
 //Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
@@ -62,15 +77,17 @@ type SupplierOrder struct {
 
 //ODM PO   Key: "CPO"+ CPONo
 type ODMPurchaseOrder struct {
-	CPONO         string        `json:"CPONO"`         //Customer purchase order number  index
-	SONUMBER      string        `json:"SONUMBER"`      //Sales document number
-	SOITEM        string        `json:"SOITEM"`        //Sales document Item
-	PONO          string        `json:"PONO"`          //PO  no
-	POITEM        string        `json:"POITEM"`        //PO  item no
-	SalesOrder    SalesOrder    `json:"SalesOrder"`    //Sales Order info, only for search
-	PurchaseOrder PurchaseOrder `json:"PurchaseOrder"` //Purchase Order info,only for search
-	ODMPayments   []ODMPayment  `json:"ODMPayments"`   //Billing info
-	ODMGRInfos    []ODMGRInfo   `json:"ODMGRInfos"`    //GR info
+	CPONO           string           `json:"CPONO"`         //Customer purchase order number  index
+	TRANSDOC        string           `json:"TRANSDOC"`
+	SONUMBER        string           `json:"SONUMBER"`        //Sales document number
+	SOITEM          string           `json:"SOITEM"`          //Sales document Item
+	PONO            string           `json:"PONO"`            //PO  no
+	POITEM          string           `json:"POITEM"`          //PO  item no
+	SalesOrder      SalesOrder       `json:"SalesOrder"`      //Sales Order info, only for search
+	PurchaseOrder   PurchaseOrder    `json:"PurchaseOrder"`   //Purchase Order info,only for search
+	ODMPayments     []ODMPayment     `json:"ODMPayments"`     //Billing info
+	ODMGRInfos      []ODMGRInfo      `json:"ODMGRInfos"`      //GR info
+	ODMLOIMaterials []ODMLOIMaterial `json:"ODMLOIMaterials"` //LOI Material Pull
 }
 
 type ODMPayment struct {
@@ -85,6 +102,26 @@ type ODMGRInfo struct {
 	PARTNUM string `json:"PARTNUM"` //PART No
 	GRQTY   string `json:"GRQTY"`   // received qty
 }
+
+type ODMLOIMaterial struct {
+	RefNo               string `json:"RefNo"`               //Pull Reference No
+	PullType            string `json:"PullType"`            //Pull type
+	Week                string `json:"Week"`                //Week
+	PullDate            string `json:"PullDate"`            //Actual Pull Date
+	PN                  string `json:"PN"`                  //Pull Reference No
+	Qty                 string `json:"Qty"`                 //Qty
+	IntelShipTo         string `json:"IntelShipTo"`         //IntelShipTo
+	NotesToReceiver     string `json:"NotesToReceiver"`     //NotesToReceiver
+	ItemNumber          string `json:"ItemNumber"`          //Pull Reference No
+	Product             string `json:"Product"`             //Product
+	Quantity            string `json:"Quantity"`            //Quantity
+	DlvryDate           string `json:"DlvryDate"`           //RequestedDeliveryDate
+	RequestedDate       string `json:"RequestedDate"`       //RequestedDate
+	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
+}
+
+
+
 //SalesOrder   Key: "SO"+So number + Item_no
 type SalesOrder struct {
 	SONUMBER    string        `json:"SONUMBER"`    //Sales document number
