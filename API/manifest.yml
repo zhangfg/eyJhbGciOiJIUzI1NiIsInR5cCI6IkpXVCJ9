@@ -3,11 +3,11 @@ applications:
   memory: 512M
   instances: 1
   domain: mybluemix.net
-  name: Supplier1BS
-  host: Supplier1BS
+  name: LenovoBS
+  host: LenovoBS
   disk_quota: 1024M
   services:
   - Cloudant NoSQL DB-gp
-  - Blockchain-Supplier1
+  - Blockchain-Lenovo
   env:
     redacted_message: '[PRIVATE DATA HIDDEN]'
