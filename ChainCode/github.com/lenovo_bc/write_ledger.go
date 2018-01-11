@@ -342,9 +342,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 						}
 					}
 				} else if order.TRANSDOC == "LP" {
-					for _, subObject := range order.LOIMaterials {
-						cPOOrder.LOIMaterials = append(cPOOrder.LOIMaterials, subObject)
-					}
+					cPOOrder.LOIMaterials = order.LOIMaterials
 				} else if order.TRANSDOC == "LI" {
 					for _, subObject := range order.LOIInventorys {
 						cPOOrder.LOIInventorys = append(cPOOrder.LOIInventorys, subObject)
@@ -356,10 +354,6 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				} else if order.TRANSDOC == "SI" {
 					for _, subObject := range order.SOIInventorys {
 						cPOOrder.SOIInventorys = append(cPOOrder.SOIInventorys, subObject)
-					}
-				} else if order.TRANSDOC == "LG" {
-					for _, subObject := range order.LOIGRInfos {
-						cPOOrder.LOIGRInfos = append(cPOOrder.LOIGRInfos, subObject)
 					}
 				}
 				c, _ = json.Marshal(cPOOrder)
@@ -380,8 +374,6 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					cPOOrder.SOIPulls = order.SOIPulls
 				} else if order.TRANSDOC == "SI" {
 					cPOOrder.SOIInventorys = order.SOIInventorys
-				} else if order.TRANSDOC == "LG" {
-					cPOOrder.LOIGRInfos = order.LOIGRInfos
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
@@ -431,15 +423,19 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 			} else {
 				c, _ = json.Marshal(order)
 			}
-			err, poKey, b := updatePurchaseOrderBySupplier(stub, c)
-			if err != nil {
-				return shim.Error(err.Error())
+			if (order.PONumber != "" && order.POItem != "") {
+				err, poKey, b := updatePurchaseOrderBySupplier(stub, c)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				if b == nil {
+					return shim.Error("PO item NO is not correct")
+				}
+				stub.PutState(poKey, b)
 			}
-			if b == nil {
-				return shim.Error("PO item NO is not correct")
-			}
+
 			stub.PutState(sup_key, c)
-			stub.PutState(poKey, b)
+
 		} else {
 			return shim.Error("ASNNumber is required")
 		}

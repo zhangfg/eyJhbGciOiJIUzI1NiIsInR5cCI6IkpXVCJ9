@@ -28,34 +28,6 @@ type POAndSOOrder struct {
 	PurchaseOrder PurchaseOrder `json:"PurchaseOrder"` //Purchase Order info,only for search
 }
 
-//Request Data
-type ODMInfoReq struct {
-	CPONO               string `json:"CPONO"`
-	TRANSDOC            string `json:"TRANSDOC"`
-	GRNO                string `json:"GRNO"`
-	PARTNUM             string `json:"PARTNUM"`   //PART No
-	GRQTY               string `json:"GRQTY"`     // received qty
-	BILLINGNO           string `json:"BILLINGNO"` //Lenovo DN NO.
-	FlexInvoiceNO       string `json:"FlexInvoiceNO"`
-	INVOICESTATUS       string `json:"INVOICESTATUS"`
-	PAYMENTDATE         string `json:"PAYMENTDATE"`
-	RefNo               string `json:"RefNo"`               //Pull Reference No
-	PullType            string `json:"PullType"`            //Pull type
-	Week                string `json:"Week"`                //Week
-	PullDate            string `json:"PullDate"`            //Actual Pull Date
-	PN                  string `json:"PN"`                  //Pull Reference No
-	Qty                 string `json:"Qty"`                 //Qty
-	IntelShipTo         string `json:"IntelShipTo"`         //IntelShipTo
-	NotesToReceiver     string `json:"NotesToReceiver"`     //NotesToReceiver
-	ItemNumber          string `json:"ItemNumber"`          //Pull Reference No
-	Product             string `json:"Product"`             //Product
-	Quantity            string `json:"Quantity"`            //Quantity
-	DlvryDate           string `json:"DlvryDate"`           //RequestedDeliveryDate
-	RequestedDate       string `json:"RequestedDate"`       //RequestedDate
-	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
-
-}
-
 //Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
 type SupplierOrder struct {
 	ASNNumber           string        `json:"ASNNumber"`           //ASNNumber   -> Supplier ASN, Inbound Delivery/GR  Reference
@@ -87,11 +59,11 @@ type ODMPurchaseOrder struct {
 	PurchaseOrder PurchaseOrder     `json:"PurchaseOrder"` //Purchase Order info,only for search
 	Payments      []ODMPayment      `json:"Payments"`      //Billing info
 	GRInfos       []ODMGRInfo       `json:"GRInfos"`       //GR info
-	LOIMaterials  []ODMLOIMaterial  `json:"LOIMaterials"`  //LOI Material Pull
+	LOIMaterials  ODMLOIMaterial    `json:"LOIMaterials"`  //LOI Material Pull
 	LOIInventorys []ODMLOIInventory `json:"LOIInventorys"` //LOI  inventory(Flex system)
 	SOIPulls      []ODMSOIPull      `json:"SOIPulls"`      //VMI SOI Pull
 	SOIInventorys []ODMSOIInventory `json:"SOIInventorys"` //VMI inventory
-	LOIGRInfos    []ODMLOIGRInfo    `json:"LOIGRInfos"`    //LOI GR
+	//LOIGRInfos    []ODMLOIGRInfo    `json:"LOIGRInfos"`    //LOI GR
 }
 
 type ODMSOIPull struct {

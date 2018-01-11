@@ -46,7 +46,7 @@ var cloudant = require('./app/cloudant');
 var ledgerData = require('./app/ledgerData');
 var mutipart = require('connect-multiparty');
 
-var mutipartMiddeware = mutipart();
+var multipartMiddleware = mutipart();
 ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// SET CONFIGURATONS ////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,11 +63,14 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users', 'upload']
+    path: ['/users', '/upload']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
     if (req.originalUrl.indexOf('/users') >= 0) {
+        return next();
+    }
+    if (req.originalUrl.indexOf('/upload') >= 0) {
         return next();
     }
 
@@ -439,8 +442,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         }, (err) => {
             logger.debug('error is ' + err);
             res.json(getInvokeErrorMessage(err));
-        })
-    ;
+        });
 });
 // Query on chaincode on target peers
 app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req, res) {
@@ -482,34 +484,130 @@ app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req,
         });
 });
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', mutipartMiddeware, function (req, res) {
+// app.post('/upload', multipartMiddleware, function (req, res) {
     logger.debug('==================== upload ON CHAINCODE ==================');
     console.log(req.files);
     console.log('req.body', req.body);
+    console.log(req.files.attachment);
     var ASNNO = req.body.ASNNO;
     var peers = req.body.peers;
     var chaincodeName = req.params.chaincodeName;
     var channelName = req.params.channelName;
     var role = req.params.role;
+    var attachment = req.files.attachment;
+    if (attachment) {
+        var fileId = ASNNO + '_' + attachment.originalFilename;
+        // var fileId = ASNNO;
+        cloudant.insertAttachment(fileId, attachment, function (err, data) {
+            if (err) {
+                res.json(getErrorMessage(err))
+            } else {
+                console.log('file is inserted database successfully!!!');
+                var fcn = 'crSupplierOrderInfo';
+                var args = [{
+                    "TRANSDOC": "UL",
+                    "ASNNumber": ASNNO,
+                    "PackingList":
+                        {
+                            "FileId": fileId,
+                            "FileName": attachment.originalFilename,
+                            "FileType": attachment.type,
+                        }
+                }];
+                var str = JSON.stringify(args);
+                args = prepareVendor(str, req.vendorNo);
 
-    // var fcn = req.body.fcn;
-    // var args = req.body.args;
-    var fcn = 'crSupplierOrderInfo';
-    var args = [{
-        "TRANSDOC": "UL",
-        "ASNNumber": ASNNO,
-        "PackingList":
-            {
-                "FileId": "",
-                "FileName": "",
-                "FileType": "",
+                invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
+                    .then(function (message) {
+                        res.json(getInvokeSuccessMessage(message));
+                    }, (err) => {
+                        logger.debug('error is ' + err);
+                        res.json(getInvokeErrorMessage(err));
+                    });
             }
-    }];
-    var str = JSON.stringify(args);
-    args = prepareVendor(str, req.vendorNo);
-
-
-
+        });
+    } else {
+        res.json(getInvokeErrorMessage('Upload file failed!!'));
+    }
 });
+app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', function (req, res) {
+
+    logger.debug('==================== Download ON CHAINCODE ==================');
+    var peers = req.body.peers;
+    var chaincodeName = req.params.chaincodeName;
+    var channelName = req.params.channelName;
+    var role = req.params.role;
+    var asnno = req.query.asnno;
+    logger.debug('channelName  : ' + channelName);
+    logger.debug('chaincodeName : ' + chaincodeName);
+    logger.debug('req.vendorNo : ' + req.vendorNo);
+    logger.debug('ASNNUMBER  : ' + asnno);
+    if (!chaincodeName) {
+        res.json(getErrorMessage('\'chaincodeName\''));
+        return;
+    }
+    if (!channelName) {
+        res.json(getErrorMessage('\'channelName\''));
+        return;
+    }
+    if (!asnno) {
+        res.json(getErrorMessage('\'ASNNUMBER\''));
+        return;
+    }
+
+    logger.debug('==================== Download DATA TO DATABASE==================');
+
+
+    let queryFcn = 'queryByIds';
+    var queryData = [];
+
+    var keyObj = {
+        KeyPrefix: 'SUP',
+        KeysStart: [],
+        KeysEnd: []
+    };
+    keyObj.KeysStart.push(req.vendorNo);
+    keyObj.KeysStart.push(asnno);
+    queryData.push(keyObj);
+    var jsonStr = JSON.stringify(queryData);
+    var argsArr = [];
+    argsArr.push(jsonStr);
+    var argsArr = prepareArgs(argsArr, role);
+    logger.debug('argsArr', argsArr);
+    query.queryChaincode(peers, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
+        .then(function (message) {
+            // logger.debug('pomessage', pomessage);
+            if (message && typeof message === 'string' && message.includes(
+                    'Error:')) {
+                res.json(getInvokeErrorMessage(message));
+            } else {
+                var respPoObj;
+                if (typeof message !== 'string') {
+                    respPoObj = message;
+                } else {
+                    respPoObj = JSON.parse(message);
+                }
+                if (respPoObj && respPoObj.PackingList) {
+                    logger.debug('download ID, Name:', respPoObj.PackingList.FileId, respPoObj.PackingList.FileName);
+                    cloudant.getAttachment(respPoObj.PackingList.FileId, respPoObj.PackingList.FileName,
+                        function (err, data) {
+                            if (err) {
+                                res.json(getErrorMessage(err))
+                            } else {
+                                res.download(fileId, attachment.originalFilename);
+                            }
+                        })
+
+                } else {
+                    res.json(getInvokeErrorMessage('ASN NO  or attachment doesn\'t exist!'));
+                }
+            }
+        }, (err) => {
+            logger.debug('error is ' + err);
+            res.json(getInvokeErrorMessage(err));
+        });
+});
+
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', function (req, res) {
     logger.debug('==================== query ON CHAINCODE ==================');
     var channelName = req.params.channelName;
@@ -598,7 +696,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
         var argsArr = [];
         argsArr.push(jsonStr);
         var argsStr = prepareArgs(argsArr, role);
-        // logger.debug('argsStr', argsStr);
+        logger.debug('argsStr', argsStr);
         query.queryChaincode(peer, channelName, chaincodeName, argsStr, fcn, req.username, req.orgname)
             .then(function (message) {
                 if (message && typeof message === 'string' && message.includes(

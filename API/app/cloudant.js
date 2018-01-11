@@ -517,69 +517,33 @@ var login = function (userid, password, callback) {
 
 };
 
-// create a document
-var createDocument = function (docObj, callback) {
-    logger.debug("Creating document ");
-    // we are specifying the id of the document so we can update and delete it later
-    db.insert(docObj, function (err, data) {
-        logger.debug('Error:', err);
-        logger.debug('Data:', data);
-        callback(err, data);
-    });
-};
-
-// read a document
-var readDocument = function (docName, callback) {
-    logger.debug("Reading document 'mydoc'");
-    db.get(docName, function (err, data) {
-        logger.debug('Error:', err);
-        logger.debug('Data:', data);
-        callback(err, data);
-    });
-};
-
-// update a document
-var updateDocument = function (doc, callback) {
-    logger.debug("Updating document");
-    // make a change to the document, using the copy we kept from reading it back
-    db.insert(doc, function (err, data) {
-        logger.debug('Error:', err);
-        logger.debug('Data:', data);
-        // keep the revision of the update so we can delete it
-        doc._rev = data.rev;
-        callback(err, data);
-    });
-};
-
-// deleting a document
-var deleteDocument = function (doc, callback) {
-    logger.debug("Deleting document 'mydoc'");
-    // supply the id and revision to be deleted
-    db.destroy(doc._id, doc._rev, function (err, data) {
-        logger.debug('Error:', err);
-        logger.debug('Data:', data);
-        callback(err, data);
-    });
-};
-
-var insertAttachment = function (fileName, doc, callback) {
+var insertAttachment = function (fileId, attachment, callback) {
     //db.attachment.insert(docname, attname, att, contenttype, [params], [callback])
-    fs.readFile(fileName, function (err, data) {
+    fs.readFile(attachment.path, function (err, data) {
         if (!err) {
-            db.attachment.insert('rabbit', 'rabbit.png', data, 'image/png',
-                {rev: '12-150985a725ec88be471921a54ce91452'}, function (err, body) {
-                    if (!err)
+            db.attachment.insert(fileId, attachment.originalFilename, data, attachment.type,
+                function (err, body) {
+                    if (!err) {
                         console.log(body);
+                    }
+                    callback(err, body);
+
                 });
         }
     });
 };
-var getAttachment = function (fileName, doc, callback) {
+var getAttachment = function (doc, fileName, callback) {
     // db.attachment.get(docname, attname, [params], [callback])
-    db.attachment.get('rabbit', 'rabbit.png', function (err, body) {
+    db.attachment.get(doc, fileName, function (err, body) {
         if (!err) {
-            fs.writeFile('rabbit.png', body);
+            console.log('getAttachement...', body);
+            fs.writeFile(doc, body, function (err) {
+                callback(err, body);
+            });
+        } else {
+            callback(err, body);
         }
+
     });
 };
 exports.login = login;
@@ -587,7 +551,3 @@ exports.queryItemNo = queryItemNo;
 exports.insertSearchDocument = insertSearchDocument;
 exports.insertAttachment = insertAttachment;
 exports.getAttachment = getAttachment;
-exports.createDocument = createDocument;
-exports.readDocument = readDocument;
-exports.updateDocument = updateDocument;
-exports.deleteDocument = deleteDocument;
