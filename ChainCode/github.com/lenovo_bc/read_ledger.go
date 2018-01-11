@@ -20,6 +20,8 @@ func filterByUserRole(valAsbytes []byte, KeyPrefix string, userRole string) (err
 		return filterSalesOrder(valAsbytes, userRole);
 	} else if KeyPrefix == PO_KEY {
 		return filterPurchaseOrder(valAsbytes, userRole);
+	} else if KeyPrefix == CPO_KEY {
+		return filterCPurchaseOrder(valAsbytes, userRole);
 	} else {
 		return nil, valAsbytes
 	}
@@ -32,9 +34,16 @@ func filterSalesOrder(valAsbytes []byte, userRole string) (error, []byte) {
 	if err != nil {
 		return errors.New(err.Error()), nil
 	}
-	if userRole != "lenovo" {
-		salesOrder.NETPRICE = STAR;
-		salesOrder.NETVALUE = STAR;
+	if userRole != "lenovo" && userRole != "flex" {
+		salesOrder.NETPRICE = STAR
+		salesOrder.NETVALUE = STAR
+		salesOrder.CURRENCY = STAR
+		for _, billing := range salesOrder.BILLINFOS {
+			billing.NETVALUE = STAR
+			billing.TAXAMOUNT = STAR
+			billing.CURRENCY = STAR
+		}
+
 	}
 	b, err := json.Marshal(salesOrder)
 	if err != nil {
@@ -50,8 +59,8 @@ func filterPurchaseOrder(valAsbytes []byte, userRole string) (error, []byte) {
 	if err != nil {
 		return errors.New(err.Error()), nil
 	}
-	if userRole != "lenovo" {
-		purchaseOrder.POItemChgDate = STAR;
+	if userRole != "lenovo" && userRole != "flex" {
+		//purchaseOrder.POItemChgDate = STAR;
 	}
 	b, err := json.Marshal(purchaseOrder)
 	if err != nil {
@@ -59,6 +68,27 @@ func filterPurchaseOrder(valAsbytes []byte, userRole string) (error, []byte) {
 	}
 	return nil, b
 }
+
+func filterCPurchaseOrder(valAsbytes []byte, userRole string) (error, []byte) {
+	fmt.Println("filterCPurchaseOrder,userRole=" + userRole)
+	cPoOrder := ODMPurchaseOrder{}
+	err := json.Unmarshal(valAsbytes, &cPoOrder)
+	if err != nil {
+		return errors.New(err.Error()), nil
+	}
+	if userRole != "lenovo" && userRole != "flex" {
+		//purchaseOrder.POItemChgDate = STAR;
+		for _, cpo := range cPoOrder.Payments {
+			cpo.INVOICESTATUS = STAR
+		}
+	}
+	b, err := json.Marshal(cPoOrder)
+	if err != nil {
+		return errors.New(err.Error()), nil
+	}
+	return nil, b
+}
+
 
 func integrateLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, KeyPrefix string, userRole string) (error, []byte) {
 	fmt.Println("integrateLedger,KeyPrefix=" + KeyPrefix + ",userRole=" + userRole)
@@ -94,6 +124,7 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 	fmt.Println("get CPO object in SO,CPO key:" + cpoKey)
 	if err == nil {
 		cpoObjAsbytes, err := stub.GetState(cpoKey)
+		err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
 		if err == nil {
 			err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
 			salesOrder.ODMPayments = cPOOrder.Payments

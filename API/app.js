@@ -63,16 +63,14 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users', '/upload']
+    path: ['/users']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
     if (req.originalUrl.indexOf('/users') >= 0) {
         return next();
     }
-    if (req.originalUrl.indexOf('/upload') >= 0) {
-        return next();
-    }
+
 
     var token = req.token;
     jwt.verify(token, app.get('secret'), function (err, decoded) {
@@ -483,18 +481,27 @@ app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req,
             res.json(getInvokeSuccessMessage(message));
         });
 });
-app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', mutipartMiddeware, function (req, res) {
+app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multipartMiddleware, function (req, res) {
 // app.post('/upload', multipartMiddleware, function (req, res) {
     logger.debug('==================== upload ON CHAINCODE ==================');
-    console.log(req.files);
-    console.log('req.body', req.body);
-    console.log(req.files.attachment);
+    logger.debug(req.files);
+    logger.debug('req.body', req.body);
+    logger.debug(req.files.attachment);
     var ASNNO = req.body.ASNNO;
     var peers = req.body.peers;
     var chaincodeName = req.params.chaincodeName;
     var channelName = req.params.channelName;
     var role = req.params.role;
+    if (!chaincodeName) {
+        res.json(getErrorMessage('\'chaincodeName\''));
+        return;
+    }
+    if (!channelName) {
+        res.json(getErrorMessage('\'channelName\''));
+        return;
+    }
     var attachment = req.files.attachment;
+
     if (attachment) {
         var fileId = ASNNO + '_' + attachment.originalFilename;
         // var fileId = ASNNO;
@@ -516,7 +523,10 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', mutipa
                 }];
                 var str = JSON.stringify(args);
                 args = prepareVendor(str, req.vendorNo);
-
+                logger.debug('req.vendorNo=' + req.vendorNo);
+                logger.debug('req.username=' + req.username);
+                logger.debug('req.vendorgnameorNo=' + req.orgname);
+                logger.debug('req.peers=' + peers);
                 invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
                     .then(function (message) {
                         res.json(getInvokeSuccessMessage(message));
@@ -538,9 +548,13 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
     var channelName = req.params.channelName;
     var role = req.params.role;
     var asnno = req.query.asnno;
+    var vendorNo = req.query.vendorNo;
+    if (!vendorNo) {
+        vendorNo = req.vendorNo;
+    }
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
-    logger.debug('req.vendorNo : ' + req.vendorNo);
+    logger.debug('req.vendorNo : ' + vendorNo);
     logger.debug('ASNNUMBER  : ' + asnno);
     if (!chaincodeName) {
         res.json(getErrorMessage('\'chaincodeName\''));
@@ -566,7 +580,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
         KeysStart: [],
         KeysEnd: []
     };
-    keyObj.KeysStart.push(req.vendorNo);
+    keyObj.KeysStart.push(vendorNo);
     keyObj.KeysStart.push(asnno);
     queryData.push(keyObj);
     var jsonStr = JSON.stringify(queryData);
