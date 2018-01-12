@@ -35,7 +35,7 @@
 			</el-table-column>
 			<el-table-column prop="" label="Packaging List">
 				<template slot-scope="scope">
-					<el-button type="text" size="small">Download</el-button>
+						<p class="el-icon-download load" @click="Download(scope.row)"></p>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -63,8 +63,27 @@ export default {
       }
       return supplierItem
     }
+  },
+  methods: {
+    // fileDeal (content, filename) {
+    // 	console.log(this)
+    //   // 创建隐藏的可下载链接
+    //   let eleLink = document.createElement('a')
+    //   eleLink.download = filename
+    //   eleLink.style.display = 'none'
+    //   // 字符内容转变成blob地址
+    //   let blob = new Blob([content], { "type" : "application/vnd.ms-excel" })
+    //   eleLink.href = URL.createObjectURL(blob)
+    //   document.body.appendChild(eleLink)
+    //   eleLink.click()
+    //   document.body.removeChild(eleLink)
+    // },
+    Download (row) {
+      this.$store.dispatch('getDownload', {
+        asnno: row.ASNNO,
+        vendorNo: ''
+      })
+    }
   }
 }
 </script>
-<style lang="less" scoped>
-</style>

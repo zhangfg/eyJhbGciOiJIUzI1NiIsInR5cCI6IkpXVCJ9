@@ -37,8 +37,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-  .wrap {
-    padding: 10px 0;
-  }
-</style>

@@ -107,12 +107,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-.document-header-wrap {
-  .title {
-    font-weight: bold;
-    margin-top: 15px;
-    margin-bottom: 15px;
-  }
-}
-</style>
