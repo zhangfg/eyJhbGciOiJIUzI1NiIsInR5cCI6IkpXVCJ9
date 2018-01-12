@@ -30,8 +30,9 @@ export default {
     uploadSuccess (response, file, fileList) {
       this.$message({
         showClose: true,
-        message: '上传文件'
+        message: '上传成功'
       })
+      this.uploadData.ASNNO = ''
     },
     // 上传错误
     uploadError (response, file, fileList) {

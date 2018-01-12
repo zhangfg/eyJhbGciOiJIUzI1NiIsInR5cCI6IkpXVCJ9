@@ -16,18 +16,16 @@ const getters = {
   searchSupplierData: state => state.searchSupplierData
 }
 
-const headers = {
-  'content-type': 'application/json',
-  'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
-}
-
 const actions = {
   getSearchSoData ({ commit }, payload) {
     return Vue.http.post(constants.LENOVO_URL + sessionStorage.getItem('roleId') + '/channels/' + constants.CHAINCODE_NAME + '/chaincodes/' + constants.CHANNEL_NAME + '/so/search', {
       fcn: payload.fcn,
       args: payload.args
     }, {
-      headers: headers
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
+      }
     }).then(datas => {
       datas && commit(types.GET_SEARCH_SO_DATA, datas)
       return datas
@@ -38,7 +36,10 @@ const actions = {
       fcn: payload.fcn,
       args: payload.args
     }, {
-      headers: headers
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
+      }
     }).then(datas => {
       datas && commit(types.GET_SEARCH_PO_DATA, datas)
       return datas
@@ -49,7 +50,10 @@ const actions = {
       fcn: payload.fcn,
       args: payload.args
     }, {
-      headers: headers
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
+      }
     }).then(datas => {
       datas && commit(types.GET_SEARCH_ODM_DATA, datas)
       return datas
@@ -60,7 +64,10 @@ const actions = {
       fcn: payload.fcn,
       args: payload.args
     }, {
-      headers: headers
+      headers: {
+        'content-type': 'application/json',
+        'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
+      }
     }).then(datas => {
       datas && commit(types.GET_SEARCH_SUPPLIER_DATA, datas)
       return datas

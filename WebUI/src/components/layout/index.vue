@@ -46,13 +46,13 @@ export default {
 		.el-menu-vertical-demo {
 			float: left;
 			width: 200px;
-			height: 93.5%;
+			height: 100%;
 			a {
 			 	text-decoration: none;
 			 }
 		}
 		.view {
-			height: 93.5%;
+			height: 100%;
 			margin-left: 200px;
 			background: #f0f0f0;
 		}
