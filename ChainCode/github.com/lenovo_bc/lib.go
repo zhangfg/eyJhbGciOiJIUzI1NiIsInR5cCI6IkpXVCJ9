@@ -8,8 +8,8 @@ import (
 
 //附件
 type Attachment struct {
-	FileId   string `json:"ID"`       //地址
-	FileName string `json:"Name"`     //文件名
+	FileId   string `json:"FileId"`   //地址
+	FileName string `json:"FileName"` //文件名
 	FileType string `json:"FileType"` //文件类型
 }
 

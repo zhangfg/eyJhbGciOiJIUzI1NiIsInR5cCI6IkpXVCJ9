@@ -428,6 +428,7 @@ var prepareSupplierSearchData = function (data) {
     res.VendorNO = data.VendorNO;
     res.PONumber = data.PONumber;
     res.POItem = data.POItem;
+    res.PackingList = data.PackingList;
     if (data.PurchaseOrder) {
         res.POTYPE = data.PurchaseOrder.POTYPE;
         res.PARTSNO = data.PurchaseOrder.PARTSNO;
@@ -481,12 +482,7 @@ var prepareSupplierSearchData = function (data) {
                             item.GRNO = grItem.GRNO;
                         });
                 }
-                if (data.PurchaseOrder.SupplierOrders) {
-                    data.PurchaseOrder.SupplierOrders.filter(supItem => inbdItem.ASNNO === supItem.ASNNumber)
-                        .forEach(supItem => {
-                            item.PackingList = supItem.PackingList;
-                        });
-                }
+                item.PackingList = data.PackingList;
                 if (data.SalesOrder && data.SalesOrder.GIInfo) {
                     data.SalesOrder.GIInfo.filter(giItem => giItem.IBDNNUMBER === inbdItem.IBDNNUMBER).forEach(giItem => {
                         item.DNNUMBER = giItem.DNNUMBER;

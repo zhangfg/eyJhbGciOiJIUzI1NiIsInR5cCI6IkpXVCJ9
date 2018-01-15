@@ -521,6 +521,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
                             "FileType": attachment.type,
                         }
                 }];
+                logger.debug('UPLoad File INFO ', args);
                 var str = JSON.stringify(args);
                 args = prepareVendor(str, req.vendorNo);
                 logger.debug('req.vendorNo=' + req.vendorNo);
@@ -547,8 +548,8 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
     var chaincodeName = req.params.chaincodeName;
     var channelName = req.params.channelName;
     var role = req.params.role;
-    var asnno = req.query.asnno;
-    var vendorNo = req.query.vendorNo;
+    var asnno = req.body.asnno;
+    var vendorNo = req.body.vendorNo;
     if (!vendorNo) {
         vendorNo = req.vendorNo;
     }
@@ -588,33 +589,43 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
     argsArr.push(jsonStr);
     var argsArr = prepareArgs(argsArr, role);
     logger.debug('argsArr', argsArr);
-    query.queryChaincode(peers, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
+    query.queryChaincode(peers, channelName, chaincodeName, argsArr, queryFcn, req.username, req.orgname)
         .then(function (message) {
             // logger.debug('pomessage', pomessage);
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
                 res.json(getInvokeErrorMessage(message));
             } else {
-                var respPoObj;
+                var respObjects;
                 if (typeof message !== 'string') {
-                    respPoObj = message;
+                    respObjects = message;
                 } else {
-                    respPoObj = JSON.parse(message);
+                    respObjects = JSON.parse(message);
                 }
-                if (respPoObj && respPoObj.PackingList) {
-                    logger.debug('download ID, Name:', respPoObj.PackingList.FileId, respPoObj.PackingList.FileName);
-                    cloudant.getAttachment(respPoObj.PackingList.FileId, respPoObj.PackingList.FileName,
-                        function (err, data) {
-                            if (err) {
-                                res.json(getErrorMessage(err))
-                            } else {
-                                res.download(fileId, attachment.originalFilename);
-                            }
-                        })
-
-                } else {
+                if (respObjects.length === 0) {
                     res.json(getInvokeErrorMessage('ASN NO  or attachment doesn\'t exist!'));
                 }
+                respObjects.forEach(respObj => {
+                    if (respObj && respObj.PackingList) {
+
+                        logger.debug('download ID, Name:', respObj.PackingList.FileId, respObj.PackingList.FileName);
+                        if (respObj.PackingList.FileId) {
+                            cloudant.getAttachment(respObj.PackingList.FileId, respObj.PackingList.FileName,
+                                function (err, data) {
+                                    if (err) {
+                                        res.json(getErrorMessage(err))
+                                    } else {
+                                        res.download(respObj.PackingList.FileId, respObj.PackingList.FileName);
+                                    }
+                                })
+                        } else {
+                            res.json(getInvokeErrorMessage('PackingList does not exist'));
+                        }
+
+
+                    }
+                });
+
             }
         }, (err) => {
             logger.debug('error is ' + err);

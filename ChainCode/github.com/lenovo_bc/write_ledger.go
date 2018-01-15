@@ -392,7 +392,7 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 	}
 	jsonStr := args[0]
 	vendorNo := args[1]
-	fmt.Println("write data, SO data - "+vendorNo, jsonStr)
+	fmt.Println("write data, Supplier Object data - "+vendorNo, jsonStr)
 
 	var supOrders [] SupplierOrder
 
@@ -413,6 +413,8 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 			if err == nil && supObjAsbytes != nil {
 				supOrder := SupplierOrder{}
 				err = json.Unmarshal(supObjAsbytes, &supOrder)
+				fmt.Println("write data, Suplier part for - ", supOrder)
+				fmt.Println("write data, Suplier part for2 - ", order)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
