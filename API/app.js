@@ -63,7 +63,7 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users']
+    path: ['/users', '/uploadfile']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
@@ -71,6 +71,9 @@ app.use(function (req, res, next) {
         return next();
     }
 
+    if (req.originalUrl.indexOf('/uploadfile') >= 0) {
+        return next();
+    }
 
     var token = req.token;
     jwt.verify(token, app.get('secret'), function (err, decoded) {
@@ -222,6 +225,40 @@ app.post('/users', function (req, res) {
         }
     });
 
+});
+
+app.post('/uploadfile', multipartMiddleware, function (req, res) {
+    var attachment = req.files.attachment;
+    var ASNNO = req.body.ASNNO;
+    var fileId = ASNNO + '_' + attachment.originalFilename;
+    var args = [{
+        "TRANSDOC": "UL",
+        "ASNNumber": ASNNO,
+        "PackingList":
+            {
+                "FileId": fileId,
+                "FileName": attachment.originalFilename,
+                "FileType": attachment.type,
+            }
+    }];
+    logger.debug('UPLoad File INFO ', args)
+    var fileId = req.vendorNo + '_' + ASNNO;
+    cloudant.getAttachment(fileId, attachment.originalFilename,
+        function (err, data) {
+            if (err) {
+                res.json(getErrorMessage(err))
+            } else {
+                res.download(fileId, attachment.originalFilename,
+                    function (err) {
+                        if (err) {
+                            logger.info('download err,', err);
+                        } else {
+                            logger.info('downloaded successfully');
+                        }
+
+                    });
+            }
+        });
 });
 // Create Channel
 app.post('/channels', function (req, res) {
@@ -503,13 +540,15 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
     var attachment = req.files.attachment;
 
     if (attachment) {
-        var fileId = ASNNO + '_' + attachment.originalFilename;
+        var fileId = req.vendorNo + '_' + ASNNO;
         // var fileId = ASNNO;
-        cloudant.insertAttachment(fileId, attachment, function (err, data) {
+
+        cloudant.insertNewAttachment(fileId, attachment, function (err, data) {
+            logger.debug('start to insert data to blockchain');
             if (err) {
                 res.json(getErrorMessage(err))
             } else {
-                console.log('file is inserted database successfully!!!');
+                logger.info('file is inserted database successfully!!!');
                 var fcn = 'crSupplierOrderInfo';
                 var args = [{
                     "TRANSDOC": "UL",
@@ -537,6 +576,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
                     });
             }
         });
+
     } else {
         res.json(getInvokeErrorMessage('Upload file failed!!'));
     }
@@ -607,7 +647,6 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                 }
                 respObjects.forEach(respObj => {
                     if (respObj && respObj.PackingList) {
-
                         logger.debug('download ID, Name:', respObj.PackingList.FileId, respObj.PackingList.FileName);
                         if (respObj.PackingList.FileId) {
                             cloudant.getAttachment(respObj.PackingList.FileId, respObj.PackingList.FileName,
@@ -615,9 +654,32 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                                     if (err) {
                                         res.json(getErrorMessage(err))
                                     } else {
-                                        res.download(respObj.PackingList.FileId, respObj.PackingList.FileName);
+                                        res.download(respObj.PackingList.FileId, respObj.PackingList.FileName,
+                                            function (err) {
+                                                if (err) {
+                                                    logger.info('download err,', err);
+                                                } else {
+                                                    logger.info('downloaded successfully');
+                                                    // fs.unlink(respObj.PackingList.FileId, (err) => {
+                                                    //     if (err) {
+                                                    //         console.log(err);
+                                                    //     }
+                                                    //     logger.debug('FILE [' + respObj.PackingList.FileId + '] REMOVED!');
+                                                    // });
+                                                }
+
+                                            });
+
+
+                                        // res.set({
+                                        //     "Content-type": "application/octet-stream",
+                                        //     "Content-Disposition": "attachment;filename=" + encodeURI(respObj.PackingList.FileName)
+                                        // });
+                                        // res.setHeader('Content-Length', data.length);
+                                        // res.write(data, 'binary');
+                                        // res.end();
                                     }
-                                })
+                                });
                         } else {
                             res.json(getInvokeErrorMessage('PackingList does not exist'));
                         }

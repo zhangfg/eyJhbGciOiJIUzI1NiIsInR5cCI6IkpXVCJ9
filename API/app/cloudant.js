@@ -517,6 +517,33 @@ var login = function (userid, password, callback) {
 
 };
 
+var insertNewAttachment = function (fileId, attachement, callback) {
+    readDocument(fileId, function (err, data) {
+        logger.debug('insertNewAttachment search::', err);
+        logger.debug('insertNewAttachment search:', data);
+        if (data) {
+            logger.debug('the data should be deleted');
+            deleteDocument(data, function (err, data) {
+                logger.debug('insert Data....');
+                insertAttachment(fileId, attachement, callback);
+            });
+        } else {
+            logger.debug('no data need to be deleted');
+            insertAttachment(fileId, attachement, callback);
+        }
+    })
+}
+var destroyAttachment = function (fileId, attachment, callback) {
+    logger.debug('destroyAttachment', fileId, attachment);
+    // db.attachment.destroy(docname, attname, [params], [callback])
+    db.attachment.destroy(fileId, attachment.originalFilename, function (err, body) {
+        logger.debug('destroyAttachment::', err);
+        logger.debug('destroyAttachment body::', body);
+        callback(err, body);
+    });
+    // callback();
+};
+
 var insertAttachment = function (fileId, attachment, callback) {
     //db.attachment.insert(docname, attname, att, contenttype, [params], [callback])
     fs.readFile(attachment.path, function (err, data) {
@@ -546,8 +573,55 @@ var getAttachment = function (doc, fileName, callback) {
 
     });
 };
+
+// create a document
+var createDocument = function (docObj, callback) {
+    logger.debug("Creating document ");
+    // we are specifying the id of the document so we can update and delete it later
+    db.insert(docObj, function (err, data) {
+        logger.debug('createDocument Error:', err);
+        logger.debug('createDocument Data:', data);
+        callback(err, data);
+    });
+};
+
+// read a document
+var readDocument = function (docName, callback) {
+    logger.debug("Reading document");
+    db.get(docName, function (err, data) {
+        logger.debug('readDocument Error:', err);
+        logger.debug('readDocument Data:', data);
+        callback(err, data);
+    });
+};
+
+// update a document
+var updateDocument = function (doc, callback) {
+    logger.debug("Updating document");
+    // make a change to the document, using the copy we kept from reading it back
+    db.insert(doc, function (err, data) {
+        logger.debug('updateDocument Error:', err);
+        logger.debug('updateDocument Data:', data);
+        // keep the revision of the update so we can delete it
+        // doc._rev = data.rev;
+        callback(err, data);
+    });
+};
+
+// deleting a document
+var deleteDocument = function (doc, callback) {
+    logger.debug("Deleting document 'mydoc'");
+    // supply the id and revision to be deleted
+    db.destroy(doc._id, doc._rev, function (err, data) {
+        logger.debug('Error:', err);
+        logger.debug('Data:', data);
+        callback(err, data);
+    });
+};
 exports.login = login;
 exports.queryItemNo = queryItemNo;
 exports.insertSearchDocument = insertSearchDocument;
+exports.insertNewAttachment = insertNewAttachment;
 exports.insertAttachment = insertAttachment;
+exports.destroyAttachment = destroyAttachment;
 exports.getAttachment = getAttachment;
