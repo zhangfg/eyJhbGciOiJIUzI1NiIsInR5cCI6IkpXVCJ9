@@ -42,6 +42,7 @@
 	</div>
 </template>
 <script>
+let FileSaver = require('file-saver')
 export default {
   props: {
     supplierPono: {
@@ -65,23 +66,13 @@ export default {
     }
   },
   methods: {
-    // fileDeal (content, filename) {
-    // 	console.log(this)
-    //   // 创建隐藏的可下载链接
-    //   let eleLink = document.createElement('a')
-    //   eleLink.download = filename
-    //   eleLink.style.display = 'none'
-    //   // 字符内容转变成blob地址
-    //   let blob = new Blob([content], { "type" : "application/vnd.ms-excel" })
-    //   eleLink.href = URL.createObjectURL(blob)
-    //   document.body.appendChild(eleLink)
-    //   eleLink.click()
-    //   document.body.removeChild(eleLink)
-    // },
     Download (row) {
       this.$store.dispatch('getDownload', {
         asnno: row.ASNNO,
         vendorNo: ''
+      }).then((datas) => {
+        var blob = new Blob([datas.body], {type: row.PackingList.FileType})
+        FileSaver.saveAs(blob, row.PackingList.FileName)
       })
     }
   }

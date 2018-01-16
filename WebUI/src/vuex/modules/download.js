@@ -1,7 +1,6 @@
 // import * as types from './../mutation-types'
 // import * as constants from './../apiConstant'
 import Vue from 'vue'
-var FileSaver = require('file-saver');
 const state = {
 }
 
@@ -17,9 +16,6 @@ const actions = {
       headers: {
         'authorization': 'Bearer' + ' ' + sessionStorage.getItem('accessToken')
       }
-    }).then((datas) => {
-      var blob = new Blob([datas.body], {type: "application/pdf"});
-      FileSaver.saveAs(blob, "test.pdf");
     })
   }
 }

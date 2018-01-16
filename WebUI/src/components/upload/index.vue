@@ -32,6 +32,7 @@ export default {
         showClose: true,
         message: '上传成功'
       })
+      console.log(response, file, fileList)
       this.uploadData.ASNNO = ''
     },
     // 上传错误

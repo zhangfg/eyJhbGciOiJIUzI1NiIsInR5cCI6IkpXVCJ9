@@ -17,8 +17,8 @@
 			<el-input v-model="searchData.poNo" placeholder="Please Enter Content"></el-input>
 		</div>
 		<div>
-			<label>AsnNo</label>
-			<el-input v-model="searchData.asnNo" placeholder="Please Enter Content"></el-input>
+			<label>ASNNumber</label>
+			<el-input v-model="searchData.ASNNumber" placeholder="Please Enter Content"></el-input>
 		</div>
 		<div>
 			<label>LenovoPartNo</label>
@@ -44,7 +44,7 @@ export default {
         startDate: '',
         endDate: '',
         poNo: '',
-        asnNo: '',
+        ASNNumber: '',
         partNo: ''
       }
     }
@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     search () {
-      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.poNo === '' && this.searchData.asnNo === '' && this.searchData.partNo === '') {
+      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.poNo === '' && this.searchData.ASNNumber === '' && this.searchData.partNo === '') {
         this.$message({
           showClose: true,
           message: 'Please enter a search condition at least!',
@@ -70,7 +70,7 @@ export default {
             startDate: '',
             endDate: '',
             poNo: '',
-            asnNo: '',
+            ASNNumber: '',
             partNo: ''
           }
         })
