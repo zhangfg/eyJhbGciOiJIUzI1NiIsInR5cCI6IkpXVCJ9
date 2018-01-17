@@ -73,7 +73,7 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 			stub.PutState(warehouse_key, c)
 		}
 	}
-
+	return nil
 }
 
 // update PO
