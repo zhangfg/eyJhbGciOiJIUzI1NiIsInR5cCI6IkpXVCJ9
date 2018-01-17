@@ -29,13 +29,27 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 			}
 			var c []byte
 			whObjAsbytes, err := stub.GetState(warehouse_key)
-			if err == nil && whObjAsbytes != nil {
+			if err != nil {
+				return err
+			}
+			if whObjAsbytes != nil {
 				whOrder := WareHouseInfo{}
 				err = json.Unmarshal(whObjAsbytes, &whOrder)
 				if err != nil {
 					return err
 				}
 				whOrder.Quantity = whOrder.Quantity + loiMaterial.Quantity
+				whHistory := WareHouseHistory{}
+				whHistory.PullRefNo = loiMaterial.RefNo
+				whHistory.qty = loiMaterial.Quantity
+				whHistory.updateDate = loiMaterial.PullDate
+				whOrder.history = append(whOrder.history, whHistory)
+				c, _ = json.Marshal(whOrder)
+				stub.PutState(warehouse_key, c)
+			} else {
+				whOrder := WareHouseInfo{}
+				whOrder.Quantity = loiMaterial.Quantity
+				whOrder.PN = loiMaterial.Product
 				whHistory := WareHouseHistory{}
 				whHistory.PullRefNo = loiMaterial.RefNo
 				whHistory.qty = loiMaterial.Quantity
@@ -57,6 +71,9 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 			return err
 		}
 		whObjAsbytes, err := stub.GetState(warehouse_key)
+		if err != nil {
+			return err
+		}
 		if err == nil && whObjAsbytes != nil {
 			whOrder := WareHouseInfo{}
 			err = json.Unmarshal(whObjAsbytes, &whOrder)
@@ -64,6 +81,17 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 				return err
 			}
 			whOrder.Quantity = whOrder.Quantity + loiGRInfo.Qty
+			whHistory := WareHouseHistory{}
+			whHistory.GRNO = loiGRInfo.GRNO
+			whHistory.qty = loiGRInfo.Qty
+			whHistory.updateDate = loiGRInfo.GRDate
+			whOrder.history = append(whOrder.history, whHistory)
+			c, _ = json.Marshal(whOrder)
+			stub.PutState(warehouse_key, c)
+		} else {
+			whOrder := WareHouseInfo{}
+			whOrder.Quantity = loiGRInfo.Qty
+			whOrder.PN = loiGRInfo.PN
 			whHistory := WareHouseHistory{}
 			whHistory.GRNO = loiGRInfo.GRNO
 			whHistory.qty = loiGRInfo.Qty
