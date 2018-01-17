@@ -639,7 +639,7 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(err.Error())
 	}
 	for _, warehouse := range warehouses {
-		if warehouse.PN != "" && warehouse.Quantity != "" {
+		if warehouse.PN != "" {
 			err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{warehouse.PN})
 			fmt.Println("write data, WareHouse part for - " + warehouse_key)
 			if err != nil {
