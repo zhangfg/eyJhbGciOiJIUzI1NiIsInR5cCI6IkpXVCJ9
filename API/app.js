@@ -28,6 +28,7 @@ var expressJWT = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var bearerToken = require('express-bearer-token');
 var cors = require('cors');
+var fs = require('fs');
 var appEnv = cfenv.getAppEnv();
 
 require('./config.js');
@@ -63,7 +64,7 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users', '/uploadfile']
+    path: ['/users', '/downloadfile']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
@@ -71,7 +72,7 @@ app.use(function (req, res, next) {
         return next();
     }
 
-    if (req.originalUrl.indexOf('/uploadfile') >= 0) {
+    if (req.originalUrl.indexOf('/downloadfile') >= 0) {
         return next();
     }
 
@@ -227,35 +228,53 @@ app.post('/users', function (req, res) {
 
 });
 
-app.post('/uploadfile', multipartMiddleware, function (req, res) {
-    var attachment = req.files.attachment;
-    var ASNNO = req.body.ASNNO;
-    var fileId = ASNNO + '_' + attachment.originalFilename;
-    var args = [{
-        "TRANSDOC": "UL",
-        "ASNNumber": ASNNO,
-        "PackingList":
-            {
-                "FileId": fileId,
-                "FileName": attachment.originalFilename,
-                "FileType": attachment.type,
-            }
-    }];
-    logger.debug('UPLoad File INFO ', args)
-    var fileId = req.vendorNo + '_' + ASNNO;
-    cloudant.getAttachment(fileId, attachment.originalFilename,
+// app.get('/:role/channels/:channelName/chaincodes/:chaincodeName/downloadfile', function (req, res) {
+app.get('/downloadfile', function (req, res) {
+    // var fileId = req.query.fileId;
+    // var vendorNo = req.query.vendorNo;
+    // var fileName = req.query.fileName;
+
+    var file = req.query.file.split('-');
+    // logger.debug('channelName  : ' + channelName);
+    // logger.debug('chaincodeName : ' + chaincodeName);
+    logger.debug('req.query.file : ' + req.query.file);
+
+    // if (!chaincodeName) {
+    //     res.json(getErrorMessage('\'chaincodeName\''));
+    //     return;
+    // }
+    // if (!channelName) {
+    //     res.json(getErrorMessage('\'channelName\''));
+    //     return;
+    // }
+    if (!file || file.length < 2) {
+        res.json(getErrorMessage('\'file\''));
+        return;
+    }
+    var fileId = file[0];
+    var fileName = file[1];
+    logger.debug('fileId  : ' + fileId);
+    logger.debug('fileName  : ' + fileName);
+
+    // var fileId = vendorNo + '_' + asnno;
+    cloudant.getAttachment(fileId, fileName,
         function (err, data) {
             if (err) {
                 res.json(getErrorMessage(err))
             } else {
-                res.download(fileId, attachment.originalFilename,
+                res.download(fileId, fileName,
                     function (err) {
                         if (err) {
                             logger.info('download err,', err);
                         } else {
                             logger.info('downloaded successfully');
+                            fs.unlink(fileId, (err) => {
+                                if (err) {
+                                    console.log(err);
+                                }
+                                logger.debug('FILE [' + fileId + '] REMOVED!');
+                            });
                         }
-
                     });
             }
         });
@@ -660,23 +679,24 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                                                     logger.info('download err,', err);
                                                 } else {
                                                     logger.info('downloaded successfully');
-                                                    // fs.unlink(respObj.PackingList.FileId, (err) => {
-                                                    //     if (err) {
-                                                    //         console.log(err);
-                                                    //     }
-                                                    //     logger.debug('FILE [' + respObj.PackingList.FileId + '] REMOVED!');
-                                                    // });
+                                                    fs.unlink(respObj.PackingList.FileId, (err) => {
+                                                        if (err) {
+                                                            console.log(err);
+                                                        }
+                                                        logger.debug('FILE [' + respObj.PackingList.FileId + '] REMOVED!');
+                                                    });
                                                 }
-
                                             });
 
 
                                         // res.set({
-                                        //     "Content-type": "application/octet-stream",
+                                        //     "Content-type": respObj.PackingList.FileType,
                                         //     "Content-Disposition": "attachment;filename=" + encodeURI(respObj.PackingList.FileName)
                                         // });
+                                        // // //data = Buffer.concat([new Buffer('\xEF\xBB\xBF', 'binary'), new Buffer(data)]);
                                         // res.setHeader('Content-Length', data.length);
-                                        // res.write(data, 'binary');
+                                        // // res.write(data, 'binary');
+                                        // res.write(data);
                                         // res.end();
                                     }
                                 });

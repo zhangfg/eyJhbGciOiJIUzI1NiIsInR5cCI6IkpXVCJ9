@@ -28,6 +28,36 @@ type POAndSOOrder struct {
 	PurchaseOrder PurchaseOrder `json:"PurchaseOrder"` //Purchase Order info,only for search
 }
 
+// WareHouse Key : "WH" + PN
+type WareHouseInfo struct {
+	PN       string             `json:"PN"`       // Pull Reference No  KEY
+	TRANSDOC string             `json:"TRANSDOC"` //Trans doc type
+	Quantity int                `json:"Quantity"` // Quantity
+	history  []WareHouseHistory `json:"history"`  // change log
+}
+
+type WareHouseHistory struct {
+	qty        int    `json:"qty"`        // Quantity
+	updateDate string `json:"updateDate"` // Update Date  GR Date or Pull Date
+	PullRefNo  string `json:"PullRefNo"`  // Pulling Reference No
+	GRNO       string `json:"GRNO"`       // GR NO
+}
+
+// new Ledger TODO
+// SOI Inventory Key: "SOI" + PN
+type SOIInventory struct {
+	PN            string `json:"PN"`            //Pull Reference No  KEY
+	TRANSDOC      string `json:"TRANSDOC"`      //Trans doc type
+	PartDesc      string `json:"PartDesc"`      //part description
+	Qty           string `json:"Qty"`           //inventory Quantity
+	InventoryType string `json:"InventoryType"` //inventory type(SOI)
+	SupplierName  string `json:"SupplierName"`  //supplier name
+	COO           string `json:"COO"`           //COO
+	Plant         string `json:"Plant"`         //part
+	PurchasingOrg string `json:"PurchasingOrg"` //Purchasing org
+	Location      string `json:"Location"`      //storage location
+}
+
 //Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
 type SupplierOrder struct {
 	ASNNumber           string        `json:"ASNNumber"`           //ASNNumber   -> Supplier ASN, Inbound Delivery/GR  Reference
@@ -51,18 +81,17 @@ type SupplierOrder struct {
 type ODMPurchaseOrder struct {
 	CPONO           string           `json:"CPONO"`         //Customer purchase order number  index
 	TRANSDOC      string            `json:"TRANSDOC"`
-	SONUMBER      string            `json:"SONUMBER"`      //Sales document number
-	SOITEM        string            `json:"SOITEM"`        //Sales document Item
-	PONO          string            `json:"PONO"`          //PO  no
-	POITEM        string            `json:"POITEM"`        //PO  item no
-	SalesOrder    SalesOrder        `json:"SalesOrder"`    //Sales Order info, only for search
-	PurchaseOrder PurchaseOrder     `json:"PurchaseOrder"` //Purchase Order info,only for search
-	Payments      []ODMPayment      `json:"Payments"`      //Billing info
-	GRInfos       []ODMGRInfo       `json:"GRInfos"`       //GR info
-	LOIMaterials  ODMLOIMaterial    `json:"LOIMaterials"`  //LOI Material Pull
-	LOIInventorys []ODMLOIInventory `json:"LOIInventorys"` //LOI  inventory(Flex system)
-	SOIPulls      []ODMSOIPull      `json:"SOIPulls"`      //VMI SOI Pull
-	SOIInventorys []ODMSOIInventory `json:"SOIInventorys"` //VMI inventory
+	SONUMBER      string            `json:"SONUMBER"`     //Sales document number
+	SOITEM        string           `json:"SOITEM"`        //Sales document Item
+	PONO          string           `json:"PONO"`          //PO  no
+	POITEM        string           `json:"POITEM"`        //PO  item no
+	SalesOrder    SalesOrder       `json:"SalesOrder"`    //Sales Order info, only for search
+	PurchaseOrder PurchaseOrder    `json:"PurchaseOrder"` //Purchase Order info,only for search
+	Payments      []ODMPayment     `json:"Payments"`      //Billing info
+	GRInfos       []ODMGRInfo      `json:"GRInfos"`       //GR info
+	LOIMaterials  []ODMLOIMaterial `json:"LOIMaterials"`  //LOI Material Pull
+	SOIPulls      []ODMSOIPull     `json:"SOIPulls"`      //VMI SOI Pull
+	//SOIInventorys []SOIInventory `json:"SOIInventorys"` //VMI inventory
 	//LOIGRInfos    []ODMLOIGRInfo    `json:"LOIGRInfos"`    //LOI GR
 }
 
@@ -72,24 +101,9 @@ type ODMSOIPull struct {
 	PullDate string `json:"PullDate"` //Actual Pull Date
 	PN       string `json:"PN"`       //Pull Reference No
 	Qty      string `json:"Qty"`      //Qty
-	RefNo    string `json:"RefNo"`    //Pull Reference No
+	RefNo    string `json:"RefNo"`    //Pull Reference No  --- KEY
 }
-type ODMSOIInventory struct {
-	PN            string `json:"PN"`            //Pull Reference No
-	PartDesc      string `json:"PartDesc"`      //part description
-	MaterialType  string `json:"MaterialType"`  //material type
-	Qty           string `json:"Qty"`           //inventory Quantity
-	InventoryType string `json:"InventoryType"` //inventory type(SOI)
-	SupplierName  string `json:"SupplierName"`  //supplier name
-	COO           string `json:"COO"`           //COO
-	Plant         string `json:"Plant"`         //part
-	PurchasingOrg string `json:"PurchasingOrg"` //Purchasing org
-	Location      string `json:"Location"`      //storage location
-}
-type ODMLOIInventory struct {
-	PN       string `json:"PN"`       //Pull Reference No
-	Quantity string `json:"Quantity"` //Quantity
-}
+
 type ODMPayment struct {
 	FlexInvoiceNO string `json:"FlexInvoiceNO"` //Flex Invoice Document
 	BILLINGNO     string `json:"BILLINGNO"`     //Billing Document
@@ -108,27 +122,29 @@ type ODMLOIMaterial struct {
 	PullType            string `json:"PullType"`            //Pull type
 	Week                string `json:"Week"`                //Week
 	PullDate            string `json:"PullDate"`            //Actual Pull Date
-	PN                  string `json:"PN"`                  //Pull Reference No
-	Qty                 string `json:"Qty"`                 //Qty
-	IntelShipTo         string `json:"IntelShipTo"`         //IntelShipTo
 	NotesToReceiver     string `json:"NotesToReceiver"`     //NotesToReceiver
-	ItemNumber          string `json:"ItemNumber"`          //Pull Reference No
-	Product             string `json:"Product"`             //Product
-	Quantity            string `json:"Quantity"`            //Quantity
+	Product             string `json:"Product"`             //Product -- Part NO
+	Quantity            int    `json:"Quantity"`            //Quantity
 	DlvryDate           string `json:"DlvryDate"`           //RequestedDeliveryDate
 	RequestedDate       string `json:"RequestedDate"`       //RequestedDate
 	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
 }
 
-type ODMLOIGRInfo struct {
-	PONO     string `json:"PONO"`     //Lenovo PO number
-	POITEM   string `json:"POITEM"`   //PO  item no
-	PN       string `json:"PN"`       //item PN
-	Qty      string `json:"Qty"`      //item Quantity
-	DNNumber string `json:"DNNumber"` //DN number
-	GRPODate string `json:"GRPODate"` //GR PO date
+// LOI GR Data Key: LOI + PN
+type LOIGRInfo struct {
+	PN        string      `json:"PN"`        //item PN --Key
+	TRANSDOC  string      `json:"TRANSDOC"`  //Trans doc type
+	Qty       int         `json:"Qty"`       //item Quantity
+	GRNO      string      `json:"GRNO"`      //DN number
+	GRDate    string      `json:"GRDate"`    //GR PO date
+	GRHistory []GRHistory `json:"GRHistory"` //GR History
 }
 
+type GRHistory struct {
+	GRNO   string `json:"GRNO"`   //Lenovo PO number
+	Qty    int    `json:"Qty"`    //item Quantity
+	GRDate string `json:"GRDate"` //GR PO date
+}
 
 //SalesOrder   Key: "SO"+So number + Item_no
 type SalesOrder struct {

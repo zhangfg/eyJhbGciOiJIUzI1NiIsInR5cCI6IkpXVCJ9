@@ -4,12 +4,77 @@ import (
 	// "bytes"
 	"fmt"
 	"errors"
+	//"strconv"
 	// "encoding/pem"
 	// "crypto/x509"
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
+
+// update Warehouse
+
+func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtype string) (error) {
+	fmt.Println("updateWarehouse  TYPE: " + Objtype)
+	if Objtype == "LP" {
+		var loiMaterials [] ODMLOIMaterial
+		err := json.Unmarshal(valAsbytes, &loiMaterials)
+		if err != nil {
+			return err
+		}
+		for _, loiMaterial := range loiMaterials {
+			err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{loiMaterial.Product})
+			if err != nil {
+				return err
+			}
+			var c []byte
+			whObjAsbytes, err := stub.GetState(warehouse_key)
+			if err == nil && whObjAsbytes != nil {
+				whOrder := WareHouseInfo{}
+				err = json.Unmarshal(whObjAsbytes, &whOrder)
+				if err != nil {
+					return err
+				}
+				whOrder.Quantity = whOrder.Quantity + loiMaterial.Quantity
+				whHistory := WareHouseHistory{}
+				whHistory.PullRefNo = loiMaterial.RefNo
+				whHistory.qty = loiMaterial.Quantity
+				whHistory.updateDate = loiMaterial.PullDate
+				whOrder.history = append(whOrder.history, whHistory)
+				c, _ = json.Marshal(whOrder)
+				stub.PutState(warehouse_key, c)
+			}
+		}
+	} else if Objtype == "LG" {
+		var loiGRInfo LOIGRInfo
+		err := json.Unmarshal(valAsbytes, &loiGRInfo)
+		if err != nil {
+			return err
+		}
+		var c []byte
+		err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{loiGRInfo.PN})
+		if err != nil {
+			return err
+		}
+		whObjAsbytes, err := stub.GetState(warehouse_key)
+		if err == nil && whObjAsbytes != nil {
+			whOrder := WareHouseInfo{}
+			err = json.Unmarshal(whObjAsbytes, &whOrder)
+			if err != nil {
+				return err
+			}
+			whOrder.Quantity = whOrder.Quantity + loiGRInfo.Qty
+			whHistory := WareHouseHistory{}
+			whHistory.GRNO = loiGRInfo.GRNO
+			whHistory.qty = loiGRInfo.Qty
+			whHistory.updateDate = loiGRInfo.GRDate
+			whOrder.history = append(whOrder.history, whHistory)
+			c, _ = json.Marshal(whOrder)
+			stub.PutState(warehouse_key, c)
+		}
+	}
+
+}
 
 // update PO
 func updatePurchaseOrderBySupplier(stub shim.ChaincodeStubInterface, valAsbytes []byte) (error, string, []byte) {
@@ -342,19 +407,25 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 						}
 					}
 				} else if order.TRANSDOC == "LP" {
-					cPOOrder.LOIMaterials = order.LOIMaterials
-				} else if order.TRANSDOC == "LI" {
-					for _, subObject := range order.LOIInventorys {
-						cPOOrder.LOIInventorys = append(cPOOrder.LOIInventorys, subObject)
-					}
+					//cPOOrder.LOIMaterials = order.LOIMaterials
+					//for _, subObject := range order.LOIMaterials {
+					//	var exist = false
+					//	for i, child := range cPOOrder.LOIMaterials {
+					//		if child.RefNo == subObject.RefNo {
+					//			cPOOrder.LOIMaterials[i] = subObject
+					//			exist = true
+					//		}
+					//	}
+					//	if (!exist) {
+					//		cPOOrder.LOIMaterials = append(cPOOrder.LOIMaterials, subObject)
+					//	}
+					//	// UPDATE WareHouse
+					//
+					//}
+					cPOOrder.LOIMaterials = append(cPOOrder.LOIMaterials, order.LOIMaterials...)
+
 				} else if order.TRANSDOC == "SP" {
-					for _, subObject := range order.SOIPulls {
-						cPOOrder.SOIPulls = append(cPOOrder.SOIPulls, subObject)
-					}
-				} else if order.TRANSDOC == "SI" {
-					for _, subObject := range order.SOIInventorys {
-						cPOOrder.SOIInventorys = append(cPOOrder.SOIInventorys, subObject)
-					}
+					cPOOrder.SOIPulls = append(cPOOrder.SOIPulls, order.SOIPulls...)
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
@@ -368,15 +439,21 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					cPOOrder.Payments = order.Payments
 				} else if order.TRANSDOC == "LP" {
 					cPOOrder.LOIMaterials = order.LOIMaterials
-				} else if order.TRANSDOC == "LI" {
-					cPOOrder.LOIInventorys = order.LOIInventorys
 				} else if order.TRANSDOC == "SP" {
 					cPOOrder.SOIPulls = order.SOIPulls
-				} else if order.TRANSDOC == "SI" {
-					cPOOrder.SOIInventorys = order.SOIInventorys
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(cpoKey, c)
+			}
+
+			m, _ := json.Marshal(order.LOIMaterials)
+			err = updateWarehouse(stub, m, "LP")
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			if order.TRANSDOC == "LP" {
+				d, _ := json.Marshal(order.LOIMaterials)
+				stub.SetEvent("OIPulling", d)
 			}
 		} else {
 			return shim.Error("PO number is required")
@@ -440,6 +517,155 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 
 		} else {
 			return shim.Error("ASNNumber is required")
+		}
+	}
+	return shim.Success(nil)
+}
+
+// Upload  LOI GR
+func crCGoodReceiveInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting json to create/update Supplier Object")
+	}
+	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, Supplier Object data - "+vendorNo, jsonStr)
+
+	var grInfos [] LOIGRInfo
+
+	err := json.Unmarshal([]byte(jsonStr), &grInfos)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, grInfo := range grInfos {
+		if grInfo.PN != "" {
+			err, soi_key := generateKey(stub, LOI_KEY, []string{grInfo.PN})
+			fmt.Println("write data, LOI GR part for - " + soi_key)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			soiObjAsbytes, err := stub.GetState(soi_key)
+			grHistory := GRHistory{}
+			grHistory.GRNO = grInfo.GRNO
+			grHistory.GRDate = grInfo.GRDate
+			grHistory.Qty = grInfo.Qty
+			var c []byte
+			if err == nil && soiObjAsbytes != nil {
+				loiGROrder := LOIGRInfo{}
+				err = json.Unmarshal(soiObjAsbytes, &loiGROrder)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				//b,err := strconv.Atoi(loiGROrder.Qty)
+				loiGROrder.Qty = grInfo.Qty + loiGROrder.Qty
+				loiGROrder.GRHistory = append(loiGROrder.GRHistory, grHistory)
+				c, _ = json.Marshal(loiGROrder)
+			} else {
+				grInfo.GRHistory = append(grInfo.GRHistory, grHistory)
+				c, _ = json.Marshal(grInfo)
+			}
+			stub.PutState(soi_key, c)
+			err = updateWarehouse(stub, c, "LG")
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+		} else {
+			return shim.Error("ASNNumber is required")
+		}
+	}
+	return shim.Success(nil)
+}
+
+// Upload  SOI Inventory Data
+func crCSOIInventoryInfo(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting json to SOI Inventory Object")
+	}
+	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, SOI Inventory Object data - "+vendorNo, jsonStr)
+
+	var soiInventorys [] SOIInventory
+
+	err := json.Unmarshal([]byte(jsonStr), &soiInventorys)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, inventory := range soiInventorys {
+		if inventory.PN != "" {
+			err, soi_key := generateKey(stub, SOI_KEY, []string{inventory.PN})
+			fmt.Println("write data, SOI Inventory for - " + soi_key)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			soiObjAsbytes, err := stub.GetState(soi_key)
+			var c []byte
+			if err == nil && soiObjAsbytes != nil {
+				soiInventory := SOIInventory{}
+				err = json.Unmarshal(soiObjAsbytes, &soiInventory)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				if inventory.TRANSDOC == "SI" { // TODO
+					soiInventory = inventory
+				}
+				c, _ = json.Marshal(soiInventory)
+			} else {
+				c, _ = json.Marshal(inventory)
+			}
+
+			stub.PutState(soi_key, c)
+
+		} else {
+			return shim.Error("PN is required")
+		}
+	}
+	return shim.Success(nil)
+}
+
+//init WareHouse
+func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting json to init Warehouse Object")
+	}
+	jsonStr := args[0]
+	vendorNo := args[1]
+	fmt.Println("write data, initial Warehouse Object data - "+vendorNo, jsonStr)
+
+	var warehouses [] WareHouseInfo
+
+	err := json.Unmarshal([]byte(jsonStr), &warehouses)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	for _, warehouse := range warehouses {
+		if warehouse.PN != "" && warehouse.Quantity != "" {
+			err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{warehouse.PN})
+			fmt.Println("write data, WareHouse part for - " + warehouse_key)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			whObjAsbytes, err := stub.GetState(warehouse_key)
+			var c []byte
+			if err == nil && whObjAsbytes != nil {
+				whOrder := WareHouseInfo{}
+				err = json.Unmarshal(whObjAsbytes, &whOrder)
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				if whOrder.TRANSDOC == "INIT" { // initial
+					whOrder.Quantity = warehouse.Quantity
+					whOrder.history = append(whOrder.history, warehouse.history...)
+				}
+				c, _ = json.Marshal(whOrder)
+			} else {
+				c, _ = json.Marshal(warehouse)
+			}
+
+			stub.PutState(warehouse_key, c)
+
+		} else {
+			return shim.Error(" Fields (PN and Quantity) are required")
 		}
 	}
 	return shim.Success(nil)

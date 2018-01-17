@@ -32,6 +32,12 @@ func (t *SmartContract) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return crSalesOrderInfo(stub,args)
 	} else if function == "crCPurchaseOrderInfo" {
 		return crCPurchaseOrderInfo(stub, args)
+	} else if function == "crCSOIInventoryInfo" {
+		return crCSOIInventoryInfo(stub, args)
+	} else if function == "crCGoodReceiveInfo" {
+		return crCGoodReceiveInfo(stub, args)
+	} else if function == "initWHQty" {
+		return initWHQty(stub, args)
 	}else if function == "crPurchaseOrderInfo"{
 		return crPurchaseOrderInfo(stub,args)
 	} else if function == "crSupplierOrderInfo" {
