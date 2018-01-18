@@ -243,10 +243,6 @@ var preparePOSearchData = function (data) {
         res.SOCDATE = soData.SOCDATE;
         res.SOQTY = soData.SOQTY;
         res.UNIT = soData.UNIT;
-        // res.PARTSNO = soData.PARTSNO;
-        // res.PARTSDESC = soData.PARTSDESC;
-        // res.VENDORNO = soData.VENDORNO;
-        // res.VENDORNAME = soData.VENDORNAME;
         res.CRAD = soData.CRAD;
         res.SOLDTO = soData.SOLDTO;
         res.NAME_AG = soData.NAME1_AG + ' ' + soData.NAME2_AG;
@@ -265,7 +261,8 @@ var preparePOSearchData = function (data) {
                 item.OAName = poData.OAName;
                 item.OANO = poData.OANO;
                 item.PONO = data.PONO;
-
+                item.PARTSDESC = poData.PARTSDESC;
+                item.PARTSNO = poData.PARTSNO;
                 item.DlvyQty = indnItem.DlvyQty;
                 item.ASNNO = indnItem.ASNNO;
                 item.IBDNNUMBER = indnItem.IBDNNUMBER;
@@ -289,10 +286,11 @@ var preparePOSearchData = function (data) {
 
                 if (data.SalesOrder) {
                     var soData = data.SalesOrder;
-                    item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
+                    if (soData.SOLDTO) {
+                        item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
+                    }
                     item.SONUMBER = data.SONUMBER;
-                    item.PARTSNO = soData.PARTSNO;
-                    item.PARTSDESC = soData.PARTSDESC;
+
                     item.CRAD = soData.CRAD;
                     if (soData.GIINFOS) {
                         soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)

@@ -45,6 +45,7 @@ var host = process.env.HOST || hfc.getConfigSetting('host');
 var port = process.env.PORT || appEnv.port;
 var cloudant = require('./app/cloudant');
 var ledgerData = require('./app/ledgerData');
+var eventUtil = require('./app/eventutil');
 var mutipart = require('connect-multiparty');
 
 var multipartMiddleware = mutipart();
@@ -110,6 +111,8 @@ logger.info('****************** SERVER STARTED ************************');
 logger.info('**************  http://' + host + ':' + port +
     '  ******************');
 server.timeout = 240000;
+
+eventUtil.triggerEvent();
 
 function getNoAccessMessage() {
     var response = {
@@ -495,7 +498,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
             res.json(getInvokeSuccessMessage(message));
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage(err));
+            res.json(getInvokeErrorMessage('System Error'));
         });
 });
 // Query on chaincode on target peers
@@ -591,7 +594,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
                         res.json(getInvokeSuccessMessage(message));
                     }, (err) => {
                         logger.debug('error is ' + err);
-                        res.json(getInvokeErrorMessage(err));
+                        res.json(getInvokeErrorMessage('System Error'));
                     });
             }
         });
@@ -653,7 +656,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
             // logger.debug('pomessage', pomessage);
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
-                res.json(getInvokeErrorMessage(message));
+                res.json(getInvokeErrorMessage('System Error'));
             } else {
                 var respObjects;
                 if (typeof message !== 'string') {
@@ -711,7 +714,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
             }
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage(err));
+            res.json(getInvokeErrorMessage('System Error'));
         });
 });
 
@@ -749,14 +752,14 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', functio
         .then(function (message) {
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
-                res.json(getInvokeErrorMessage(message));
+                res.json(getInvokeErrorMessage('System Error'));
             } else {
                 res.json(getQuerySuccessMessage(message));
             }
 
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage(err));
+            res.json(getInvokeErrorMessage('System Error'));
         });
 });
 
@@ -808,7 +811,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
             .then(function (message) {
                 if (message && typeof message === 'string' && message.includes(
                         'Error:')) {
-                    res.json(getInvokeErrorMessage(message));
+                    res.json(getInvokeErrorMessage('System Error'));
                 } else {
                     var respObj;
 
@@ -829,7 +832,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
 
             }, (err) => {
                 logger.debug('error is ' + err);
-                res.json(getInvokeErrorMessage(err));
+                res.json(getInvokeErrorMessage('System Error'));
             });
     });
 

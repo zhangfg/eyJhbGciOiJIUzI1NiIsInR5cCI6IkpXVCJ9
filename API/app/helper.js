@@ -123,6 +123,7 @@ function newRemotes(names, forPeers, userOrg) {
                 let eh = client.newEventHub();
                 eh.setPeerAddr(ORGS[userOrg].peers[peerName].events, grpcOpts);
                 targets.push(eh);
+                logger.debug('PeerAddr', ORGS[userOrg].peers[peerName].events);
             }
         }
     }

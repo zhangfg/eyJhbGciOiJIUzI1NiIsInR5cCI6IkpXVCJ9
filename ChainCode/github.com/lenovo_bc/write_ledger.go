@@ -481,7 +481,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 			}
 			if order.TRANSDOC == "LP" {
 				d, _ := json.Marshal(order.LOIMaterials)
-				stub.SetEvent("OIPulling", d)
+				stub.SetEvent("LOIPulling", d)
 			}
 		} else {
 			return shim.Error("PO number is required")

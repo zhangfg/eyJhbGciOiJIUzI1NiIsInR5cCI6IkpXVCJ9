@@ -4,15 +4,17 @@ var log4js = require('log4js');
 var logger = log4js.getLogger('CloudantAPI');
 // var Cloudant = require('cloudant');
 var fs = require('fs');
+require('../config.js');
+var hfc = require('fabric-client');
 var appEnv = cfenv.getAppEnv();
 var nano, db;
 var dbCreds = appEnv.getServiceCreds('Cloudant NoSQL DB-gp');
-var dbname = 'buy_sell';
 
 
 if (dbCreds) {
     logger.info('URL is ' + dbCreds.url);
     nano = require('nano')(dbCreds.url);
+    let dbname = hfc.getConfigSetting('databaseName');
     db = nano.use(dbname);
 } else {
     logger.error('NO DB!');

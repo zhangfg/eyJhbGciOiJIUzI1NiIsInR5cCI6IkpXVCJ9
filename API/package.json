@@ -21,7 +21,8 @@
     "fs-extra": "^2.0.0",
     "jsonwebtoken": "^7.3.0",
     "log4js": "^0.6.38",
-    "nano": "^6.4.2"
+    "nano": "^6.4.2",
+    "request": "^2.83.0"
   },
   "repository": {},
   "engines": {
