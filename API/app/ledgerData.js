@@ -122,7 +122,7 @@ var prepareSOSearchData = function (data) {
                                                     if (soData.ODMGRInfos) {
                                                         soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
                                                             .forEach(odmgr => {
-                                                                item.GRQty += odmgr.GRQTY;
+                                                                item.GRQty += parseInt(odmgr.GRQTY);
                                                             });
                                                     }
                                                 });
@@ -163,7 +163,7 @@ var prepareSOSearchData = function (data) {
                                 if (soData.ODMGRInfos) {
                                     soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
                                         .forEach(odmgr => {
-                                            item.GRQty += odmgr.GRQTY;
+                                            item.GRQty += parseInt(odmgr.GRQTY);
                                         });
                                 }
                             });
@@ -314,7 +314,7 @@ var preparePOSearchData = function (data) {
                                                     if (soData.ODMGRInfos) {
                                                         soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
                                                             .forEach(odmgr => {
-                                                                item.GRQty += odmgr.GRQTY;
+                                                                item.GRQty += parseInt(odmgr.GRQTY);
                                                             });
                                                     }
                                                 });
@@ -383,7 +383,7 @@ var prepareODMSearchData = function (data) {
             if (data.GRInfos) {
                 data.GRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
                     .forEach(odmgr => {
-                        item.GRQty += odmgr.GRQTY;
+                        item.GRQty += parseInt(odmgr.GRQTY);
                     });
             }
             if (data.SalesOrder && data.SalesOrder.BILLINFOS) {
