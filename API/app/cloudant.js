@@ -62,7 +62,7 @@ var insertSoSearchDocument = function (roleId, docObj, vendorNo, callback) {
             }
         }
     }, function (err, result) {
-        if (result.docs.length > 0) {
+        if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.info('update the information of the SO', data);
             readDocument(data._id, function (err, dataItem) {
@@ -133,7 +133,7 @@ var insertPoSearchDocument = function (roleId, docObj, vendorNo, callback) {
             }
         }
     }, function (err, result) {
-        if (result.docs.length > 0) {
+        if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.info('update the information of the PO', data);
             readDocument(data._id, function (err, dataItem) {
@@ -190,7 +190,7 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
             }
         }
     }, function (err, result) {
-        if (result.docs.length > 0) {
+        if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.info('update the information of the ODM', data);
             readDocument(data._id, function (err, dataItem) {
@@ -250,7 +250,7 @@ var insertSupplierSearchDocument = function (roleId, poItem, docObj, vendorNo, c
             }
         }
     }, function (err, result) {
-        if (result.docs.length > 0) {
+        if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.info('update the information of the Supplier', data);
             readDocument(data._id, function (err, dataItem) {
