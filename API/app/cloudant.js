@@ -22,13 +22,57 @@ if (dbCreds) {
 var insertSearchDocument = function (roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
     if (item.TRANSDOC === 'SO') {
-        insertSoSearchDocument(roleId, item, vendorNo, callback);
-        insertODMSearchDocument(roleId, item, vendorNo, callback);
+        let soItem = {
+            'SOCDATE': item.SOCDATE,
+            'PONO': item.PONO,
+            'SONUMBER': item.SONUMBER,
+            'SOITEM': item.SOITEM,
+            'CPONO': item.CPONO,
+            'SOTYPE': item.SOTYPE,
+            'PARTSNO': item.PARTSNO,
+            'VENDORNO': item.VENDORNO,
+            'PRNO': item.PRNO
+        };
+        insertSoSearchDocument(roleId, soItem, vendorNo, callback);
+
+        let odmItem = {
+            'SOCDATE': item.SOCDATE,
+            'SONUMBER': item.SONUMBER,
+            'SOITEM': item.SOITEM,
+            'CPONO': item.CPONO,
+            'PARTSNO': item.PARTSNO,
+            'VENDORNO': item.VENDORNO
+        };
+        insertODMSearchDocument(roleId, odmItem, vendorNo, callback);
     } else if (item.TRANSDOC === 'PO') {
-        insertPoSearchDocument(roleId, item, vendorNo, callback);
+        let poItem = {
+            'PODate': item.PODate,
+            'PONO': item.PONO,
+            'POItemNO': item.POItemNO,
+            'POTYPE': item.POTYPE,
+            'PARTSNO': item.PARTSNO,
+            'VENDORNO': item.VENDORNO
+        };
+        insertPoSearchDocument(roleId, poItem, vendorNo, callback);
+        let supItem = {
+            'PODate': item.PODate,
+            'PONumber': item.PONO,
+            'POItem': item.POItemNO,
+            'PARTSNO': item.PARTSNO,
+            'vendorNo': item.VendorNO
+        };
+        insertSupplierSearchDocumentByPO(roleId, supItem, callback);
     } else if (item.TRANSDOC === 'SUP') {
         let poItem = item.poitem;
-        insertSupplierSearchDocument(roleId, poItem, item, vendorNo, callback);
+        let supItem = {
+            'PODate': poItem.PODate,
+            'ASNNumber': item.ASNNumber,
+            'PONumber': item.PONumber,
+            'POItem': item.POItem,
+            'PARTSNO': poItem.PARTSNO,
+            'vendorNo': item.vendorNo,
+        };
+        insertSupplierSearchDocument(roleId, supItem, callback);
     }
 
 };
@@ -233,17 +277,17 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
         }
     });
 };
-var insertSupplierSearchDocument = function (roleId, poItem, docObj, vendorNo, callback) {
+var insertSupplierSearchDocument = function (roleId, docObj, callback) {
     logger.debug('insertSearchDocument--Supplier--', docObj);
     // var local = this;
-    if (poItem.PODate) {
-        poItem.PODate = poItem.PODate.replace(/-/g, '');
+    if (docObj.PODate) {
+        docObj.PODate = docObj.PODate.replace(/-/g, '');
     }
     db.find({
         selector: {
             "type": "supplierkey",
             'rows.vendorNo': {
-                '$eq': vendorNo
+                '$eq': docObj.vendorNo
             },
             'rows.ASNNumber': {
                 '$eq': docObj.ASNNumber
@@ -254,8 +298,8 @@ var insertSupplierSearchDocument = function (roleId, poItem, docObj, vendorNo, c
             var data = result.docs[0];
             logger.info('update the information of the Supplier', data);
             readDocument(data._id, function (err, dataItem) {
-                if (poItem.PODate) {
-                    dataItem.rows.orderCreateDate = poItem.PODate;
+                if (docObj.PODate) {
+                    dataItem.rows.orderCreateDate = docObj.PODate;
                 }
                 if (docObj.ASNNumber) {
                     dataItem.rows.ASNNumber = docObj.ASNNumber;
@@ -267,10 +311,10 @@ var insertSupplierSearchDocument = function (roleId, poItem, docObj, vendorNo, c
                     dataItem.rows.itemNo = docObj.POItem;
                 }
                 if (poItem.PARTSNO) {
-                    dataItem.rows.partNo = poItem.PARTSNO;
+                    dataItem.rows.partNo = docObj.PARTSNO;
                 }
                 if (vendorNo) {
-                    dataItem.rows.vendorNo = vendorNo;
+                    dataItem.rows.vendorNo = docObj.vendorNo;
                 }
                 updateDocument(dataItem, callback);
             });
@@ -279,12 +323,70 @@ var insertSupplierSearchDocument = function (roleId, poItem, docObj, vendorNo, c
             var insertObject = {
                 "type": "supplierkey",
                 "rows": {
-                    'orderCreateDate': poItem.PODate,
+                    'orderCreateDate': docObj.PODate,
                     'ASNNumber': docObj.ASNNumber,
                     'poNo': docObj.PONumber,
                     'itemNo': docObj.POItem,
-                    'partNo': poItem.PARTSNO,
-                    'vendorNo': vendorNo
+                    'partNo': docObj.PARTSNO,
+                    'vendorNo': docObj.vendorNo
+                }
+            };
+            logger.info('insert the information of the Supplier Object ', insertObject);
+            createDocument(insertObject, callback);
+        }
+    });
+};
+var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
+    logger.debug('insertSupplierSearchDocumentByPO--Supplier--', docObj);
+    // var local = this;
+    if (docObj.PODate) {
+        docObj.PODate = docObj.PODate.replace(/-/g, '');
+    }
+    db.find({
+        selector: {
+            "type": "supplierkey",
+            'rows.poNo': {
+                '$eq': docObj.PONumber
+            },
+            'rows.itemNo': {
+                '$eq': docObj.POItem
+            }
+        }
+    }, function (err, result) {
+        if (result && result.docs && result.docs.length > 0) {
+            var data = result.docs[0];
+            logger.info('update the information of the Supplier', data);
+            readDocument(data._id, function (err, dataItem) {
+                if (docObj.PODate) {
+                    dataItem.rows.orderCreateDate = docObj.PODate;
+                }
+                if (docObj.ASNNumber) {
+                    dataItem.rows.ASNNumber = docObj.ASNNumber;
+                }
+                if (docObj.PONumber) {
+                    dataItem.rows.poNo = docObj.PONumber;
+                }
+                if (docObj.POItem) {
+                    dataItem.rows.itemNo = docObj.POItem;
+                }
+                if (poItem.PARTSNO) {
+                    dataItem.rows.partNo = docObj.PARTSNO;
+                }
+                if (vendorNo) {
+                    dataItem.rows.vendorNo = docObj.vendorNo;
+                }
+                updateDocument(dataItem, callback);
+            });
+
+        } else {
+            var insertObject = {
+                "type": "supplierkey",
+                "rows": {
+                    'orderCreateDate': docObj.PODate,
+                    'poNo': docObj.PONumber,
+                    'itemNo': docObj.POItem,
+                    'partNo': docObj.PARTSNO,
+                    'vendorNo': docObj.vendorNo
                 }
             };
             logger.info('insert the information of the Supplier Object ', insertObject);
@@ -301,11 +403,15 @@ var querySoKeyNo = function (query, vendorNo, callback) {
     };
     if (query.startDate) {
         query.startDate = query.startDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$gte": query.startDate};
+        selector.rows.orderCreateDate = {};
+        selector.rows.orderCreateDate["$gte"] = query.startDate;
     }
     if (query.endDate) {
         query.endDate = query.endDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$lte": query.endDate};
+        if (!selector.rows.orderCreateDate) {
+            selector.rows.orderCreateDate = {};
+        }
+        selector.rows.orderCreateDate["$lte"] = query.endDate;
     }
     if (query.soNo) {
         selector.rows.soNo = {"$eq": query.soNo};
@@ -358,11 +464,15 @@ var queryPoKeyNo = function (query, vendorNo, callback) {
     };
     if (query.startDate) {
         query.startDate = query.startDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$gte": query.startDate};
+        selector.rows.orderCreateDate = {};
+        selector.rows.orderCreateDate["$gte"] = query.startDate;
     }
     if (query.endDate) {
         query.endDate = query.endDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$lte": query.endDate};
+        if (!selector.rows.orderCreateDate) {
+            selector.rows.orderCreateDate = {};
+        }
+        selector.rows.orderCreateDate["$lte"] = query.endDate;
     }
     if (query.poNo) {
         selector.rows.poNo = {"$eq": query.poNo};
@@ -407,11 +517,15 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
     };
     if (query.startDate) {
         query.startDate = query.startDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$gte": query.startDate};
+        selector.rows.orderCreateDate = {};
+        selector.rows.orderCreateDate["$gte"] = query.startDate;
     }
     if (query.endDate) {
         query.endDate = query.endDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$lte": query.endDate};
+        if (!selector.rows.orderCreateDate) {
+            selector.rows.orderCreateDate = {};
+        }
+        selector.rows.orderCreateDate["$lte"] = query.endDate;
     }
     if (query.soNo) {
         selector.rows.soNo = {"$eq": query.soNo};
@@ -426,6 +540,7 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
     if (query.vendorNo) {
         selector.rows.vendorNo = {"$eq": query.vendorNo};
     }
+    logger.debug('selector', selector);
     db.find({
         selector: selector
     }, function (err, data) {
@@ -455,11 +570,15 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
     };
     if (query.startDate) {
         query.startDate = query.startDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$gte": query.startDate};
+        selector.rows.orderCreateDate = {};
+        selector.rows.orderCreateDate["$gte"] = query.startDate;
     }
     if (query.endDate) {
         query.endDate = query.endDate.replace(/-/g, '');
-        selector.rows.orderCreateDate = {"$lte": query.endDate};
+        if (!selector.rows.orderCreateDate) {
+            selector.rows.orderCreateDate = {};
+        }
+        selector.rows.orderCreateDate["$lte"] = query.endDate;
     }
     if (query.poNo) {
         selector.rows.poNo = {"$eq": query.poNo};
