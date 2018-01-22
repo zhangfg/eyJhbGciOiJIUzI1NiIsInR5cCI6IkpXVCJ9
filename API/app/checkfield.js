@@ -29,107 +29,105 @@ exports.checkField = function (fcn,args)
             switch(args[i].TRANSDOC){
                 case 'GR':
                 if(typeof args[i].CPONO ===string && args[i].CPONO.length <= 35){
-                    return '';
+
                 }else{
-                    return 'CPONO check error';
+                    return 'CPONO check constraints are not satisfied.';
                 }
                 if(typeof args[i].GRNO ===string){
-                    return '';
+            
                 }else{
-                    return 'GRNO check error';
+                    return 'GRNO check constraints are not satisfied.';
                 }
                 if(typeof args[i].PARTNUM <= 18 && reg.test(args[i].PARTNUM)){
-                    return '';
+                   
                 }else{
-                    return 'PARTNUM check error';
+                    return 'PARTNUM check constraints are not satisfied.';
                 }
                 if(typeof args[i].GRQTY===number){
-                    return '';
+                   
                 }else{
-                    return 'GRQTY check error';
+                    return 'GRQTY check constraints are not satisfied.';
                 }
                 break;
 
                 case 'PY':
                 if(typeof args[i].CPONO === string && args[i].CPONO.length<= 35){
-                    return '';
+                   
                 }else{
-                    return 'CPONO check error';
+                    return 'CPONO check constraints are not satisfied.';
                 }
                 for(var j=0;j<args[i].ODMPayments.length;j++){
                     if(typeof args[i].ODMPayments[j].FlexInvoiceNO === string){
-                        return '';
+                       
                     }else{
-                        return 'FlexInvoiceNO check error';
+                        return 'FlexInvoiceNO check constraints are not satisfied.';
                     }
                     if(typeof args[i].ODMPayments[j].GRNO ===string){
-                        return '';
+                       
                     }else{
-                        return 'GRNO check error';
+                        return 'GRNO check constraints are not satisfied.';
                     }
                     if(typeof args[i].ODMPayments[j].BILLINGNO === string 
-                        && args[i].ODMPayments[j].BILLINGNO.length==10){
-                            return '';
+                        && args[i].ODMPayments[j].BILLINGNO.length===10){
+                           
                         }else{
-                            return 'BILLINGNO check error';
+                            return 'BILLINGNO check constraints are not satisfied.';
                         }
-                    if(typeof args[i].ODMPayments[j].INVOICESTATUS==string && args[i].ODMPayments[j].INVOICESTATUS.length==1
-                        &&args[i].ODMPayments[j].INVOICESTATUS=='A' ||args[i].ODMPayments[j].INVOICESTATUS=='P'){
-                            return '';
+                    if((typeof args[i].ODMPayments[j].INVOICESTATUS===string)&&args[i].ODMPayments[j].INVOICESTATUS==='A' ||args[i].ODMPayments[j].INVOICESTATUS==='P'){
+                            
                         }else{
-                            return 'INVOICESTATUS check error';
+                            return 'INVOICESTATUS check constraints are not satisfied.';
                         }
-                     if(checkDate2(args[i].ODMPayments[j].PAYMENTDATE) && args[i].ODMPayments[j].PAYMENTDATE.length==8){
-                         return '';
+                     if(typeof args[i].ODMPayments[j].PAYMENTDATE === string&&CheckDate2(args[i].ODMPayments[j].PAYMENTDATE)){
+                        
                      }else{
-                         return 'PAYMENTDATE check error';
+                         return 'PAYMENTDATE check constraints are not satisfied.';
                      }    
                 }
                 break;
                 
                 case 'LP':
-                if(typeof args[i].CPONO == string && args[i].CPONO.length<= 35){
+                if(typeof args[i].CPONO === string && args[i].CPONO.length<= 35){
                     for(var j =0;j<args[i].LOIMaterials;j++){
                         if(typeof args[i].LOIMaterials[j].RefNo === string){
-                            return '';
+                           
                         }else{
-                            return 'CPONO check error';
+                            return 'CPONO check constraints are not satisfied.';
                         }
-                        if(typeof args[i].LOIMaterials[j].PullType === string && args[i].LOIMaterials[j].PullType.length===3
-                            &&args[i].LOIMaterials[j].PullType === 'LOI'){
-                                return '';
+                        if(typeof args[i].LOIMaterials[j].PullType === string &&args[i].LOIMaterials[j].PullType === 'LOI'){
+                               
                             }else{
-                                return 'PullType check error';
+                                return 'PullType check constraints are not satisfied.';
                             }
                          if(typeof args[i].LOIMaterials[j].Week===string && args[i].LOIMaterials[j].Week.length ===8){
-                            return '';
+                           
                          }else{
-                            return 'Week check error';
+                            return 'Week check constraints are not satisfied.';
                          }
                          if(typeof args[i].LOIMaterials[j].NotesToReceiver===string&&args[i].LOIMaterials[j].NotesToReceiver.length<=18){
-                             return '';
+                            
                          }else{
-                             return 'NotesToReceiver check error';
+                             return 'NotesToReceiver check constraints are not satisfied.';
                          }  
                          if(typeof args[i].LOIMaterials[j].Quantity === number){
-                             return '';
+                            
                          } else{
-                             return 'Quantity check error';
+                             return 'Quantity check constraints are not satisfied.';
                          }
-                         if(CheckDate2(args[i].LOIMaterials[j].DlveryDate)&&args[i].LOIMaterials[j].DlveryDate.length===8){
-                            return '';
+                         if(typeof args[i].LOIMaterials[j].DlveryDate===string&&CheckDate2(args[i].LOIMaterials[j].DlveryDate)){
+                          
                          }else{
-                             return 'DlveryDate check error';
+                             return 'DlveryDate check constraints are not satisfied.';
                          }
-                         if(CheckDate2(args[i].LOIMaterials[j].RequestedDate)&&args[i].LOIMaterials[j].RequestedDat===8){
-                             return '';
+                         if(typeof args[i].LOIMaterials[j].RequestedDate===string&&CheckDate2(args[i].LOIMaterials[j].RequestedDate)){
+                            
                          }else{
-                             return 'RequestedDate check error';
+                             return 'RequestedDate check constraints are not satisfied.';
                          }
                          if(args[i].LOIMaterials[j].ShipmentInstruction===string){
-                             return '';
+                            
                          }else{
-                             return 'ShipmentInstruction check error';
+                             return 'ShipmentInstruction check constraints are not satisfied.';
                          }
                     }
 
@@ -138,63 +136,62 @@ exports.checkField = function (fcn,args)
 
                 case 'LG':
                 if(typeof args[i].GRNO === string){
-                    return '';
+                   
                 }else{
-                    return 'GRNO check error';
+                    return 'GRNO check constraints are not satisfied.';
                 }
-                if(typeof args[i].PN === string && args[i].PN.length==18){
-                    return '';
+                if(typeof args[i].PN === string && args[i].PN.length===18){
+                   
                 }else{
-                    return 'PN check error';
+                    return 'PN check constraints are not satisfied.';
                 }
                 if(typeof args[i].Qty === number){
-                    return '';
+                   
                 }else{
-                    return 'Qty check error';
+                    return 'Qty check constraints are not satisfied.';
                 }
-                if(CheckDate2(args[i].GRDate)&& args[i].GRDate.length === 8){
-                    return '';
+                if(typeof args[i].GRDate === string && CheckDate2(args[i].GRDate) ){
+                   
                 }else{
-                    return 'GRDate check error';
+                    return 'GRDate check constraints are not satisfied.';
                 }
                 break; 
                 case 'SP':
                 if(typeof args[i].CPONO === string && args[i].CPONO.length<= 35){
-                    return '';
+                   
                 }else{
-                    return 'CPONO check error';
+                    return 'CPONO check constraints are not satisfied.';
                 }
                 for(var j =0;j<args[i].SOIPulls;j++){
-                    if(typeof args[i].SOIPulls[j].PullType === string && args[i].SOIPulls[j].PullType.length===3 && args[i].SOIPulls[j].PullType==='LOI'){
-                        return '';
+                    if(typeof args[i].SOIPulls[j].PullType === string  && args[i].SOIPulls[j].PullType==='LOI'){
+                       
                     }else{
-                        return 'PullType check error';
+                        return 'PullType check constraints are not satisfied.';
                     }
                     if(typeof args[i].SOIPulls[j].Week === string && args[i].SOIPulls[j].Week.length===8){
-                        return '';
+                        
                     }else{
-                        return 'Week check error';
+                        return 'Week check constraints are not satisfied.';
                     }
-                    if(typeof CheckDate2(args[i].SOIPulls[j].PullDate)  
-                    && args[i].SOIPulls[j].PullDate.length ===8){
-                        return '';
+                    if( typeof args[i].SOIPulls[j].PullDate === string && CheckDate2(args[i].SOIPulls[j].PullDate)){
+                        
                     }else{
-                        return 'PullDate check error';
+                        return 'PullDate check constraints are not satisfied.';
                     }
                     if(typeof args[i].SOIPulls[j].PN === string && args[i].SOIPulls[j].PN.length<=18){
-                        return '';
+                       
                     }else{
-                        return 'PN check error';
+                        return 'PN check constraints are not satisfied.';
                     }
                     if(typeof args[i].SOIPulls[j].Qty === number){
-                        return '';
+                       
                     }else{
-                        return 'Qty check error';
+                        return 'Qty check constraints are not satisfied.';
                     }
-                    if(typeof args[i].SOIPulls[j].RefNo ===string && args[i].SOIPulls[j].RefNo.length==10 ){
-                        return '';
+                    if(typeof args[i].SOIPulls[j].RefNo ===string && args[i].SOIPulls[j].RefNo.length===10 ){
+                       
                     }else{
-                        return 'RefNo check error';
+                        return 'RefNo check constraints are not satisfied.';
                     }
                    
                 }
@@ -203,48 +200,93 @@ exports.checkField = function (fcn,args)
                 case 'SI':
                 if(typeof args[i].PN === string && args[i].PN.length<= 18)
                 {
-                    return '';
+                   
                 }else{
-                    return 'PN check error';
+                    return 'PN check constraints are not satisfied.';
                 }
                 if(typeof args[i].PartDesc === string){
-                    return '';
+                   
                 }else{
-                    return 'PartDesc check error';
+                    return 'PartDesc check constraints are not satisfied.';
                 }
-                if(typeof args[i].InventoryType === string
-                    &&args[i].InventoryType.length ===3 && args[i].InventoryType === 'SOI'){
-                        return '';
+                if(typeof args[i].InventoryType === string && args[i].InventoryType === 'SOI'){
+                       
                     }else{
-                        return 'InventoryType check error';
+                        return 'InventoryType check constraints are not satisfied.';
                     }
                 if(typeof args[i].Qty === number){
-                    return '';
+                   
                 }else{
-                    return 'Qty check error';
+                    return 'Qty check constraints are not satisfied.';
                 }
                 if(typeof args[i].SupplierName === string){
-                    return '';
+                   
                 }else{
-                    return 'SupplierName check error';
+                    return 'SupplierName check constraints are not satisfied.';
                 }
                 break; 
 
             }
-        }          
-      
+        }           
       
     }
     
-
 }
 
 function CheckDate2(strInputDate) {
-     var reg = /^(\d{4})(\d{2})(\d{2})$/;
-    var arr = reg.exec(strInputDate);
-    if (strInputDate=="") return true;
-    if (!reg.test(strInputDate)&&RegExp.$2<=12&&RegExp.$3<=31){
-    return false;
+                var parts;
+                if(strInputDate.length === 8){
+                parts[0]= strInputDate.substring(0,4);
+                parts[1]= strInputDate.substring(4,6);
+                parts[2]= strInputDate.substring(6,8);
+              
+                for (i = 0; i < 3; i++) {
+                    //如果构成日期的某个部分不是数字，则返回false
+                    if (isNaN(parts[i])) {
+                        return false;
+                    }
+                }
+              var  y = parts[0]; //年
+              var  m = parts[1]; //月
+              var  d = parts[2]; //日
+                if (y > 3000) {
+                    return false;
+                }
+                var smonth="01,02,03,04,05,06,07,08,09,10,11,12";
+                if (smonth.indexOf(m) == -1) {
+                    return false;
+                }
+                var sday = "01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31";
+                if (sday.indexOf(d) == -1) {
+                    return false;
+                }
+                switch (d) {
+                    case 29:
+                        if (m == "02") {
+                            //如果是2月份
+                            if ((y / 100) * 100 == y && (y / 400) * 400 != y) {
+                                //如果年份能被100整除但不能被400整除 (即闰年)
+                            } else {
+                                return false;
+                            } 
+                        }
+                        break;
+                    case 30:
+                        if (m == "02") {
+                            //2月没有30日
+                            return false;
+                        }
+                        break;
+                    case 31:
+                        if (m == "02" || m == "04" || m == "06" || m == "09" || m == "11") {
+                            //2、4、6、9、11月没有31日
+                            return false;
+                        }
+                        break;
+                    default:
+                }
+                return true;
+    }else{
+        return false;
     }
-    return true;
-    }
+}
