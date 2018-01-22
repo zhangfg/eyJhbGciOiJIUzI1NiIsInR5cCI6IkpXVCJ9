@@ -1,7 +1,7 @@
 .el-form {
 	.el-form-item {
 		.el-form-item__content {
-			border-top: 1px solid #6d8589;
+			/*border-top: 1px solid #fff;*/
 			.el-form-item__error {
 				margin-left: 10px;
 				padding-top: 0;
@@ -10,8 +10,7 @@
 				.el-input__inner {
 					outline: medium;
 					border: 0;
-					/* 输入框表框颜色*/
-					background-color: rgba(250, 250, 250, 0);
+					/*background-color: rgba(250, 250, 250, 0);*/
 					/* 输入框背景颜色*/
 					padding-top: 4px;
 					/*输入框里的文字和输入框上边之间的距离（因为输入框比较高，输入的字不是居中的，所以设定此样式）*/
@@ -19,8 +18,12 @@
 					/*输入框文字类型*/
 					font-size: 16px;
 					/*输入框内文字大小*/
-					color: #fff;
+					color: #000;
 					margin-left: -5px;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          border-top-right-radius: 4px;
+          border-bottom-right-radius: 4px;
 				}
 				::-webkit-input-placeholder {
 					color: #6d8589;
@@ -54,13 +57,86 @@
 	>div {
 		margin: 15px;
 	}
-  .title {
-    font-weight: bold;
-    margin-top: 15px;
-    margin-bottom: 15px;
-  }
 }
 .load {
 	font-size: 20px;
 	cursor: pointer;
 }
+
+.el-table .cell {
+	>a {
+		text-decoration: none;
+		color: #000;
+		font-size: 12px;
+	}
+	.ban {
+		cursor: pointer;
+	}
+}
+
+/*loading页面样式修改*/
+.el-loading-mask {
+  background-color: rgba(0, 0, 0, 0.4);
+  .el-loading-spinner {
+    .el-icon-loading {
+      font-size: 40px;
+    }
+    .el-loading-text {
+      font-size: 25px;
+    }
+  }
+}
+
+/*组件共用样式*/
+.search-wrap {
+  padding: 10px;
+  .el-input {
+    width: 180px !important;
+  }
+  .search-form {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px 10px;
+    font-weight: bold;
+
+    .timer {
+      margin-bottom: 10px;
+      overflow: hidden;
+      >label {
+        margin-right: 10px;
+      }
+      >label,>p {
+        float: left;
+        display: inline-block;
+        font-size: 13px;
+        height: 40px;
+        line-height: 40px;
+      }
+    }
+    .search-content {
+      .condition-group {
+        >div {
+          margin-bottom: 10px;
+          >label {
+            display: inline-block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            width: 110px;
+          }
+        }
+      }
+    }
+    
+    .search {    
+      margin: 5px 0 15px 116px;
+      border: 0;
+      background: #0084ff;
+      color: #fff;
+    }
+    .search:hover {
+      background: #0560b5;
+      color: #fff;
+    }
+  }
+}
+

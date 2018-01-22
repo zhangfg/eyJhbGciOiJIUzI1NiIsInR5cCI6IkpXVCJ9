@@ -2,7 +2,7 @@
 	<div class="upload">
     <div class="content">
       <div>
-        <label>ASN No</label>
+        <label>ASN No.</label>
         <el-input v-model="uploadData.ASNNO" placeholder="Please Enter Content"></el-input>
       </div>
       <el-upload :disabled="uploadData.ASNNO === ''" class='ensure ensureButt' :data="uploadData" :action="importFileUrl" :headers="headers" name="attachment" :onError="uploadError" :onSuccess="uploadSuccess" :beforeUpload="beforeAvatarUpload">

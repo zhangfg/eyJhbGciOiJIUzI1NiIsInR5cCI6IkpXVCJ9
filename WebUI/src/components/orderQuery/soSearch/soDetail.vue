@@ -1,69 +1,68 @@
 <template>
 	<div v-if="searchInfo" class="document-header-wrap">
 		<div v-if="searchInfo.data">
-      <p class="title">Document Header</p>
 			<el-table :data="searchInfo.data" empty-text="No Data" border>
 				<el-table-column prop="SOTYPE" label="SOTYPE">
 				</el-table-column>
-				<el-table-column prop="SONUMBER" label="SO">
+				<el-table-column prop="SONUMBER" label="SO" width="120">
 				</el-table-column>
 				<el-table-column prop="SOITEM" label="SOITEM">
 					<template slot-scope="scope">
 						<el-button @click="soitemClick(scope.row)" type="text" size="small">{{scope.row.SOITEM}}</el-button>
 					</template>
 				</el-table-column>
-        <el-table-column prop="POTYPE" label="POTYPE">
+        <el-table-column prop="POTYPE" label="PO TYPE">
         </el-table-column>
-				<el-table-column prop="PONO" label="PO">
+				<el-table-column prop="PONO" label="PO" width="120">
 				</el-table-column>
-				<el-table-column prop="POITEM" label="POITEM">
+				<el-table-column prop="POITEM" label="PO ITEM">
 					<template slot-scope="scope">
 						<el-button @click="poitemClick(scope.row)" type="text" size="small">{{scope.row.POITEM}}</el-button>
 					</template>
 				</el-table-column>
-				<el-table-column prop="PARTSNO" label="PartNo">
+				<el-table-column prop="PARTSNO" label="Part No." width="120">
 				</el-table-column>
-				<el-table-column prop="SOQTY" label="Quantity">
-				</el-table-column>
+        <el-table-column prop="SOITEM" label="Quantity">
+        </el-table-column>
 				<el-table-column prop="Unit" label="Unit">
 				</el-table-column>
-				<el-table-column prop="PARTSDESC" label="Description">
+				<el-table-column prop="PARTSDESC" label="Description" width="120">
 				</el-table-column>
-				<el-table-column prop="CRAD" label="CustomerRequiredSchedule">
+				<el-table-column prop="CRAD" label="Customer Required Schedule" width="120">
 				</el-table-column>
-				<el-table-column prop="SOLDTO" label="CustomerNo">
+				<el-table-column prop="SOLDTO" label="Customer No." width="120">
 				</el-table-column>
-				<el-table-column prop="NAME_AG" label="CustomerName">
+				<el-table-column prop="NAME_AG" label="Customer Name" width="130">
         </el-table-column>
-        <el-table-column prop="CPONO" label="CustomerPoNo">
+        <el-table-column prop="CPONO" label="Customer Po No." width="130">
         </el-table-column>
-        <el-table-column prop="VENDORNO" label="VendorNo">
+        <el-table-column prop="VENDORNO" label="Vendor No." width="120">
         </el-table-column>
-        <el-table-column prop="VENDORNAME" label="VendorName">
+        <el-table-column prop="VENDORNAME" label="Vendor Name" width="120">
         </el-table-column>
-        <el-table-column prop="OANO" label="OANo">
+        <el-table-column prop="OANO" label="OA No." width="120">
         </el-table-column>
-        <el-table-column prop="CITY_WE" label="ShipToLocation">
+        <el-table-column prop="CITY_WE" label="Ship To Location" width="130">
         </el-table-column>
-        <el-table-column prop="ContractNO" label="ContractNO">
+        <el-table-column prop="ContractNO" label="Contract No." width="120">
         </el-table-column>
-        <el-table-column prop="ContractItemNO" label="ContractItemNO">
+        <el-table-column prop="ContractItemNO" label="Contract Item No." width="140">
 				</el-table-column>
-        <el-table-column prop="PRNO" label="PRNo">
+        <el-table-column prop="PRNO" label="PR No." width="120">
         </el-table-column>
 			</el-table>
 		</div>
-		<el-dialog :visible.sync="soitemTableVisible">
-			<soitem :giData="giData" :searchInfoData="searchInfo.data"></soitem>
+		<el-dialog :visible.sync="soitemTableVisible" width="100%">
+			<so-item :giData="giData" :searchInfoData="searchInfo.data"></so-item>
 		</el-dialog>
-		<el-dialog :visible.sync="poitemTableVisible">
-			<poitem :grData="grData" :searchInfoData="searchInfo.data"></poitem>
+		<el-dialog :visible.sync="poitemTableVisible" width="100%">
+			<po-item :grData="grData" :searchInfoData="searchInfo.data"></po-item>
 		</el-dialog>
 	</div>
 </template>
 <script>
-import soitem from './soitem.vue'
-import poitem from './poitem.vue'
+import soItem from './soItem.vue'
+import poItem from './poItem.vue'
 
 export default {
   data () {
@@ -81,8 +80,8 @@ export default {
     }
   },
   components: {
-    soitem,
-    poitem
+    soItem,
+    poItem
   },
   props: {
     searchInfo: {
