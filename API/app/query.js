@@ -163,9 +163,9 @@ var getChainInfo = function (peer, username, org) {
         if (blockchainInfo) {
             // FIXME: Save this for testing 'getBlockByHash'  ?
             logger.debug('===========================================');
-            logger.debug(blockchainInfo.currentBlockHash);
+            logger.debug('blockchainInfo.currentBlockHash===='+blockchainInfo.currentBlockHash);
             logger.debug('===========================================');
-            //logger.debug(blockchainInfo);
+            logger.debug(blockchainInfo);
             return blockchainInfo;
         } else {
             logger.error('response_payloads is null');
@@ -263,9 +263,9 @@ var getChannels = function (peer, username, org) {
 var getChannelHeight=function(peer,channelName,org){
     return getChainInfo(peer,channelName,org).then(response=>{
         if(response){
-            logger.debug('<<<<<<<<<< channel height >>>>>>>>>')
-            logger.debug(response.height.low)
-            return response.height.low.toString()
+            logger.debug('<<<<<<<<<< channel height >>>>>>>>>');
+            logger.debug(response.height.low);
+            return response.height.low.toString();
         }
     })
 }

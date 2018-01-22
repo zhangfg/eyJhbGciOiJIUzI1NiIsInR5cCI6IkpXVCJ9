@@ -83,7 +83,20 @@ var queryItemNo = function (query, vendorNo, callback) {
     } else if (query.keyprefix === 'PO') {
         queryPoKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'CPO') {
-        queryODMKeyNo(query, vendorNo, callback);
+        if (query.flexPONo) {
+            var queryData = [];
+            var keyObj = {
+                KeyPrefix: 'FLEX',
+                KeysStart: [],
+                KeysEnd: []
+            };
+            keyObj.KeysStart.push(query.flexPONo);
+            queryData.push(keyObj);
+            logger.info('Return item:', keyObj);
+            callback(queryData);
+        } else {
+            queryODMKeyNo(query, vendorNo, callback);
+        }
     } else if (query.keyprefix === 'SUP') {
         querySupplierKeyNo(query, vendorNo, callback);
     }

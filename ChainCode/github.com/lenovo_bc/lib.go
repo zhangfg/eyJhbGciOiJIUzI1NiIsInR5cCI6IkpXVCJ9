@@ -77,32 +77,28 @@ type SupplierOrder struct {
 	PurchaseOrder       PurchaseOrder `json:"PurchaseOrder"`       //Purchase Order info,only for search
 }
 
-//ODM PO   Key: "CPO"+ CPONo
-type ODMPurchaseOrder struct {
-	CPONO           string           `json:"CPONO"`         //Customer purchase order number  index
-	TRANSDOC      string            `json:"TRANSDOC"`
+//ODM PO   Key: "CPO"+ CPONO
+type CPONOFLEXPONO struct {
+	CPONO      string       		`json:"CPONO"`         //Customer purchase order number
+	FLEXPONO   []string 			`json:"FLEXPONO"` 		//Customer purchase order number
 	SONUMBER      string            `json:"SONUMBER"`     //Sales document number
 	SOITEM        string           `json:"SOITEM"`        //Sales document Item
 	PONO          string           `json:"PONO"`          //PO  no
 	POITEM        string           `json:"POITEM"`        //PO  item no
 	SalesOrder    SalesOrder       `json:"SalesOrder"`    //Sales Order info, only for search
 	PurchaseOrder PurchaseOrder    `json:"PurchaseOrder"` //Purchase Order info,only for search
-	Payments      []ODMPayment     `json:"Payments"`      //Billing info
-	GRInfos       []ODMGRInfo      `json:"GRInfos"`       //GR info
-	LOIMaterials  []ODMLOIMaterial `json:"LOIMaterials"`  //LOI Material Pull
-	SOIPulls      []ODMSOIPull     `json:"SOIPulls"`      //VMI SOI Pull
-	//SOIInventorys []SOIInventory `json:"SOIInventorys"` //VMI inventory
-	//LOIGRInfos    []ODMLOIGRInfo    `json:"LOIGRInfos"`    //LOI GR
 }
 
-type ODMSOIPull struct {
-	PullType string `json:"PullType"` //Pull type
-	Week     string `json:"Week"`     //Week
-	PullDate string `json:"PullDate"` //Actual Pull Date
-	PN       string `json:"PN"`       //Pull Reference No
-	Qty      string `json:"Qty"`      //Qty
-	RefNo    string `json:"RefNo"`    //Pull Reference No  --- KEY
+//ODM PO   Key: "FLEX"+ FLEXPONO
+type ODMPurchaseOrder struct {
+	FLEXPONO      string       	   `json:"FLEXPONO"`         //Customer purchase order number  index
+	TRANSDOC      string           `json:"TRANSDOC"`
+	Payments      []ODMPayment     `json:"Payments"`      //Billing info
+	GRInfos       []ODMGRInfo      `json:"GRInfos"`       //GR info
+	CPONO      	  string       	   `json:"CPONO"`         //Customer purchase order number
+	CPONOFLEXPONO CPONOFLEXPONO    `json:"SalesOrder"`    //Sales Order info, only for search
 }
+
 
 type ODMPayment struct {
 	FlexInvoiceNO string `json:"FlexInvoiceNO"` //Flex Invoice Document
@@ -117,8 +113,16 @@ type ODMGRInfo struct {
 	GRQTY   string `json:"GRQTY"`   // received qty
 }
 
+//ODM PO   Key: "REF"+ FLEXPONO
+type FLEXPONOREF struct {
+	FLEXPONO   	string       		`json:"FLEXPONO"`      	//Customer purchase order number
+	RefNos   	[]string 			`json:"RefNos"` 			//Reference No
+}
+
+// Upload  LOI Pull Data TRANSDOC: "PULL" + Ref No
 type ODMLOIMaterial struct {
 	RefNo               string `json:"RefNo"`               //Pull Reference No
+	//TRANSDOC      		string `json:"TRANSDOC"`
 	PullType            string `json:"PullType"`            //Pull type
 	Week                string `json:"Week"`                //Week
 	PullDate            string `json:"PullDate"`            //Actual Pull Date
@@ -133,7 +137,7 @@ type ODMLOIMaterial struct {
 // LOI GR Data Key: LOI + PN
 type LOIGRInfo struct {
 	PN        string      `json:"PN"`        //item PN --Key
-	TRANSDOC  string      `json:"TRANSDOC"`  //Trans doc type
+	//TRANSDOC  string      `json:"TRANSDOC"`  //Trans doc type
 	Qty       int         `json:"Qty"`       //item Quantity
 	GRNO      string      `json:"GRNO"`      //DN number
 	GRDate    string      `json:"GRDate"`    //GR PO date

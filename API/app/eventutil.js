@@ -29,9 +29,9 @@ exports.retrieveEventOnLenovo = function (ccName) {
         if (eventhubs.length > 0) {
             let eh = eventhubs[0];
             eh.connect();
-            let eventName = 'LOIPulling';
-            logger.info('chainCodeName:' + ccName + ', eventName=' + eventName);
-            eh.registerChaincodeEvent(ccName, eventName, (block) => {
+            let loiEventName = 'LOIPulling';
+            logger.info('chainCodeName:' + ccName + ', eventName=' + loiEventName);
+            eh.registerChaincodeEvent(ccName, loiEventName, (block) => {
                 logger.info('get event ==========**********');
                 logger.info('get event ==========' + block.chaincode_id);
                 logger.info('get event ==========' + block.tx_id);
@@ -40,6 +40,21 @@ exports.retrieveEventOnLenovo = function (ccName) {
                 let byteData = block.payload + '';
                 let requestData = JSON.parse(byteData);
                 createSaleOrder(requestData);
+            }, (error) => {
+                // empty method body
+            });
+
+            let soiEventName = 'SOIPulling';
+            logger.info('chainCodeName:' + ccName + ', eventName=' + soiEventName);
+            eh.registerChaincodeEvent(ccName, soiEventName, (block) => {
+                logger.info('get event ==========**********');
+                logger.info('get event ==========' + block.chaincode_id);
+                logger.info('get event ==========' + block.tx_id);
+                logger.info('get event ==========' + block.event_name);
+                logger.info('get event ==========' + block.payload);
+                let byteData = block.payload + '';
+                let requestData = JSON.parse(byteData);
+
             }, (error) => {
                 // empty method body
             });
@@ -66,21 +81,17 @@ var prepareCreateSORequestData = function (data) {
     request.items = items;
     respsone.request = request;
     return respsone;
-}
+};
 
 var createSaleOrder = function (request) {
-    logger.info(request);
-    logger.info('request.length=' + request.length);
     httpRequest.login(function (res) {
         logger.debug('login result', res);
         if (res.success) {
             let token = res.result.access_token;
-            request.forEach(item => {
-                logger.info('call Create SO order...', item);
-                var requestData = prepareCreateSORequestData(item);
-                httpRequest.createSO(token, requestData, function (res) {
-                    logger.debug('create SO result', res);
-                });
+            logger.info('call Create SO order...', request);
+            var requestData = prepareCreateSORequestData(request);
+            httpRequest.createSO(token, requestData, function (res) {
+                logger.debug('create SO result', res);
             });
         } else {
             logger.error("get Token failed ", res.msg);
