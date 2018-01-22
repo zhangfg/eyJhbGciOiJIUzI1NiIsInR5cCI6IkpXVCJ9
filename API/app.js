@@ -778,6 +778,8 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
     logger.debug('chaincodeName : ' + chaincodeName);
     logger.debug('fcn : ' + fcn);
     logger.debug('args : ' + args);
+    var len = query.getChannelHeight(peer,channelName,req.orgname);
+    logger.debug('length::::'+len);
     if (!chaincodeName) {
         res.json(getErrorMessage('\'chaincodeName\''));
         return;
