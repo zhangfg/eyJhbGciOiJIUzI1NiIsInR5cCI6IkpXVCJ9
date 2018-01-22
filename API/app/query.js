@@ -260,7 +260,15 @@ var getChannels = function (peer, username, org) {
         return 'Failed to query with error:' + err.stack ? err.stack : err;
     });
 };
-
+var getChannelHeight=function(peer,channelName,org){
+    return getChainInfo(peer,channelName,org).then(response=>{
+        if(response){
+            logger.debug('<<<<<<<<<< channel height >>>>>>>>>')
+            logger.debug(response.height.low)
+            return response.height.low.toString()
+        }
+    })
+}
 function buildTarget(peer, org) {
     var target = null;
     if (typeof peer !== 'undefined') {
@@ -279,3 +287,4 @@ exports.getBlockByHash = getBlockByHash;
 exports.getChainInfo = getChainInfo;
 exports.getInstalledChaincodes = getInstalledChaincodes;
 exports.getChannels = getChannels;
+exports.getChannelHeight = getChannelHeight;
