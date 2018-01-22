@@ -8,12 +8,15 @@ import 'element-ui/lib/theme-chalk/index.css'
 import VueResource from 'vue-resource'
 import store from './vuex/store'
 import './assets/common.less'
+import Icon from 'vue-svg-icon/Icon.vue'
 
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
 
 Vue.use(VueResource)
+
+Vue.component('icon', Icon)
 
 router.beforeEach((to, from, next) => {
   if (to.path === '/login') {

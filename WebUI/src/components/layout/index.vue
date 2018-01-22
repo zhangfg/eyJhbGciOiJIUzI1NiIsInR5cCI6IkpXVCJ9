@@ -49,7 +49,10 @@ export default {
 			height: 100%;
 			a {
 			 	text-decoration: none;
-			 }
+		 	}
+		 	span {
+		 		font-size: 17px;
+		 	}
 		}
 		.view {
 			height: 100%;

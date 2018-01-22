@@ -1,52 +1,59 @@
 <template>
-	<div class="wrap">
+	<div class="search-wrap">
 		<div class="search-form">
-		<div>
-			<label>LenovoSoCreateDate</label>
-			<el-date-picker v-model="searchData.startDate" type="date" @change="getStartTime" value-format="yyyy-MM-dd" placeholder="Please Enter startDate">
-			</el-date-picker>
-		</div>
-		<div>
-			<el-date-picker v-model="searchData.endDate" type="date" @change="getEndTime" value-format="yyyy-MM-dd" placeholder="Please Enter endDate">
-			</el-date-picker>
-		</div>
-		<div>
-      <label>LenovoSoNo</label>
-      <el-input v-model="searchData.soNo" placeholder="Please Enter Content"></el-input>
+  		<div class="timer">
+  			<label>Lenovo SO Create Date</label>
+        <p>
+          <el-date-picker v-model="searchData.startDate" type="date" @change="getStartTime" value-format="yyyy-MM-dd" placeholder="Please Enter startDate">
+          </el-date-picker>
+          <span>--</span>
+          <el-date-picker v-model="searchData.endDate" type="date" @change="getEndTime" value-format="yyyy-MM-dd" placeholder="Please Enter endDate">
+          </el-date-picker>
+        </p>
+  		</div>
+      <div class="search-content">
+        <div class="condition-group">
+          <div>
+            <label>Lenovo SO No.</label>
+            <el-input v-model="searchData.soNo" placeholder="Please Enter Content"></el-input>
+          </div>
+          <div>
+            <label>SO Order Type</label>
+            <el-input v-model="searchData.soOrder" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+        <div class="condition-group">
+          <div>
+            <label>Vendor No.</label>
+            <el-input v-model="searchData.vendorNo" placeholder="Please Enter Content"></el-input>
+          </div>
+          <div>
+            <label>Lenovo Part No.</label>
+            <el-input v-model="searchData.partNo" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+        <div class="condition-group">
+          <div>
+            <label>Customer PO No.</label>
+            <el-input v-model="searchData.customerPoNo" placeholder="Please Enter Content"></el-input>
+          </div>
+          <div>
+            <label>Lenovo PR No.</label>
+            <el-input v-model="searchData.prNo" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+      </div>
+  		<el-button type="primary" class="search" @click="search">Search</el-button>
     </div>
-    <div>
-			<label>SoOrderType</label>
-			<el-input v-model="searchData.soOrder" placeholder="Please Enter Content"></el-input>
-		</div>
-	</div>
-	<div class="search-form">
-		<div>
-			<label>VendorNo</label>
-			<el-input v-model="searchData.vendorNo" placeholder="Please Enter Content"></el-input>
-		</div>
-		<div>
-			<label>LenovoPartNo</label>
-			<el-input v-model="searchData.partNo" placeholder="Please Enter Content"></el-input>
-		</div>
-		<div>
-			<label>CustomerPoNo</label>
-			<el-input v-model="searchData.customerPoNo" placeholder="Please Enter Content"></el-input>
-		</div>
-    <div>
-      <label>LenovoPRNo</label>
-      <el-input v-model="searchData.prNo" placeholder="Please Enter Content"></el-input>
-    </div>
-		<el-button class="search" @click="search">Search</el-button>
-	</div>
-	<document-header :searchInfo="searchInfo"></document-header>
+    <so-detail :searchInfo="searchInfo"></so-detail>
 	</div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import documentHeader from '../documentHeader.vue'
+import soDetail from './soDetail.vue'
 export default {
   components: {
-    documentHeader
+    soDetail
   },
   data () {
     return {
@@ -76,11 +83,26 @@ export default {
           type: 'error'
         })
       } else {
+        const loading = this.$loading({
+          lock: true,
+          text: 'Searching From Block Chain',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
         this.$store.dispatch('getSearchSoData', {
           fcn: 'queryByIds',
           args: this.searchData
-        }).then(() => {
-          this.searchInfo = this.searchSoData.body
+        }).then((res) => {
+          loading.close()
+          if (res.body.success) {
+            this.searchInfo = this.searchSoData.body
+          } else {
+            this.$message({
+              showClose: true,
+              message: 'No Data',
+              type: 'error'
+            })
+          }
           this.searchData = {
             startDate: '',
             endDate: '',
@@ -91,7 +113,7 @@ export default {
             prNo: '',
             vendorNo: ''
           }
-        })
+        }).then((error) => error)
       }
     },
     getStartTime (date) {
@@ -104,30 +126,11 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.wrap {
-  .el-input {
-    width: 150px !important;
-  }
-  .search-form {
-    overflow: hidden;
-    margin-bottom: 15px;
-    margin-left: -15px;
-    font-weight: bold;
-    >div {
-      float: left;
-      margin-left: 15px;
-      >label {
-        font-size: 16px;
-      }
-    }
-    .search {
-      margin-left: 15px;
-      border: 0;
-    }
-    .search:hover {
-      background: #fff;
-      color: #000;
-    }
+.search-content {
+  display: flex;
+  justify-content: space-between;
+  .condition-group {
+    margin-right: 20px;
   }
 }
 

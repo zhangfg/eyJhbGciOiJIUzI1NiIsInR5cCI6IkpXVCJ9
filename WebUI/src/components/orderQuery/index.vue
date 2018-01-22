@@ -2,10 +2,10 @@
   <div class="wrap">
     <div v-if="lenovoCustomer === 'lenovo'">
       <el-tabs v-model="defaultSo" type="card">
-        <el-tab-pane label="Search By So" name="first">
+        <el-tab-pane label="Search By SO" name="first">
           <search-by-so></search-by-so>
         </el-tab-pane>
-        <el-tab-pane label="Search By Po" name="second">
+        <el-tab-pane label="Search By PO" name="second">
           <search-by-po></search-by-po>
         </el-tab-pane>
       </el-tabs>

@@ -1,44 +1,49 @@
 <template>
-	<div class="wrap">
-		<div class="search-form">
-		<div>
-			<label>LenovoPoCreateDate</label>
-			<el-date-picker v-model="searchData.startDate" type="date" @change="getStartTime" value-format="yyyy-MM-dd" placeholder="Please Enter startDate">
-			</el-date-picker>
-		</div>
-		<div>
-			<el-date-picker v-model="searchData.endDate" type="date" @change="getEndTime" value-format="yyyy-MM-dd" placeholder="Please Enter endDate">
-			</el-date-picker>
-		</div>
-	</div>
-	<div class="search-form">
-		<div>
-			<label>LenovoPoNo</label>
-			<el-input v-model="searchData.poNo" placeholder="Please Enter Content"></el-input>
-		</div>
-    <div>
-      <label>PoOrderType</label>
-      <el-input v-model="searchData.poOrder" placeholder="Please Enter Content"></el-input>
+	<div class="search-wrap">
+    <div class="search-form">
+      <div class="timer">
+        <label>Lenovo Po Create Date</label>
+        <p>
+          <el-date-picker v-model="searchData.startDate" type="date" @change="getStartTime" value-format="yyyy-MM-dd" placeholder="Please Enter startDate">
+          </el-date-picker>
+          <span>--</span>
+          <el-date-picker v-model="searchData.endDate" type="date" @change="getEndTime" value-format="yyyy-MM-dd" placeholder="Please Enter endDate">
+          </el-date-picker>
+        </p>
+      </div>
+      <div class="search-content">
+        <div class="condition-group">
+          <div>
+            <label>Lenovo PO No.</label>
+            <el-input v-model="searchData.poNo" placeholder="Please Enter Content"></el-input>
+          </div>
+          <div>
+            <label>PO Order Type</label>
+            <el-input v-model="searchData.poOrder" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+        <div class="condition-group">
+          <div>
+            <label>Vendor No.</label>
+            <el-input v-model="searchData.vendorNo" placeholder="Please Enter Content"></el-input>
+          </div>
+          <div>
+            <label>Lenovo Part No.</label>
+            <el-input v-model="searchData.partNo" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+      </div>
+      <el-button class="search" @click="search">Search</el-button>
     </div>
-		<div>
-			<label>VendorNo</label>
-			<el-input v-model="searchData.vendorNo" placeholder="Please Enter Content"></el-input>
-		</div>
-		<div>
-			<label>LenovoPartNo</label>
-			<el-input v-model="searchData.partNo" placeholder="Please Enter Content"></el-input>
-		</div>
-		<el-button class="search" @click="search">Search</el-button>
-	</div>
-	<document-header :searchInfo="searchInfo"></document-header>
+  	<po-detail :searchInfo="searchInfo"></po-detail>
 	</div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import documentHeader from '../documentHeader.vue'
+import poDetail from './poDetail.vue'
 export default {
   components: {
-    documentHeader
+    poDetail
   },
   data () {
     return {
@@ -66,11 +71,26 @@ export default {
           type: 'error'
         })
       } else {
+        const loading = this.$loading({
+          lock: true,
+          text: 'Searching From Block Chain',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
         this.$store.dispatch('getSearchPoData', {
           fcn: 'queryByIds',
           args: this.searchData
-        }).then(() => {
-          this.searchInfo = this.searchPoData.body
+        }).then((res) => {
+          loading.close()
+          if (res.body.success) {
+            this.searchInfo = this.searchPoData.body
+          } else {
+            this.$message({
+              showClose: true,
+              message: 'No Data',
+              type: 'error'
+            })
+          }
           this.searchData = {
             startDate: '',
             endDate: '',
@@ -92,30 +112,11 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.wrap {
-  .el-input {
-    width: 150px !important;
-  }
-  .search-form {
-    overflow: hidden;
-    margin-bottom: 15px;
-    margin-left: -15px;
-    font-weight: bold;
-    >div {
-      float: left;
-      margin-left: 15px;
-      >label {
-        font-size: 16px;
-      }
-    }
-    .search {
-      margin-left: 15px;
-      border: 0;
-    }
-    .search:hover {
-      background: #fff;
-      color: #000;
-    }
+.search-content {
+  overflow: hidden;
+  .condition-group {
+    float: left;
+    margin-right: 300px;
   }
 }
 

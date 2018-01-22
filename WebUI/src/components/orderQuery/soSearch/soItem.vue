@@ -1,0 +1,78 @@
+<template>
+	<div class="item-wrap">
+		<el-table :data="getSoItem.data" empty-text="No Data" border>
+			<el-table-column prop="Customer" label="Customer" width="120">
+			</el-table-column>
+			<el-table-column prop="OAName" label="Supplier OA" width="120">
+			</el-table-column>
+			<el-table-column prop="PONO" label="PO No." width="120">
+			</el-table-column>
+			<el-table-column prop="SONUMBER" label="SO No." width="120">
+			</el-table-column>
+			<el-table-column prop="PARTSNO" label="Lenovo Part No." width="130">
+			</el-table-column>
+			<el-table-column prop="DlvyQty" label="Delivery Qty" width="130">
+			</el-table-column>
+			<el-table-column prop="ASNNO" label="Supplier Delivery Note" width="130">
+			</el-table-column>
+			<el-table-column prop="IBDNNUMBER" label="Inbound Delivery" width="130">
+			</el-table-column>
+			<el-table-column prop="GRNO" label="GR Document" width="120">
+			</el-table-column>
+			<el-table-column prop="INVOICE" label="Invoice">
+			</el-table-column>
+			<el-table-column prop="DNNUMBER" label="Outbound Delivery" width="150">
+			</el-table-column>
+			<el-table-column prop="DNDATE" label="Delivery Date" width="120">
+			</el-table-column>
+			<el-table-column prop="PROINV" label="Commercial Invoice" width="150">
+			</el-table-column>
+			<el-table-column prop="BILLINGNO" label="Billing" width="120">
+			</el-table-column>
+			<el-table-column prop="DNQTY" label="ODM Invoice Status">
+			</el-table-column>
+			<el-table-column prop="CRAD" label="Customer Requested Date" width="120">
+			</el-table-column>
+			<el-table-column prop="IDDlvyDate" label="Supplier Goods Arrive date (CDD)" width="120">
+			</el-table-column>
+			<el-table-column prop="UPDATEDAY" label="ODM GR No.">
+			</el-table-column>
+			<el-table-column prop="" label="Packaging List" width="120">
+				<template slot-scope="scope">
+						<a v-if="scope.row.PackingList && scope.row.PackingList.FileId !== ''" :href="'https://supplier1bs.mybluemix.net/downloadfile?file=' + scope.row.PackingList.FileId + '-' + scope.row.PackingList.FileName">Download</a>
+						<a v-else  title="No files can be downloaded" class="ban">Download</a>
+				</template>
+			</el-table-column>
+		</el-table>
+	</div>
+</template>
+<script>
+export default {
+  props: {
+    giData: {
+      type: Object
+    },
+    searchInfoData: {
+      type: Array
+    }
+  },
+  computed: {
+    getSoItem () {
+      let soItem = ''
+      if (this.searchInfoData) {
+        this.searchInfoData.map(item => {
+          if (item.SOITEM === this.giData.SOITEM && item.SONUMBER === this.giData.SONUMBER) {
+            soItem = item
+          }
+        })
+      }
+      return soItem
+    }
+  }
+}
+</script>
+<style lang="less" scoped>
+	.isShow {
+		display: none;
+	}
+</style>
