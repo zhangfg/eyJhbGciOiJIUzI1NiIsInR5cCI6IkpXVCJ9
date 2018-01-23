@@ -177,7 +177,7 @@ function CheckDate2(strInputDate) {
         parts[1] = strInputDate.substring(4, 6);
         parts[2] = strInputDate.substring(6, 8);
 
-        for (i = 0; i < 3; i++) {
+        for (var i = 0; i < 3; i++) {
             //如果构成日期的某个部分不是数字，则返回false
             if (isNaN(parts[i])) {
                 return false;
