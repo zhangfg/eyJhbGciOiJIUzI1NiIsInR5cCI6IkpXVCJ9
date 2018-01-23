@@ -300,26 +300,26 @@ var preparePOSearchData = function (data) {
                                 if (soData.BILLINFOS) {
                                     soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER)
                                         .forEach(blItem => {
-                                        item.PROINV = blItem.PROINV;
-                                        item.PROINVITEM = blItem.PROINVITEM;
-                                        item.BILLINGNO = blItem.BILLINGNO;
-                                        item.BILLINGITEM = blItem.BILLINGITEM;
-                                        if (soData.ODMPayments) {
-                                            soData.ODMPayments.filter(odmItem => blItem.BILLINGNO === odmItem.BILLINGNO)
-                                                .forEach(odmItem => {
-                                                    item.INVOICESTATUS = odmItem.INVOICESTATUS;
-                                                    item.PAYMENTDATE = odmItem.PAYMENTDATE;
-                                                    item.CGRNO = odmItem.GRNO;
-                                                    item.GRQty = 0;
-                                                    if (soData.ODMGRInfos) {
-                                                        soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
-                                                            .forEach(odmgr => {
-                                                                item.GRQty += parseInt(odmgr.GRQTY);
-                                                            });
-                                                    }
-                                                });
-                                        }
-                                    });
+                                            item.PROINV = blItem.PROINV;
+                                            item.PROINVITEM = blItem.PROINVITEM;
+                                            item.BILLINGNO = blItem.BILLINGNO;
+                                            item.BILLINGITEM = blItem.BILLINGITEM;
+                                            if (soData.ODMPayments) {
+                                                soData.ODMPayments.filter(odmItem => blItem.BILLINGNO === odmItem.BILLINGNO)
+                                                    .forEach(odmItem => {
+                                                        item.INVOICESTATUS = odmItem.INVOICESTATUS;
+                                                        item.PAYMENTDATE = odmItem.PAYMENTDATE;
+                                                        item.CGRNO = odmItem.GRNO;
+                                                        item.GRQty = 0;
+                                                        if (soData.ODMGRInfos) {
+                                                            soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                                                .forEach(odmgr => {
+                                                                    item.GRQty += parseInt(odmgr.GRQTY);
+                                                                });
+                                                        }
+                                                    });
+                                            }
+                                        });
                                 }
                             });
                     }
@@ -334,45 +334,55 @@ var preparePOSearchData = function (data) {
 
 var prepareODMSearchData = function (data) {
     var res = {};
+    res.FLEXPONO = data.FLEXPONO;
     res.CPONO = data.CPONO;
-    res.SONUMBER = data.SONUMBER;
-    res.SOITEM = data.SOITEM;
-    res.PONO = data.PONO;
-    res.POITEM = data.POITEM;
 
-    if (data.SalesOrder) {
-        var soData = data.SalesOrder;
-        res.SOTYPE = soData.SOTYPE;
-        res.PARTSNO = soData.PARTSNO;
-        res.PARTSDESC = soData.PARTSDESC;
-        res.SOQTY = soData.SOQTY;
-        res.UNIT = soData.UNIT;
-        res.VENDORNO = soData.VENDORNO;
-        res.VENDORNAME = soData.VENDORNAME;
-        res.CRAD = soData.CRAD;
-        res.CITY_WE = soData.CITY_WE;
-    }
-    if (data.PurchaseOrder) {
-        var poData = data.PurchaseOrder;
-        res.OANO = poData.OANO; // PO
-        res.OAName = poData.OAName; // PO
-    }
+    if (data.ODMPurchaseOrder) {
 
+        var odmData = data.ODMPurchaseOrder;
+        res.SONUMBER = odmData.SONUMBER;
+        res.SOITEM = odmData.SOITEM;
+        res.PONO = odmData.PONO;
+        res.POITEM = odmData.POITEM;
+
+        if (odmData.SalesOrder) {
+            var soData = odmData.SalesOrder;
+            res.SOTYPE = soData.SOTYPE;
+            res.PARTSNO = soData.PARTSNO;
+            res.PARTSDESC = soData.PARTSDESC;
+            res.SOQTY = soData.SOQTY;
+            res.UNIT = soData.UNIT;
+            res.VENDORNO = soData.VENDORNO;
+            res.VENDORNAME = soData.VENDORNAME;
+            res.CRAD = soData.CRAD;
+            res.CITY_WE = soData.CITY_WE;
+        }
+        if (odmData.PurchaseOrder) {
+            var poData = odmData.PurchaseOrder;
+            res.OANO = poData.OANO; // PO
+            res.OAName = poData.OAName; // PO
+        }
+    }
 
     res.data = [];
     if (data.Payments) {
         data.Payments.forEach(odmItem => {
             var item = {};
             item.CPONO = data.CPONO;
-            item.SONUMBER = data.SONUMBER;
-            if (data.PurchaseOrder) {
-                var poData = data.PurchaseOrder;
-                item.OA = poData.OANO + ' ' + poData.OAName;
-            }
-            if (data.SalesOrder) {
-                var soData = data.SalesOrder;
-                item.PARTSNO = soData.PARTSNO;
-                item.CRAD = soData.CRAD;
+            item.FLEXPONO = data.FLEXPONO;
+
+            if (data.ODMPurchaseOrder) {
+                var odmData = data.ODMPurchaseOrder;
+                item.SONUMBER = odmData.SONUMBER;
+                if (odmData.PurchaseOrder) {
+                    var poData = odmData.PurchaseOrder;
+                    item.OA = poData.OANO + ' ' + poData.OAName;
+                }
+                if (odmData.SalesOrder) {
+                    var soData = odmData.SalesOrder;
+                    item.PARTSNO = soData.PARTSNO;
+                    item.CRAD = soData.CRAD;
+                }
             }
 
             item.INVOICESTATUS = odmItem.INVOICESTATUS;
@@ -386,33 +396,37 @@ var prepareODMSearchData = function (data) {
                         item.GRQty += parseInt(odmgr.GRQTY);
                     });
             }
-            if (data.SalesOrder && data.SalesOrder.BILLINFOS) {
-                data.SalesOrder.BILLINFOS.filter(blItem => blItem.BILLINGNO === odmItem.BILLINGNO).forEach(blItem => {
-                    item.PROINV = blItem.PROINV;
-                    if (data.SalesOrder.GIInfo) {
-                        data.SalesOrder.GIInfo.filter(giItem => giItem.DNNUMBER === blItem.DNNUMBER).forEach(giItem => {
-                            if (data.PurchaseOrder && data.PurchaseOrder.InboundDelivery) {
-                                data.PurchaseOrder.InboundDelivery.filter(inbdItem => inbdItem.IBDNNUMBER === giItem.IBDNNUMBER)
-                                    .forEach(inbdItem => {
-                                        item.IDDlvyDate = inbdItem.IDDlvyDate;
-                                        if (data.PurchaseOrder.GRInfos) {
-                                            data.PurchaseOrder.GRInfos.filter(grItem => inbdItem.ASNNO === grItem.SupDeliveryNote)
-                                                .forEach(grItem => {
-                                                    item.GRNO = grItem.GRNO;
-                                                });
-                                        }
-                                        if (data.PurchaseOrder.SupplierOrders) {
-                                            data.PurchaseOrder.SupplierOrders.filter(supItem => inbdItem.ASNNO === supItem.ASNNumber)
-                                                .forEach(supItem => {
-                                                    item.PackingList = supItem.PackingList;
-                                                });
-                                        }
-                                    });
-                            }
-                        });
-                    }
-                });
+            if (data.ODMPurchaseOrder) {
+                var odmData = data.ODMPurchaseOrder;
+                if (odmData.SalesOrder && odmData.SalesOrder.BILLINFOS) {
+                    odmData.SalesOrder.BILLINFOS.filter(blItem => blItem.BILLINGNO === odmItem.BILLINGNO).forEach(blItem => {
+                        item.PROINV = blItem.PROINV;
+                        if (odmData.SalesOrder.GIInfo) {
+                            odmData.SalesOrder.GIInfo.filter(giItem => giItem.DNNUMBER === blItem.DNNUMBER).forEach(giItem => {
+                                if (odmData.PurchaseOrder && data.PurchaseOrder.InboundDelivery) {
+                                    odmData.PurchaseOrder.InboundDelivery.filter(inbdItem => inbdItem.IBDNNUMBER === giItem.IBDNNUMBER)
+                                        .forEach(inbdItem => {
+                                            item.IDDlvyDate = inbdItem.IDDlvyDate;
+                                            if (odmData.PurchaseOrder.GRInfos) {
+                                                odmData.PurchaseOrder.GRInfos.filter(grItem => inbdItem.ASNNO === grItem.SupDeliveryNote)
+                                                    .forEach(grItem => {
+                                                        item.GRNO = grItem.GRNO;
+                                                    });
+                                            }
+                                            if (odmData.PurchaseOrder && odmData.PurchaseOrder.SupplierOrders) {
+                                                odmData.PurchaseOrder.SupplierOrders.filter(supItem => inbdItem.ASNNO === supItem.ASNNumber)
+                                                    .forEach(supItem => {
+                                                        item.PackingList = supItem.PackingList;
+                                                    });
+                                            }
+                                        });
+                                }
+                            });
+                        }
+                    });
+                }
             }
+
 
             res.data.push(item);
         });

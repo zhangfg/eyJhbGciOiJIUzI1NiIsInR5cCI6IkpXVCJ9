@@ -111,6 +111,7 @@ type ODMGRInfo struct {
 	GRNO    string `json:"GRNO"`    //FLEX GR No
 	PARTNUM string `json:"PARTNUM"` //PART No
 	GRQTY   string `json:"GRQTY"`   // received qty
+	GRDate  string `json:"GRDate"`   // received Date
 }
 
 //ODM PO   Key: "REF"+ FLEXPONO

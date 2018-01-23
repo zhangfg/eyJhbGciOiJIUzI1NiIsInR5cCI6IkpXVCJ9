@@ -408,10 +408,10 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     // rstArgs.push(str);
     // rstArgs.push(req.vendorNo);
     // args = rstArgs;
-    var checkResult = checkfield.checkField(fcn,args);
-    if(checkResult !==''){
+    var checkResult = checkfield.checkField(fcn, args);
+    if (checkResult !== '') {
         return res.json(getInvokeErrorMessage(checkResult));
-     }
+    }
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
     logger.debug('req.vendorNo : ' + req.vendorNo);
@@ -436,7 +436,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
     reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO').forEach(item => {
-        cloudant.insertSearchDocument(role, item, req.vendorNo, function (err, body) {
+        cloudant.insertSearchDocument(fcn, role, item, req.vendorNo, function (err, body) {
             if (err) {
                 logger.error('Error creating document - ', err.message);
                 return;
@@ -480,7 +480,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
                     }
                     respPoObj.forEach(poitem => {
                         item.poitem = poitem;
-                        cloudant.insertSearchDocument(role, item, req.vendorNo, function (err, body) {
+                        cloudant.insertSearchDocument(fcn, role, item, req.vendorNo, function (err, body) {
                             if (err) {
                                 logger.error('Error creating document - ', err.message);
                                 return;
@@ -781,8 +781,6 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
     logger.debug('chaincodeName : ' + chaincodeName);
     logger.debug('fcn : ' + fcn);
     logger.debug('args : ' + args);
-    var len = query.getChannelHeight(peer,channelName,req.orgname);
-    logger.debug('length::::'+len);
     if (!chaincodeName) {
         res.json(getErrorMessage('\'chaincodeName\''));
         return;
@@ -840,6 +838,66 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                 res.json(getInvokeErrorMessage('System Error'));
             });
     });
+
+});
+
+app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', function (req, res) {
+    logger.debug('==================== query ON CHAINCODE ==================');
+    var channelName = req.params.channelName;
+    var chaincodeName = req.params.chaincodeName;
+    let peer = req.query.peer;
+    var role = req.params.role;
+
+    logger.debug('channelName : ' + channelName);
+    logger.debug('chaincodeName : ' + chaincodeName);
+
+    if (!chaincodeName) {
+        res.json(getErrorMessage('\'chaincodeName\''));
+        return;
+    }
+    if (!channelName) {
+        res.json(getErrorMessage('\'channelName\''));
+        return;
+    }
+
+    if (req.company !== role) {
+        logger.debug('role:', req.company, role);
+        res.json(getNoAccessMessage());
+        return;
+    }
+
+    query.getChannelHeight(peer, channelName, req.orgname).then(data => {
+        var len = data;
+        logger.debug('length::::' + len);
+        var promiseList = [];
+        let minIndex = (len - 5 > 0) ? (len - 5) : 0;
+        for (var index = len - 1; index >= minIndex; index--) {
+            let promise = query.getBlockByNumber(peer, index, req.username, req.orgname);
+            promiseList.push(promise);
+        }
+        var response = {
+            success: true,
+            message: '',
+            size: len,
+            data: []
+        };
+        Promise.all(promiseList).then(datas => {
+            logger.debug('block datas:', datas);
+            datas.forEach(item => {
+                logger.debug('block item:'+ JSON.stringify(item));
+                let blockInfo = {};
+                blockInfo.blockNo = item.header.number.low;
+                if (item.data.data.length > 0) {
+                    let blockData = item.data.data[0];
+                    blockInfo.timestamp = blockData.payload.header.channel_header.timestamp;
+                    blockInfo.tx_id = blockData.payload.header.channel_header.tx_id;
+                }
+                response.data.push(blockInfo);
+            });
+            res.json(response);
+        });
+    });
+
 
 });
 

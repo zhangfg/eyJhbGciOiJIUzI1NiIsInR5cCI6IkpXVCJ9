@@ -265,9 +265,9 @@ var getChannelHeight=function(peer,channelName,org){
         if(response){
             logger.debug('<<<<<<<<<< channel height >>>>>>>>>');
             logger.debug(response.height.low);
-            return response.height.low.toString();
+            return response.height.low;
         }
-    })
+    });
 }
 function buildTarget(peer, org) {
     var target = null;

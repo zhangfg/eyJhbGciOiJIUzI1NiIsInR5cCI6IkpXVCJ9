@@ -19,9 +19,20 @@ if (dbCreds) {
 } else {
     logger.error('NO DB!');
 }
-var insertSearchDocument = function (roleId, item, vendorNo, callback) {
+var insertSearchDocument = function (fcn,roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
-    if (item.TRANSDOC === 'SO') {
+    if(fcn === 'crMappingFlexPO'){
+        let odmItem = {
+            'CPONO': item.CPONO,
+            'FLEXPONO': item.FLEXPONO,
+            'SOCDATE': '',
+            'SONUMBER': '',
+            'SOITEM': '',
+            'PARTSNO': '',
+            'VENDORNO': ''
+        };
+        insertODMSearchDocument(roleId, odmItem, vendorNo, callback);
+    }else if (item.TRANSDOC === 'SO') {
         let soItem = {
             'SOCDATE': item.SOCDATE,
             'PONO': item.PONO,
@@ -41,7 +52,8 @@ var insertSearchDocument = function (roleId, item, vendorNo, callback) {
             'SOITEM': item.SOITEM,
             'CPONO': item.CPONO,
             'PARTSNO': item.PARTSNO,
-            'VENDORNO': item.VENDORNO
+            'VENDORNO': item.VENDORNO,
+            'FLEXPONO': ['']
         };
         insertODMSearchDocument(roleId, odmItem, vendorNo, callback);
     } else if (item.TRANSDOC === 'PO') {
@@ -83,20 +95,7 @@ var queryItemNo = function (query, vendorNo, callback) {
     } else if (query.keyprefix === 'PO') {
         queryPoKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'CPO') {
-        if (query.flexPONo) {
-            var queryData = [];
-            var keyObj = {
-                KeyPrefix: 'FLEX',
-                KeysStart: [],
-                KeysEnd: []
-            };
-            keyObj.KeysStart.push(query.flexPONo);
-            queryData.push(keyObj);
-            logger.info('Return item:', keyObj);
-            callback(queryData);
-        } else {
-            queryODMKeyNo(query, vendorNo, callback);
-        }
+        queryODMKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'SUP') {
         querySupplierKeyNo(query, vendorNo, callback);
     }
@@ -270,6 +269,10 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
                     dataItem.rows.vendorNo = docObj.VENDORNO;
                 }
 
+                if(docObj.FLEXPONO) {
+                    dataItem.rows.FLEXPONO = docObj.FLEXPONO;
+                }
+
                 updateDocument(dataItem, callback);
             });
 
@@ -282,7 +285,8 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
                     'cPoNo': docObj.CPONO,
                     'itemNo': docObj.SOITEM,
                     'partNo': docObj.PARTSNO,
-                    'vendorNo': docObj.VENDORNO
+                    'vendorNo': docObj.VENDORNO,
+                    'FLEXPONO': docObj.FLEXPONO
                 }
             };
             logger.info('insert the information of the ODM', insertObject);
@@ -547,6 +551,9 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
     if (query.cPoNo) {
         selector.rows.cPoNo = {"$eq": query.cPoNo};
     }
+    // if (query.flexPONo) {
+    //     selector.rows.FLEXPONO = {"$in": query.flexPONo};
+    // }
     if (query.partNo) {
         selector.rows.partNo = {"$eq": query.partNo};
     }
@@ -562,15 +569,26 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
         logger.info('queryODMKeyNo Data:', data);
         var queryData = [];
         data.docs.forEach(item => {
-            var keyObj = {
-                KeyPrefix: query.keyprefix,
-                KeysStart: [],
-                KeysEnd: []
-            };
-            keyObj.KeysStart.push(item.rows.cPoNo);
-            queryData.push(keyObj);
-            logger.info('Return item:', keyObj);
+            if(item.rows.FLEXPONO){
+                item.rows.FLEXPONO.forEach(flexPONo =>{
+                    var keyObj = {
+                        KeyPrefix: 'FLEX',
+                        KeysStart: [],
+                        KeysEnd: []
+                    };
+                    if (query.flexPONo){
+                        if(query.flexPONo === flexPONo){
+                            keyObj.KeysStart.push(flexPONo);
+                            queryData.push(keyObj);
+                        }
+                    }else{
+                        keyObj.KeysStart.push(flexPONo);
+                        queryData.push(keyObj);
+                    }
+                });
+            }
         });
+        logger.info('Return item:', queryData);
         callback(queryData);
     });
 
