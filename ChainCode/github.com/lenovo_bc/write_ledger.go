@@ -18,8 +18,8 @@ func crCMaterialPulling(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update Material Pulling Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, Material Pulling Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, Material Pulling Object data - " + vendorNo, jsonStr)
 
 	var materials [] ODMLOIMaterial
 
@@ -65,8 +65,8 @@ func crMappingRefPO(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update Material Pulling Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, Material Pulling Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, Material Pulling Object data - " + vendorNo, jsonStr)
 
 	var refMappings [] FLEXPONOREF
 
@@ -98,8 +98,8 @@ func crMappingFlexPO(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 		return shim.Error("Incorrect number of arguments. Expecting json to CPONO. <=> FlexPONO Pulling Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, CPONO. <=> FlexPONO Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, CPONO. <=> FlexPONO Object data - " + vendorNo, jsonStr)
 
 	var flexPOs [] CPONOFLEXPONO
 
@@ -131,7 +131,7 @@ func crMappingFlexPO(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 			stub.PutState(pull_key, c)
 
 			// Update CPONo.in Flex ledger
-			for _,flexPONo := range flexPO.FLEXPONO {
+			for _, flexPONo := range flexPO.FLEXPONO {
 				var b []byte
 				err, flexKey := generateKey(stub, FLEX_KEY, []string{flexPONo})
 				fmt.Println("write data, Flex for - " + flexKey)
@@ -143,15 +143,15 @@ func crMappingFlexPO(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 					return shim.Error(err.Error())
 				}
 				if cpoAsbytes != nil {
-					flexObject:= ODMPurchaseOrder{}
+					flexObject := ODMPurchaseOrder{}
 					err = json.Unmarshal(cpoAsbytes, &flexObject)
 					if err != nil {
 						return shim.Error(err.Error())
 					}
 					flexObject.CPONO = flexPO.CPONO
 					b, _ = json.Marshal(flexObject)
-				}else {
-					flexObject:= ODMPurchaseOrder{}
+				} else {
+					flexObject := ODMPurchaseOrder{}
 					flexObject.FLEXPONO = flexPONo
 					flexObject.CPONO = flexPO.CPONO
 					b, _ = json.Marshal(flexObject)
@@ -314,8 +314,8 @@ func crSalesOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update SO")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, SO data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, SO data - "+vendorNo, jsonStr)
 
 	var salesOrders [] SalesOrder
 	err := json.Unmarshal([]byte(jsonStr), &salesOrders)
@@ -397,8 +397,8 @@ func crPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args [] string) pb.Re
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update farm")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, PO data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, PO data - " + vendorNo, jsonStr)
 	var objs []PurchaseOrder
 	// obj := PurchaseOrder{}
 	err := json.Unmarshal([]byte(jsonStr), &objs)
@@ -535,7 +535,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 	}
 	jsonStr := args[0]
 	//vendorNo := args[1]
-	fmt.Println("write data, CPONO data - ", jsonStr)
+	//fmt.Println("write data, CPONO data - ", jsonStr)
 	var cPOrders [] ODMPurchaseOrder
 
 	err := json.Unmarshal([]byte(jsonStr), &cPOrders)
@@ -591,7 +591,7 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(flexKey, c)
 			} else {
-				fmt.Println("insert Flex object", order)
+				//fmt.Println("insert Flex object", order)
 				var c []byte
 				cPOOrder := ODMPurchaseOrder{}
 				if order.TRANSDOC == "GR" {
@@ -616,7 +616,7 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 	}
 	jsonStr := args[0]
 	vendorNo := args[1]
-	fmt.Println("write data, Supplier Object data - "+vendorNo, jsonStr)
+	//fmt.Println("write data, Supplier Object data - " + vendorNo, jsonStr)
 
 	var supOrders [] SupplierOrder
 
@@ -637,8 +637,6 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 			if err == nil && supObjAsbytes != nil {
 				supOrder := SupplierOrder{}
 				err = json.Unmarshal(supObjAsbytes, &supOrder)
-				fmt.Println("write data, Suplier part for - ", supOrder)
-				fmt.Println("write data, Suplier part for2 - ", order)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
@@ -675,8 +673,8 @@ func crCGoodReceiveInfo(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 		return shim.Error("Incorrect number of arguments. Expecting json to create/update Supplier Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, Supplier Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, Supplier Object data - " + vendorNo, jsonStr)
 
 	var grInfos [] LOIGRInfo
 
@@ -729,8 +727,8 @@ func crCSOIInventoryInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 		return shim.Error("Incorrect number of arguments. Expecting json to SOI Inventory Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, SOI Inventory Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, SOI Inventory Object data - " + vendorNo, jsonStr)
 
 	var soiInventorys [] SOIInventory
 
@@ -776,8 +774,8 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error("Incorrect number of arguments. Expecting json to init Warehouse Object")
 	}
 	jsonStr := args[0]
-	vendorNo := args[1]
-	fmt.Println("write data, initial Warehouse Object data - "+vendorNo, jsonStr)
+	//vendorNo := args[1]
+	//fmt.Println("write data, initial Warehouse Object data - " + vendorNo, jsonStr)
 
 	var warehouses [] WareHouseInfo
 

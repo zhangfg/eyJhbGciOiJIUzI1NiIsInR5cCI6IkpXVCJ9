@@ -89,7 +89,6 @@ func filterCPurchaseOrder(valAsbytes []byte, userRole string) (error, []byte) {
 	return nil, b
 }
 
-
 func integrateLedger(stub shim.ChaincodeStubInterface, valAsbytes []byte, KeyPrefix string, userRole string) (error, []byte) {
 	fmt.Println("integrateLedger,KeyPrefix=" + KeyPrefix + ",userRole=" + userRole)
 	if KeyPrefix == SO_KEY {
@@ -121,18 +120,36 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 	order.PONO = salesOrder.PONO
 	order.POITEM = salesOrder.POITEM
 	var c []byte
-	cPOOrder := ODMPurchaseOrder{}
-	err, cpoKey := generateKey(stub, FLEX_KEY, []string{salesOrder.CPONO})
+
+	err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
 	fmt.Println("get CPO object in SO,CPO key:" + cpoKey)
 	if err == nil {
 		cpoObjAsbytes, err := stub.GetState(cpoKey)
-		err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, FLEX_KEY, userRole)
 		if err == nil {
-			err = json.Unmarshal(cpoObjAsbytes, &cPOOrder)
-			salesOrder.ODMPayments = cPOOrder.Payments
-			salesOrder.ODMGRInfos = cPOOrder.GRInfos
+			cpoOrder := CPONOFLEXPONO{}
+			err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
+			if err == nil {
+				for _, flexPONo := range cpoOrder.FLEXPONO {
+					flexOrder := ODMPurchaseOrder{}
+					err, flexKey := generateKey(stub, FLEX_KEY, []string{flexPONo})
+					fmt.Println("get Flex object in SO,Flex key:" + flexKey)
+					if err == nil {
+						flexObjAsbytes, err := stub.GetState(flexKey)
+						err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
+						if err == nil {
+							err = json.Unmarshal(flexObjAsbytes, &flexOrder)
+							salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.Payments...)
+							salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.GRInfos...)
+						}
+					}
+				}
+
+			}
 		}
+
 	}
+	order.SalesOrder = salesOrder
+
 	POOrder := PurchaseOrder{}
 	err, poKey := generateKey(stub, PO_KEY, []string{salesOrder.PONO, salesOrder.POITEM})
 	fmt.Println("get PO object in SO,PO key:" + poKey)
@@ -144,7 +161,7 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 			order.PurchaseOrder = POOrder
 		}
 	}
-	order.SalesOrder = salesOrder
+
 	c, _ = json.Marshal(order)
 	return nil, c
 }
@@ -169,6 +186,35 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 		if err == nil {
 			err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
 			err = json.Unmarshal(soObjAsbytes, &salesOrder)
+
+			err, cpoKey := generateKey(stub, CPO_KEY, []string{salesOrder.CPONO})
+			fmt.Println("get CPO object in SO,CPO key:" + cpoKey)
+			if err == nil {
+				cpoObjAsbytes, err := stub.GetState(cpoKey)
+				if err == nil {
+					cpoOrder := CPONOFLEXPONO{}
+					err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
+					if err == nil {
+						for _, flexPONo := range cpoOrder.FLEXPONO {
+							flexOrder := ODMPurchaseOrder{}
+							err, flexKey := generateKey(stub, FLEX_KEY, []string{flexPONo})
+							fmt.Println("get Flex object in SO,Flex key:" + flexKey)
+							if err == nil {
+								flexObjAsbytes, err := stub.GetState(flexKey)
+								err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
+								if err == nil {
+									err = json.Unmarshal(flexObjAsbytes, &flexOrder)
+									salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.Payments...)
+									salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.GRInfos...)
+								}
+							}
+						}
+
+					}
+				}
+
+			}
+
 			order.SalesOrder = salesOrder
 		}
 	}
@@ -219,7 +265,6 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 			flexOrder.CPONOFLEXPONO = cPoOrder
 		}
 	}
-
 
 	c, _ = json.Marshal(flexOrder)
 	return nil, c
@@ -329,7 +374,7 @@ func getQueryResultById(stub shim.ChaincodeStubInterface, queryKey string) (erro
 	if err != nil {
 		return errors.New("\"Error\":\"Failed to get state for " + queryKey + "\""), nil
 	}
-	fmt.Println("query data, data - " + string(valAsbytes))
+	//fmt.Println("query data, data - " + string(valAsbytes))
 	return nil, valAsbytes
 }
 
@@ -441,7 +486,7 @@ func queryHistoryById(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
-	fmt.Printf("- getHistory returning:\n%s", buffer.String())
+	//fmt.Printf("- getHistory returning:\n%s", buffer.String())
 
 	return shim.Success(buffer.Bytes())
 }
@@ -495,7 +540,7 @@ func queryByIdRange(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	}
 	buffer.WriteString("]")
 
-	fmt.Printf("- getByRange queryResult:\n%s\n", buffer.String())
+	//fmt.Printf("- getByRange queryResult:\n%s\n", buffer.String())
 
 	return shim.Success(buffer.Bytes())
 }
@@ -557,7 +602,7 @@ func queryByPartialCompositeKey(stub shim.ChaincodeStubInterface, args []string)
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
-	fmt.Printf("- getByRange queryResult:\n%s\n", buffer.String())
+	//fmt.Printf("- getByRange queryResult:\n%s\n", buffer.String())
 	return shim.Success(buffer.Bytes())
 }
 
@@ -602,7 +647,7 @@ func getQueryResult(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		bArrayMemberAlreadyWritten = true
 	}
 	buffer.WriteString("]")
-	fmt.Printf("- getQueryResult :\n%s\n", buffer.String())
+	//fmt.Printf("- getQueryResult :\n%s\n", buffer.String())
 	return shim.Success(buffer.Bytes())
 }
 

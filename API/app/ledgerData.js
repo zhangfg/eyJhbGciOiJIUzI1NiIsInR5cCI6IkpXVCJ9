@@ -47,17 +47,11 @@ var prepareSOSearchData = function (data) {
 
     if (data.PurchaseOrder) {
         var poData = data.PurchaseOrder;
-        // res.PONO = poData.PONO;
-        // res.POItemNO = poData.POItemNO;
         res.POTYPE = poData.POTYPE;
         res.PODate = poData.PODate;
         res.PARTSNO = poData.PARTSNO;
         res.POQty = poData.POQty;
         res.Unit = poData.Unit;
-        // res.PARTSDESC = poData.PARTSDESC;
-        // res.PARTSNO = poData.PARTSNO;
-        // res.VENDORNO = poData.VENDORNO;
-        // res.VENDORNAME = poData.VENDORNAME;
         res.OANO = poData.OANO;
         res.OAName = poData.OAName;
         res.ContractNO = poData.ContractNO;
