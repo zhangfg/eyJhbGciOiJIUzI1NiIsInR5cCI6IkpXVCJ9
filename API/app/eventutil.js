@@ -54,7 +54,7 @@ exports.retrieveEventOnLenovo = function (ccName) {
                 logger.info('get event ==========' + block.payload);
                 let byteData = block.payload + '';
                 let requestData = JSON.parse(byteData);
-
+                createInboundDN(requestData);
             }, (error) => {
                 // empty method body
             });
@@ -92,6 +92,40 @@ var createSaleOrder = function (request) {
             var requestData = prepareCreateSORequestData(request);
             httpRequest.createSO(token, requestData, function (res) {
                 logger.debug('create SO result', res);
+            });
+        } else {
+            logger.error("get Token failed ", res.msg);
+        }
+    })
+};
+
+var prepareCreateIBDNRequestData = function (data) {
+    var respsone = {};
+    var request = {};
+    var header = {};
+    var items = [];
+    var item = {};
+    header.REFNO = data.RefNo;
+    header.PULLDATE = data.PullDate;
+
+    item.PRODUCT = data.Product;
+    item.QUANTITY = data.Quantity;
+    items.push(item);
+    request.header = header;
+    request.items = items;
+    respsone.request = request;
+    return respsone;
+};
+
+var createInboundDN = function (request) {
+    httpRequest.login(function (res) {
+        logger.debug('login result', res);
+        if (res.success) {
+            let token = res.result.access_token;
+            logger.info('call Create Inbound Delivery...', request);
+            var requestData = prepareCreateIBDNRequestData(request);
+            httpRequest.createIBDN(token, requestData, function (res) {
+                logger.debug('create Inbound Delivery result', res);
             });
         } else {
             logger.error("get Token failed ", res.msg);

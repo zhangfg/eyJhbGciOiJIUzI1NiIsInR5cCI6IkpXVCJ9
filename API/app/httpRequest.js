@@ -6,6 +6,7 @@ var logger = log4js.getLogger('HTTP');
 
 var loginUrl = 'https://soa-test.lenovo.com/api/token';
 var createSOUrl = 'https://soa-test.lenovo.com/api/bluemix2ecc_so_creation/1.0/create';
+var createIBDNUrl = 'https://soa-test.lenovo.com/api/bluemix2ecc_so_creation/1.0/createibdn';
 
 exports.login = function (callback) {
     let header = getLoginHeader();
@@ -23,6 +24,21 @@ exports.login = function (callback) {
 
 exports.createSO = function (token, data, callback) {
     let url = createSOUrl;
+    let header = getHeader(token);
+    let option = {
+        url: url,
+        method: "POST",
+        json: true,
+        headers: header,
+        body: data
+    };
+    request(option, function (error, response, body) {
+        resultFunction(callback, error, response, body);
+    });
+};
+
+exports.createIBDN = function (token, data, callback) {
+    let url = createIBDNUrl;
     let header = getHeader(token);
     let option = {
         url: url,
