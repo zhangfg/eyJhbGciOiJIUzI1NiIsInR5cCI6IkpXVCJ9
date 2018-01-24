@@ -408,10 +408,6 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     // rstArgs.push(str);
     // rstArgs.push(req.vendorNo);
     // args = rstArgs;
-    var checkResult = checkfield.checkField(fcn, args);
-    if (checkResult !== '') {
-        return res.json(getInvokeErrorMessage(checkResult));
-    }
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
     logger.debug('req.vendorNo : ' + req.vendorNo);
