@@ -433,6 +433,10 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         res.json(getErrorMessage('\'args\''));
         return;
     }
+     var checkResult = checkfield.checkField(fcn, req.body.args);
+    if (checkResult !== '') {
+        return res.json(getInvokeErrorMessage(checkResult));
+    }
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
     reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO').forEach(item => {
