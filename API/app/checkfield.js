@@ -25,7 +25,7 @@ exports.checkField = function (fcn, args) {
 
                 switch (args[i].TRANSDOC) {
                     case 'GR':
-                    logger.debug('liujiang==', args[i].FLEXPONO.length);
+                        logger.debug('liujiang==', args[i].FLEXPONO.length);
                         if ((typeof (args[i].FLEXPONO) !== "string") || (args[i].FLEXPONO.length > 35)) {
                             logger.debug('liujiang==', args[i].FLEXPONO.length);
                             return 'FLEXPONO check constraints are not satisfied.';
@@ -33,15 +33,14 @@ exports.checkField = function (fcn, args) {
                         if (args[i].ODMGRInfos !== '') {
                             for (var j = 0; j < args[i].ODMGRInfos.length; j++) {
                                 if (typeof args[i].ODMGRInfos[j].GRNO !== "string") {
-                                    logger.debug('liujiang==', typeof args[i].GRNO);
-                                    logger.debug('liujiang==yyyy', args[i].GRNO);
+
                                     return 'GRNO check constraints are not satisfied.';
                                 }
                                 logger.debug('liujiang555555==', args[i].ODMGRInfos[j].PARTNUM.length);
-                                if ((typeof args[i].ODMGRInfos[j].PARTNUM.length > 18) || (!reg.test(args[i].ODMGRInfos[j].PARTNUM))) {
+                                if ((args[i].ODMGRInfos[j].PARTNUM.length > 18) || (!reg.test(args[i].ODMGRInfos[j].PARTNUM))) {
                                     return 'PARTNUM check constraints are not satisfied.';
                                 }
-                                logger.debug('liujiang6666666==', args[i].ODMGRInfos[j].GRQTY.length);
+
                                 if (typeof args[i].ODMGRInfos[j].GRQTY !== 'number') {
                                     return 'GRQTY check constraints are not satisfied.';
                                 }
@@ -85,10 +84,10 @@ exports.checkField = function (fcn, args) {
     } else if (fcn === 'crCMaterialPulling') {
         if (args.length > 0) {
             for (var i = 0; i < args.length; i++) {
-                if ((typeof args[i].RefNo !== "string") || (args[i].length !== 10)) {
+                if ((typeof args[i].RefNo !== "string") || (args[i].RefNo.length !== 10)) {
                     return 'RefNo check constraints are not satisfied.'
                 }
-                if ((typeof args[i].PullType !== "string") || (args[i].PullType !== 'LOI') || (args[i].PullType !== 'SOI')) {
+                if ((typeof args[i].PullType !== "string") || ((args[i].PullType !== 'LOI') && (args[i].PullType !== 'SOI'))) {
                     return 'PullType check constraints are not satisfied.';
                 }
                 if ((typeof args[i].Week !== "string") || (args[i].Week.length !== 8)) {
@@ -124,7 +123,7 @@ exports.checkField = function (fcn, args) {
                 }
                 if (args[i].RefNos.length > 0) {
                     for (var j = 0; j < args[i].RefNos.length; j++) {
-                        if (typeof args[i].RefNos[j] !== "string" || args[i].RefNos[j] !== 10) {
+                        if (typeof args[i].RefNos[j] !== "string" || args[i].RefNos[j].length !== 10) {
                             return 'RefNo check constraints are not satisfied.';
                         }
                     }
@@ -164,6 +163,24 @@ exports.checkField = function (fcn, args) {
                 if (typeof args[i].SupplierName !== "string") {
                     return 'SupplierName check constraints are not satisfied.';
                 }
+            }
+        }
+    } else if (fcn === 'crCGoodReceiveInfo') {
+        if (args.length > 0) {
+            for (var i = 0; i < args.length; i++) {
+                if (typeof args[i].GRNO !== "string") {
+                    return 'GRNO check constraints are not satisfied.';
+                }
+                if ((typeof args[i].PN !== "string") || (args[i].PN.length > 18)) {
+                    return 'PN check constraints are not satisfied.';
+                }
+                if (typeof args[i].Qty !== 'number') {
+                    return 'Qty check constraints are not satisfied.';
+                }
+                if ((typeof args[i].GRDate !== "string") || (!CheckDate2(args[i].GRDate))) {
+                    return 'GRDate check constraints are not satisfied.';
+                }
+
             }
         }
     }
@@ -226,10 +243,10 @@ function CheckDate2(strInputDate) {
                 break;
             default:
                 logger.debug('liujiang==', '299999999999999999999999999');
-                return true;
+               
 
         }
-
+        return true;
     } else {
         return false;
     }
