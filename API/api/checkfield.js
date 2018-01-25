@@ -1,4 +1,8 @@
 'use strict';
+var log4js = require('log4js');
+var logger = log4js.getLogger('checkField');
+var eventutil = require('./eventutil');
+
 exports.checkField = function (fcn, args) {
 
     if (fcn === 'crCPurchaseOrderInfo') {
@@ -9,18 +13,17 @@ exports.checkField = function (fcn, args) {
 
                 switch (args[i].TRANSDOC) {
                     case 'GR':
-                       
+
                         if ((typeof (args[i].FLEXPONO) !== 'string') || (args[i].FLEXPONO.length > 35)) {
-                           
+
                             return 'FLEXPONO check constraints are not satisfied.';
                         }
                         if (args[i].ODMGRInfos !== '') {
                             for (var j = 0; j < args[i].ODMGRInfos.length; j++) {
                                 if (typeof args[i].ODMGRInfos[j].GRNO !== 'string') {
-
                                     return 'GRNO check constraints are not satisfied.';
                                 }
-                               
+
                                 if ((args[i].ODMGRInfos[j].PARTNUM.length > 18) || (!reg.test(args[i].ODMGRInfos[j].PARTNUM))) {
                                     return 'PARTNUM check constraints are not satisfied.';
                                 }
@@ -28,9 +31,12 @@ exports.checkField = function (fcn, args) {
                                 if (typeof args[i].ODMGRInfos[j].GRQTY !== 'number') {
                                     return 'GRQTY check constraints are not satisfied.';
                                 }
-                                if ((typeof args[i].ODMGRInfos[j].GRDate !== 'string') || (!CheckDate2(args[i].ODMGRInfos[j].GRDate))) {
+                                if (args[i].ODMGRInfos[j].GRDate === '') {
+
+                                } else if ((typeof args[i].ODMGRInfos[j].GRDate !== 'string') || (!CheckDate2(args[i].ODMGRInfos[j].GRDate))) {
                                     return 'GRDate check constraints are not satisfied.';
                                 }
+
                             }
                         }
                         break;
@@ -54,9 +60,12 @@ exports.checkField = function (fcn, args) {
                                 if ((typeof args[i].ODMPayments[j].INVOICESTATUS !== 'string') || (args[i].ODMPayments[j].INVOICESTATUS !== 'A' || args[i].ODMPayments[j].INVOICESTATUS !== 'P')) {
                                     return 'INVOICESTATUS check constraints are not satisfied.';
                                 }
-                                if ((typeof args[i].ODMPayments[j].PAYMENTDATE !== 'string') || (!CheckDate2(args[i].ODMPayments[j].PAYMENTDATE))) {
+                                if (args[i].ODMPayments[j].PAYMENTDATE === '') {
+
+                                } else if ((typeof args[i].ODMPayments[j].PAYMENTDATE !== 'string') || (!CheckDate2(args[i].ODMPayments[j].PAYMENTDATE))) {
                                     return 'PAYMENTDATE check constraints are not satisfied.';
                                 }
+
                             }
                         }
                         break;
@@ -86,15 +95,21 @@ exports.checkField = function (fcn, args) {
                 if (typeof args[i].Quantity !== 'number') {
                     return 'Quantity check constraints are not satisfied.'
                 }
-                if ((typeof args[i].DlvryDate !== 'string') || (!CheckDate2(args[i].DlvryDate))) {
+                if (args[i].DlvryDate === '') {
+
+                } else if ((typeof args[i].DlvryDate !== 'string') || (!CheckDate2(args[i].DlvryDate))) {
                     return 'DlveryDate check constraints are not satisfied.';
                 }
-                if ((typeof args[i].RequestedDate !== "string") || (!CheckDate2(args[i].RequestedDate))) {
+                if (args[i].RequestedDate === '') {
+
+                } else if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
                     return 'RequestedDate check constraints are not satisfied.';
                 }
+
                 if (typeof args[i].ShipmentInstruction !== 'string') {
                     return 'ShipmentInstruction check constraints are not satisfied.';
                 }
+
             }
 
         }
@@ -161,9 +176,12 @@ exports.checkField = function (fcn, args) {
                 if (typeof args[i].Qty !== 'number') {
                     return 'Qty check constraints are not satisfied.';
                 }
-                if ((typeof args[i].GRDate !== 'string') || (!CheckDate2(args[i].GRDate))) {
+                if (args[i].GRDate === '') {
+
+                } else if ((typeof args[i].GRDate !== 'string') || (!CheckDate2(args[i].GRDate))) {
                     return 'GRDate check constraints are not satisfied.';
                 }
+
 
             }
         }
@@ -178,7 +196,7 @@ function CheckDate2(strInputDate) {
         parts[0] = strInputDate.substring(0, 4);
         parts[1] = strInputDate.substring(4, 6);
         parts[2] = strInputDate.substring(6, 8);
-     
+
         for (var i = 0; i < 3; i++) {
             //如果构成日期的某个部分不是数字，则返回false
             if (isNaN(parts[i])) {
@@ -219,17 +237,40 @@ function CheckDate2(strInputDate) {
             case '31':
                 if (m === '02' || m === '04' || m === '06' || m === '09' || m === '11') {
                     //2、4、6、9、11月没有31日
-                  
+
                     return false;
                 }
                 break;
             default:
-               
-               
+
+
 
         }
         return true;
     } else {
         return false;
     }
+}
+
+
+exports.checkMaterialPulling = function (args, callback) {
+    var valid;
+    if (args.length > 0) {
+        for (var i = 0; i < args.length; i++) {
+            if (args[i].PullType === 'LOI') {
+                eventutil.createMaterialPulling(args[i], function (res) {
+                    logger.info('liujiang55555555555555555', res);
+                    if ((res.result.RESULT === 0) && (res.result.SONUMBER !== '')) {
+                        valid = true;
+                    } else {
+                        logger.info('liujiang666666666666666666666', res.result.MESSAGE);
+                        valid = false;
+                    }
+                });
+            }
+
+        }
+        callback(valid);
+    }
+
 }
