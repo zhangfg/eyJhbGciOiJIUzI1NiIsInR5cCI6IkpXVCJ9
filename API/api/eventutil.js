@@ -133,3 +133,20 @@ var createInboundDN = function (request) {
         }
     })
 };
+exports.createMaterialPulling =  function (request,callback){
+    httpRequest.login(function (res) {
+        logger.debug('login result', res);
+        if (res.success) {
+            let token = res.result.access_token;
+            logger.info('call Create MaterialPulling...', request);
+            var requestData = prepareCreateSORequestData(request);
+            httpRequest.crCMaterialPulling(token, requestData, function (res) {
+                logger.debug('create MaterialPulling result', res);
+                callback(res);
+            });
+        } else {
+            logger.error("get Token failed ", res.msg);
+            callback(res);
+        }
+    })
+};
