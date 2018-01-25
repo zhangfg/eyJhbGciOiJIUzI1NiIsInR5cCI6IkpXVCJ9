@@ -9,7 +9,7 @@
   "CC_SRC_PATH": "../artifacts",
   "keyValueStore": "/tmp/fabric-client-kvs",
   "eventWaitTime": "30000",
-  "checkIpIsValid": true,
+  "checkIpIsValid": false,
   "admins": [
     {
       "username": "admin",

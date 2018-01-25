@@ -13,6 +13,8 @@ var prepareSearchData = function (keyprefix, respObj) {
         return prepareODMSearchData(respObj);
     } else if (keyprefix === 'SUP') {
         return prepareSupplierSearchData(respObj);
+    } else if (keyprefix === 'PN') {
+        return preparePNData(respObj);
     }
 
 };
@@ -502,4 +504,7 @@ var prepareSupplierSearchData = function (data) {
     return res;
 };
 
+var preparePNData = function (data) {
+    return data;
+}
 exports.prepareSearchData = prepareSearchData;

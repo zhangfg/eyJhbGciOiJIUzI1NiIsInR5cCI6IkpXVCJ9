@@ -743,22 +743,20 @@ func crCSOIInventoryInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 			if err != nil {
 				return shim.Error(err.Error())
 			}
-			soiObjAsbytes, err := stub.GetState(soi_key)
+			//soiObjAsbytes, err := stub.GetState(soi_key)
 			var c []byte
-			if err == nil && soiObjAsbytes != nil {
-				soiInventory := SOIInventory{}
-				err = json.Unmarshal(soiObjAsbytes, &soiInventory)
-				if err != nil {
-					return shim.Error(err.Error())
-				}
-				if inventory.TRANSDOC == "SI" { // TODO
-					soiInventory = inventory
-				}
-				c, _ = json.Marshal(soiInventory)
-			} else {
-				c, _ = json.Marshal(inventory)
-			}
-
+			//if err == nil && soiObjAsbytes != nil {
+			//	soiInventory := SOIInventory{}
+			//	err = json.Unmarshal(soiObjAsbytes, &soiInventory)
+			//	if err != nil {
+			//		return shim.Error(err.Error())
+			//	}
+			//	soiInventory = inventory
+			//	c, _ = json.Marshal(soiInventory)
+			//} else {
+			//	c, _ = json.Marshal(inventory)
+			//}
+			c, _ = json.Marshal(inventory)
 			stub.PutState(soi_key, c)
 
 		} else {

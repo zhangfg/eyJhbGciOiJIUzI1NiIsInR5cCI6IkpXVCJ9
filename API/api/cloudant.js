@@ -2,7 +2,6 @@
 var cfenv = require('cfenv');
 var log4js = require('log4js');
 var logger = log4js.getLogger('CloudantAPI');
-// var Cloudant = require('cloudant');
 var fs = require('fs');
 require('../config.js');
 var hfc = require('fabric-client');
@@ -23,9 +22,13 @@ if (dbCreds) {
 var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
     if (fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo') {
-        insertPartNo(item.PN, callback);
+        insertLOIPNNo(item.PN, callback);
     }else if (fcn === 'crCMaterialPulling' && item.PullType === 'LOI') {
-        insertPartNo(item.Product, callback);
+        insertLOIPNNo(item.Product, callback);
+    }else if (fcn === 'crCMaterialPulling' && item.PullType === 'SOI') {
+        // insertSOIPNNo(item.Product, callback);
+    }else if (fcn === 'crCSOIInventoryInfo') {
+        insertSOIPNNo(item.PN, callback);
     }else if (fcn === 'crMappingFlexPO') {
         let odmItem = {
             'CPONO': item.CPONO,
@@ -68,7 +71,7 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
             'POItemNO': item.POItemNO,
             'POTYPE': item.POTYPE,
             'PARTSNO': item.PARTSNO,
-            'VENDORNO': item.VENDORNO
+            'VENDORNO': item.VendorNO
         };
         insertPoSearchDocument(roleId, poItem, vendorNo, callback);
         let supItem = {
@@ -103,8 +106,10 @@ var queryItemNo = function (query, vendorNo, callback) {
         queryODMKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'SUP') {
         querySupplierKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'PN') {
-        queryPNKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'LOI') {
+        queryLOIKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'SOI') {
+        querySOIKeyNo(query, vendorNo, callback);
     }
 
 }
@@ -418,7 +423,7 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
         }
     });
 };
-var insertPartNo = function (partNo, callback) {
+var insertSOIPNNo = function (partNo, callback) {
     logger.debug('insertPartNo--PN--', partNo);
 
     db.find({
@@ -430,9 +435,9 @@ var insertPartNo = function (partNo, callback) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
             readDocument(data._id, function (err, dataItem) {
-                var index = dataItem.rows.partNo.indexOf(partNo);
+                var index = dataItem.rows.SOIPartNo.indexOf(partNo);
                 if (index < 0 ){
-                    dataItem.rows.partNo.push(partNo);
+                    dataItem.rows.SOIPartNo.push(partNo);
                 }
                 updateDocument(dataItem, callback);
             });
@@ -443,7 +448,40 @@ var insertPartNo = function (partNo, callback) {
             var insertObject = {
                 "type": "pnKey",
                 "rows": {
-                    'partNo': parts
+                    'SOIPartNo': parts
+                }
+            };
+            logger.debug('insert the information of the PN', insertObject);
+            createDocument(insertObject, callback);
+        }
+    });
+};
+var insertLOIPNNo = function (partNo, callback) {
+    logger.debug('insertPartNo--PN--', partNo);
+
+    db.find({
+        selector: {
+            "type": "pnKey"
+        }
+    }, function (err, result) {
+        if (result && result.docs && result.docs.length > 0) {
+            var data = result.docs[0];
+            logger.debug('update the information of the PN', data);
+            readDocument(data._id, function (err, dataItem) {
+                var index = dataItem.rows.LOIPartNo.indexOf(partNo);
+                if (index < 0 ){
+                    dataItem.rows.LOIPartNo.push(partNo);
+                }
+                updateDocument(dataItem, callback);
+            });
+
+        } else {
+            var parts = [];
+            parts.push(partNo);
+            var insertObject = {
+                "type": "pnKey",
+                "rows": {
+                    'LOIPartNo': parts
                 }
             };
             logger.debug('insert the information of the PN', insertObject);
@@ -686,8 +724,8 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
     });
 
 };
-var queryPNKeyNo = function (query, vendorNo, callback) {
-    logger.debug('queryItemNo--PN:', query);
+var queryLOIKeyNo = function (query, vendorNo, callback) {
+    logger.debug('queryLOIKeyNo--PN:', query);
     var selector = {
         "type": "pnKey"
     };
@@ -696,14 +734,45 @@ var queryPNKeyNo = function (query, vendorNo, callback) {
         selector: selector
     }, function (err, data) {
         // db.get('users', function (err, data) {
-        logger.debug('queryPNKeyNo Error:', err);
-        logger.info('queryPNKeyNo Data:', data);
+        logger.debug('queryLOIKeyNo Error:', err);
+        logger.info('queryLOIKeyNo Data:', data);
         var queryData = [];
         data.docs.forEach(item => {
-            if(item.rows.partNo){
-                item.rows.partNo.forEach(partItem => {
+            if(item.rows.LOIPartNo){
+                item.rows.LOIPartNo.forEach(partItem => {
                     var keyObj = {
-                        KeyPrefix: query.keyprefix,
+                        KeyPrefix: 'WH',
+                        KeysStart: [],
+                        KeysEnd: []
+                    };
+                    keyObj.KeysStart.push(partItem);
+                    queryData.push(keyObj);
+                });
+            }
+
+        });
+        callback(queryData);
+    });
+
+};
+var querySOIKeyNo = function (query, vendorNo, callback) {
+    logger.debug('querySOIKeyNo--PN:', query);
+    var selector = {
+        "type": "pnKey"
+    };
+
+    db.find({
+        selector: selector
+    }, function (err, data) {
+        // db.get('users', function (err, data) {
+        logger.debug('querySOIKeyNo Error:', err);
+        logger.info('querySOIKeyNo Data:', data);
+        var queryData = [];
+        data.docs.forEach(item => {
+            if(item.rows.SOIPartNo){
+                item.rows.SOIPartNo.forEach(partItem => {
+                    var keyObj = {
+                        KeyPrefix: 'SOI',
                         KeysStart: [],
                         KeysEnd: []
                     };
@@ -882,4 +951,3 @@ exports.insertAttachment = insertAttachment;
 exports.destroyAttachment = destroyAttachment;
 exports.getAttachment = getAttachment;
 exports.checkIP = checkIP;
-exports.insertPartNo = insertPartNo;

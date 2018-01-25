@@ -199,18 +199,66 @@ function getClientIp(req) {
     return ip;
 };
 
-function checkIPValidate(ip) {
-    let checkIpIsValid = hfc.getConfigSetting('checkIpIsValid');
-    if (checkIpIsValid) {
-        cloudant.checkIP(ip).then(flag => {
-            logger.debug('checkIPValidate::',flag);
-            return flag;
-        });
-    } else {
-        return true;
-    }
+function insertSearchDocument(fcn, role, item, vendorNo) {
+    cloudant.insertSearchDocument(fcn, role, item, vendorNo, function (err, body) {
+        if (err) {
+            logger.error('Error creating document - ', err.message);
+            return;
+        }
+        logger.debug('all records inserted.');
+    });
 }
 
+function insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, username, orgname, vendorNo) {
+    let queryFcn = 'queryByIds';
+    var queryData = [];
+
+    var keyObj = {
+        KeyPrefix: 'PO',
+        KeysStart: [],
+        KeysEnd: []
+    };
+    if (item.PONumber && item.PONumber !== '') {
+        keyObj.KeysStart.push(item.PONumber);
+        keyObj.KeysStart.push(item.POItem);
+        queryData.push(keyObj);
+    }
+
+    var pojsonStr = JSON.stringify(queryData);
+    var poArgsArr = [];
+    poArgsArr.push(pojsonStr);
+    var poArgsStr = prepareArgs(poArgsArr, role);
+    // logger.debug('poArgsStr', poArgsStr);
+    query.queryChaincode(peers, channelName, chaincodeName, poArgsStr, queryFcn, username, orgname)
+        .then(function (pomessage) {
+            // logger.debug('pomessage', pomessage);
+            if (pomessage && typeof pomessage === 'string' && pomessage.includes(
+                    'Error:')) {
+                // res.json(getInvokeErrorMessage(pomessage));
+            } else {
+                var respPoObj;
+                if (typeof pomessage !== 'string') {
+                    respPoObj = pomessage;
+                } else {
+                    respPoObj = JSON.parse(pomessage);
+                }
+                respPoObj.forEach(poitem => {
+                    item.poitem = poitem;
+                    cloudant.insertSearchDocument(fcn, role, item, vendorNo, function (err, body) {
+                        if (err) {
+                            logger.error('Error creating document - ', err.message);
+                            return;
+                        }
+                        logger.debug('all records inserted.');
+                    });
+                });
+            }
+        }, (err) => {
+            logger.debug('error is ' + err);
+            // res.json(getInvokeErrorMessage(err));
+        });
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
@@ -230,8 +278,8 @@ app.post('/users', function (req, res) {
     let checkIpIsValid = hfc.getConfigSetting('checkIpIsValid');
     if (checkIpIsValid) {
         cloudant.checkIP(ipAddress).then(flag => {
-            logger.debug('checkIPValidate::',flag);
-            if(!flag){
+            logger.debug('checkIPValidate::', flag);
+            if (!flag) {
                 res.json(getNoAccessIPMessage());
                 return;
             }
@@ -477,73 +525,27 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         res.json(getErrorMessage('\'args\''));
         return;
     }
-     var checkResult = checkfield.checkField(fcn, req.body.args);
+    var checkResult = checkfield.checkField(fcn, req.body.args);
     if (checkResult !== '') {
         return res.json(getInvokeErrorMessage(checkResult));
     }
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
+    let initSec = 0;
     reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO' || fcn === 'crMappingFlexPO'
-    || fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo' || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
+        || fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo' || fcn === 'crCSOIInventoryInfo'
+        || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
         .forEach(item => {
-        cloudant.insertSearchDocument(fcn, role, item, req.vendorNo, function (err, body) {
-            if (err) {
-                logger.error('Error creating document - ', err.message);
-                return;
-            }
-            logger.debug('all records inserted.');
+            let sec = initSec * 100;
+            setTimeout(insertSearchDocument(fcn, role, item, req.vendorNo), sec);
+            initSec++;
         });
-    });
 
+    let initSupSec = 0;
     reqData.filter(item => item.TRANSDOC === 'SUP').forEach(item => {
-        let queryFcn = 'queryByIds';
-        var queryData = [];
-
-        var keyObj = {
-            KeyPrefix: 'PO',
-            KeysStart: [],
-            KeysEnd: []
-        };
-        if (item.PONumber && item.PONumber !== '') {
-            keyObj.KeysStart.push(item.PONumber);
-            keyObj.KeysStart.push(item.POItem);
-            queryData.push(keyObj);
-        }
-
-        var pojsonStr = JSON.stringify(queryData);
-        var poArgsArr = [];
-        poArgsArr.push(pojsonStr);
-        var poArgsStr = prepareArgs(poArgsArr, role);
-        // logger.debug('poArgsStr', poArgsStr);
-        query.queryChaincode(peers, channelName, chaincodeName, poArgsStr, queryFcn, req.username, req.orgname)
-            .then(function (pomessage) {
-                // logger.debug('pomessage', pomessage);
-                if (pomessage && typeof pomessage === 'string' && pomessage.includes(
-                        'Error:')) {
-                    // res.json(getInvokeErrorMessage(pomessage));
-                } else {
-                    var respPoObj;
-                    if (typeof pomessage !== 'string') {
-                        respPoObj = pomessage;
-                    } else {
-                        respPoObj = JSON.parse(pomessage);
-                    }
-                    respPoObj.forEach(poitem => {
-                        item.poitem = poitem;
-                        cloudant.insertSearchDocument(fcn, role, item, req.vendorNo, function (err, body) {
-                            if (err) {
-                                logger.error('Error creating document - ', err.message);
-                                return;
-                            }
-                            logger.debug('all records inserted.');
-                        });
-                    });
-                }
-            }, (err) => {
-                logger.debug('error is ' + err);
-                // res.json(getInvokeErrorMessage(err));
-            });
-
+        let supSec = initSupSec * 100;
+        setTimeout(insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo), supSec);
+        initSupSec++;
     });
 
     invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
