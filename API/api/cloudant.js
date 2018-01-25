@@ -396,7 +396,7 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
                 if (docObj.PARTSNO) {
                     dataItem.rows.partNo = docObj.PARTSNO;
                 }
-                if (vendorNo) {
+                if (docObj.vendorNo) {
                     dataItem.rows.vendorNo = docObj.vendorNo;
                 }
                 updateDocument(dataItem, callback);
