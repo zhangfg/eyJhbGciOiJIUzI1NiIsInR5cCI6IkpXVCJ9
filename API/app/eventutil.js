@@ -124,6 +124,7 @@ var createInboundDN = function (request) {
             let token = res.result.access_token;
             logger.info('call Create Inbound Delivery...', request);
             var requestData = prepareCreateIBDNRequestData(request);
+            logger.debug('Input parameters',JSON.stringify(requestData))
             httpRequest.createIBDN(token, requestData, function (res) {
                 logger.debug('create Inbound Delivery result', res);
             });
