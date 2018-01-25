@@ -25,9 +25,9 @@ exports.checkField = function (fcn, args) {
 
                 switch (args[i].TRANSDOC) {
                     case 'GR':
-                        logger.debug('liujiang==', args[i].FLEXPONO.length);
+                       
                         if ((typeof (args[i].FLEXPONO) !== "string") || (args[i].FLEXPONO.length > 35)) {
-                            logger.debug('liujiang==', args[i].FLEXPONO.length);
+                           
                             return 'FLEXPONO check constraints are not satisfied.';
                         }
                         if (args[i].ODMGRInfos !== '') {
@@ -36,7 +36,7 @@ exports.checkField = function (fcn, args) {
 
                                     return 'GRNO check constraints are not satisfied.';
                                 }
-                                logger.debug('liujiang555555==', args[i].ODMGRInfos[j].PARTNUM.length);
+                               
                                 if ((args[i].ODMGRInfos[j].PARTNUM.length > 18) || (!reg.test(args[i].ODMGRInfos[j].PARTNUM))) {
                                     return 'PARTNUM check constraints are not satisfied.';
                                 }
@@ -102,7 +102,7 @@ exports.checkField = function (fcn, args) {
                 if (typeof args[i].Quantity !== 'number') {
                     return 'Quantity check constraints are not satisfied.'
                 }
-                if ((typeof args[i].DlveryDate !== "string") || (!CheckDate2(args[i].DlveryDate))) {
+                if ((typeof args[i].DlvryDate !== "string") || (!CheckDate2(args[i].DlvryDate))) {
                     return 'DlveryDate check constraints are not satisfied.';
                 }
                 if ((typeof args[i].RequestedDate !== "string") || (!CheckDate2(args[i].RequestedDate))) {
@@ -237,12 +237,12 @@ function CheckDate2(strInputDate) {
             case '31':
                 if (m === '02' || m === '04' || m === '06' || m === '09' || m === '11') {
                     //2、4、6、9、11月没有31日
-                    logger.debug('liujiang==', '2018201820182018');
+                  
                     return false;
                 }
                 break;
             default:
-                logger.debug('liujiang==', '299999999999999999999999999');
+               
                
 
         }
