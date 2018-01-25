@@ -1,3 +1,4 @@
+
 'use strict'
 //引入request 模块
 var request = require('request');
@@ -7,7 +8,7 @@ var logger = log4js.getLogger('HTTP');
 var loginUrl = 'https://soa-test.lenovo.com/api/token';
 var createSOUrl = 'https://soa-test.lenovo.com/api/bluemix2ecc_so_creation/1.0/create';
 var createIBDNUrl = 'https://soa-test.lenovo.com/api/bluemix2ecc_so_creation/1.0/createibdn';
-
+var createMaterialPulling = 'https://soa-test.lenovo.com/api/bluemix2ecc_so_creation/1.0/simulation';
 exports.login = function (callback) {
     let header = getLoginHeader();
     let option = {
@@ -78,3 +79,17 @@ function getHeader(token) {
         "authorization": "Bearer " + token
     };
 }
+exports.crCMaterialPulling = function(token,data,callback){
+        let url = createMaterialPulling;
+        let header = getHeader(token);
+        let option = {
+            url: url,
+            method: "POST",
+            json: true,
+            headers: header,
+            body: data
+        };
+        request(option, function (error, response, body) {
+            resultFunction(callback, error, response, body);
+        });
+};
