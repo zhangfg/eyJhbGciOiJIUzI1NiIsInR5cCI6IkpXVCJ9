@@ -1,6 +1,6 @@
 applications:
 - path: .
-  memory: 512M
+  memory: 2048M
   instances: 1
   domain: mybluemix.net
   name: Supplier1BS
