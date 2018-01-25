@@ -19,9 +19,14 @@ if (dbCreds) {
 } else {
     logger.error('NO DB!');
 }
-var insertSearchDocument = function (fcn,roleId, item, vendorNo, callback) {
+
+var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
-    if(fcn === 'crMappingFlexPO'){
+    if (fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo') {
+        insertPartNo(item.PN, callback);
+    }else if (fcn === 'crCMaterialPulling' && item.PullType === 'LOI') {
+        insertPartNo(item.Product, callback);
+    }else if (fcn === 'crMappingFlexPO') {
         let odmItem = {
             'CPONO': item.CPONO,
             'FLEXPONO': item.FLEXPONO,
@@ -32,7 +37,7 @@ var insertSearchDocument = function (fcn,roleId, item, vendorNo, callback) {
             'VENDORNO': ''
         };
         insertODMSearchDocument(roleId, odmItem, vendorNo, callback);
-    }else if (item.TRANSDOC === 'SO') {
+    } else if (item.TRANSDOC === 'SO') {
         let soItem = {
             'SOCDATE': item.SOCDATE,
             'PONO': item.PONO,
@@ -98,6 +103,8 @@ var queryItemNo = function (query, vendorNo, callback) {
         queryODMKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'SUP') {
         querySupplierKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'PN') {
+        queryPNKeyNo(query, vendorNo, callback);
     }
 
 }
@@ -269,7 +276,7 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
                     dataItem.rows.vendorNo = docObj.VENDORNO;
                 }
 
-                if(docObj.FLEXPONO) {
+                if (docObj.FLEXPONO) {
                     dataItem.rows.FLEXPONO = docObj.FLEXPONO;
                 }
 
@@ -407,6 +414,39 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
                 }
             };
             logger.info('insert the information of the Supplier Object ', insertObject);
+            createDocument(insertObject, callback);
+        }
+    });
+};
+var insertPartNo = function (partNo, callback) {
+    logger.debug('insertPartNo--PN--', partNo);
+
+    db.find({
+        selector: {
+            "type": "pnKey"
+        }
+    }, function (err, result) {
+        if (result && result.docs && result.docs.length > 0) {
+            var data = result.docs[0];
+            logger.debug('update the information of the PN', data);
+            readDocument(data._id, function (err, dataItem) {
+                var index = dataItem.rows.partNo.indexOf(partNo);
+                if (index < 0 ){
+                    dataItem.rows.partNo.push(partNo);
+                }
+                updateDocument(dataItem, callback);
+            });
+
+        } else {
+            var parts = [];
+            parts.push(partNo);
+            var insertObject = {
+                "type": "pnKey",
+                "rows": {
+                    'partNo': parts
+                }
+            };
+            logger.debug('insert the information of the PN', insertObject);
             createDocument(insertObject, callback);
         }
     });
@@ -569,19 +609,19 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
         logger.info('queryODMKeyNo Data:', data);
         var queryData = [];
         data.docs.forEach(item => {
-            if(item.rows.FLEXPONO){
-                item.rows.FLEXPONO.forEach(flexPONo =>{
+            if (item.rows.FLEXPONO) {
+                item.rows.FLEXPONO.forEach(flexPONo => {
                     var keyObj = {
                         KeyPrefix: 'FLEX',
                         KeysStart: [],
                         KeysEnd: []
                     };
-                    if (query.flexPONo){
-                        if(query.flexPONo === flexPONo){
+                    if (query.flexPONo) {
+                        if (query.flexPONo === flexPONo) {
                             keyObj.KeysStart.push(flexPONo);
                             queryData.push(keyObj);
                         }
-                    }else{
+                    } else {
                         keyObj.KeysStart.push(flexPONo);
                         queryData.push(keyObj);
                     }
@@ -641,6 +681,37 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
             keyObj.KeysStart.push(item.rows.ASNNumber);
             queryData.push(keyObj);
             logger.info('Return item:', keyObj);
+        });
+        callback(queryData);
+    });
+
+};
+var queryPNKeyNo = function (query, vendorNo, callback) {
+    logger.debug('queryItemNo--PN:', query);
+    var selector = {
+        "type": "pnKey"
+    };
+
+    db.find({
+        selector: selector
+    }, function (err, data) {
+        // db.get('users', function (err, data) {
+        logger.debug('queryPNKeyNo Error:', err);
+        logger.info('queryPNKeyNo Data:', data);
+        var queryData = [];
+        data.docs.forEach(item => {
+            if(item.rows.partNo){
+                item.rows.partNo.forEach(partItem => {
+                    var keyObj = {
+                        KeyPrefix: query.keyprefix,
+                        KeysStart: [],
+                        KeysEnd: []
+                    };
+                    keyObj.KeysStart.push(partItem);
+                    queryData.push(keyObj);
+                });
+            }
+
         });
         callback(queryData);
     });
@@ -770,6 +841,39 @@ var deleteDocument = function (doc, callback) {
         callback(err, data);
     });
 };
+
+var checkIP = function (ip) {
+    logger.info('getIPlist IP:', ip);
+    return new Promise(function (resolve, reject) {
+        db.find({
+            selector: {
+                "type": "IP"
+            }
+        }, function (err, data) {
+            // db.get('users', function (err, data) {
+            logger.debug('getIPlist Error:', err);
+            logger.info('getIPlist Data:', data);
+            var flag = false;
+            data.docs.forEach(item => {
+                item.rows.whitelist.forEach(ipMark => {
+                    var ipTarg = ipMark.split('.');
+                    var ipOrg = ip.split('.');
+                    if (ipTarg.length === ipOrg.length && ipTarg.length === 4
+                    && (ipTarg[0] === ipOrg[0] || ipTarg[0] === '*')
+                    && (ipTarg[1] === ipOrg[1] || ipTarg[1] === '*')
+                    && (ipTarg[2] === ipOrg[2] || ipTarg[2] === '*')
+                    && (ipTarg[3] === ipOrg[3] || ipTarg[3] === '*')) {
+                        // resolve(true);
+                        flag = true;
+                    }
+                });
+            });
+            resolve(flag);
+        });
+    });
+
+}
+
 exports.login = login;
 exports.queryItemNo = queryItemNo;
 exports.insertSearchDocument = insertSearchDocument;
@@ -777,3 +881,5 @@ exports.insertNewAttachment = insertNewAttachment;
 exports.insertAttachment = insertAttachment;
 exports.destroyAttachment = destroyAttachment;
 exports.getAttachment = getAttachment;
+exports.checkIP = checkIP;
+exports.insertPartNo = insertPartNo;

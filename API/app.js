@@ -122,6 +122,14 @@ function getNoAccessMessage() {
     return response;
 }
 
+function getNoAccessIPMessage() {
+    var response = {
+        success: false,
+        message: ' it seems that you are connecting Blockchain service from a wrong location, please concat your administrator'
+    };
+    return response;
+}
+
 function getErrorMessage(field) {
     var response = {
         success: false,
@@ -179,6 +187,31 @@ function prepareVendor(args, vendorNo) {
     return rstArgs;
 }
 
+function getClientIp(req) {
+    var ip = req.headers['x-forwarded-for'] ||
+        req.ip ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress || '';
+    if (ip.split(',').length > 0) {
+        ip = ip.split(',')[0]
+    }
+    return ip;
+};
+
+function checkIPValidate(ip) {
+    let checkIpIsValid = hfc.getConfigSetting('checkIpIsValid');
+    if (checkIpIsValid) {
+        cloudant.checkIP(ip).then(flag => {
+            logger.debug('checkIPValidate::',flag);
+            return flag;
+        });
+    } else {
+        return true;
+    }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -187,8 +220,23 @@ app.post('/users', function (req, res) {
     var username = req.body.username;
     // var orgName = req.body.orgName;
     var password = req.body.password;
+
     logger.debug('End point : /users');
     logger.debug('User name : ' + username);
+    logger.debug(' get_client_ip:' + getClientIp(req));
+
+    var ipAddress = getClientIp(req);
+
+    let checkIpIsValid = hfc.getConfigSetting('checkIpIsValid');
+    if (checkIpIsValid) {
+        cloudant.checkIP(ipAddress).then(flag => {
+            logger.debug('checkIPValidate::',flag);
+            if(!flag){
+                res.json(getNoAccessIPMessage());
+                return;
+            }
+        });
+    }
     // logger.debug('Org name  : ' + orgName);
     if (!username) {
         res.json(getErrorMessage('\'username\''));
@@ -435,7 +483,9 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     }
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
-    reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO').forEach(item => {
+    reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO' || fcn === 'crMappingFlexPO'
+    || fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo' || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
+        .forEach(item => {
         cloudant.insertSearchDocument(fcn, role, item, req.vendorNo, function (err, body) {
             if (err) {
                 logger.error('Error creating document - ', err.message);
@@ -884,7 +934,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', functio
         Promise.all(promiseList).then(datas => {
             logger.debug('block datas:', datas);
             datas.forEach(item => {
-                logger.debug('block item:'+ JSON.stringify(item));
+                logger.debug('block item:' + JSON.stringify(item));
                 let blockInfo = {};
                 blockInfo.blockNo = item.header.number.low;
                 if (item.data.data.length > 0) {
@@ -897,8 +947,6 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', functio
             res.json(response);
         });
     });
-
-
 });
 
 //  Query Get Block by BlockNumber
