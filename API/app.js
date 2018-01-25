@@ -493,6 +493,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     logger.debug('==================== INVOKE ON CHAINCODE ==================');
     var peers = req.body.peers;
     var chaincodeName = req.params.chaincodeName;
+
     var channelName = req.params.channelName;
     var role = req.params.role;
 
@@ -528,6 +529,14 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     var checkResult = checkfield.checkField(fcn, req.body.args);
     if (checkResult !== '') {
         return res.json(getInvokeErrorMessage(checkResult));
+    }
+     if(fcn === 'crCMaterialPulling'){
+        checkfield.checkMaterialPulling(req.body.args,function(valid){
+            if(!valid){
+                res.json(getInvokeErrorMessage('input material pulling  data dissatisfy'));
+                return;
+            }
+        });
     }
     logger.debug('==================== INSERT DATA TO DATABASE==================');
     var reqData = req.body.args;
