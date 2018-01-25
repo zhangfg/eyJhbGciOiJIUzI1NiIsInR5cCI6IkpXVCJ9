@@ -17,11 +17,11 @@ import (
 func filterByUserRole(valAsbytes []byte, KeyPrefix string, userRole string) (error, []byte) {
 	fmt.Println("filterByUserRole,KeyPrefix=" + KeyPrefix + ",userRole=" + userRole)
 	if KeyPrefix == SO_KEY {
-		return filterSalesOrder(valAsbytes, userRole);
+		return filterSalesOrder(valAsbytes, userRole)
 	} else if KeyPrefix == PO_KEY {
-		return filterPurchaseOrder(valAsbytes, userRole);
+		return filterPurchaseOrder(valAsbytes, userRole)
 	} else if KeyPrefix == FLEX_KEY {
-		return filterCPurchaseOrder(valAsbytes, userRole);
+		return filterCPurchaseOrder(valAsbytes, userRole)
 	} else {
 		return nil, valAsbytes
 	}

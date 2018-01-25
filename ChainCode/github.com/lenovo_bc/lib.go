@@ -49,7 +49,7 @@ type SOIInventory struct {
 	PN            string `json:"PN"`            //Pull Reference No  KEY
 	TRANSDOC      string `json:"TRANSDOC"`      //Trans doc type
 	PartDesc      string `json:"PartDesc"`      //part description
-	Qty           string `json:"Qty"`           //inventory Quantity
+	Qty           int `json:"Qty"`           //inventory Quantity
 	InventoryType string `json:"InventoryType"` //inventory type(SOI)
 	SupplierName  string `json:"SupplierName"`  //supplier name
 	COO           string `json:"COO"`           //COO

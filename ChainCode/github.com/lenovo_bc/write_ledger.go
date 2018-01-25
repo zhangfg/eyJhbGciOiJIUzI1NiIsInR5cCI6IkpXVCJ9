@@ -777,13 +777,14 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	//vendorNo := args[1]
 	//fmt.Println("write data, initial Warehouse Object data - " + vendorNo, jsonStr)
 
-	var warehouses [] WareHouseInfo
+	var warehouses [] LOIGRInfo
 
 	err := json.Unmarshal([]byte(jsonStr), &warehouses)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 	for _, warehouse := range warehouses {
+		wareHouseInfo := WareHouseInfo{}
 		if warehouse.PN != "" {
 			err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{warehouse.PN})
 			fmt.Println("write data, WareHouse part for - " + warehouse_key)
@@ -792,19 +793,26 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 			}
 			whObjAsbytes, err := stub.GetState(warehouse_key)
 			var c []byte
+			var histories []WareHouseHistory
+			history := WareHouseHistory{}
+			history.qty = warehouse.Qty
+			history.updateDate = warehouse.GRDate
+			history.GRNO = "Initial"
 			if err == nil && whObjAsbytes != nil {
 				whOrder := WareHouseInfo{}
 				err = json.Unmarshal(whObjAsbytes, &whOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				if whOrder.TRANSDOC == "INIT" { // initial
-					whOrder.Quantity = warehouse.Quantity
-					whOrder.history = append(whOrder.history, warehouse.history...)
-				}
+				whOrder.Quantity = warehouse.Qty
+				whOrder.history = append(whOrder.history, history)
 				c, _ = json.Marshal(whOrder)
 			} else {
-				c, _ = json.Marshal(warehouse)
+				histories = append(histories, history)
+				wareHouseInfo.history = histories
+				wareHouseInfo.Quantity = warehouse.Qty
+				wareHouseInfo.PN = warehouse.PN
+				c, _ = json.Marshal(wareHouseInfo)
 			}
 
 			stub.PutState(warehouse_key, c)
