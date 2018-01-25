@@ -1,10 +1,4 @@
 'use strict';
-var cfenv = require('cfenv');
-var log4js = require('log4js');
-var logger = log4js.getLogger('checkField');
-var express = require('express');
-
-
 exports.checkField = function (fcn, args) {
 
     if (fcn === 'crCPurchaseOrderInfo') {

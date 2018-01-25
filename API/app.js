@@ -43,11 +43,11 @@ var invoke = require('./app/invoke-transaction.js');
 var query = require('./app/query.js');
 var host = process.env.HOST || hfc.getConfigSetting('host');
 var port = process.env.PORT || appEnv.port;
-var cloudant = require('./app/cloudant');
-var ledgerData = require('./app/ledgerData');
+var cloudant = require('./api/cloudant');
+var ledgerData = require('./api/ledgerData');
 var eventUtil = require('./app/eventutil');
 var mutipart = require('connect-multiparty');
-var checkfield = require('./app/checkfield');
+var checkfield = require('./api/checkfield');
 var multipartMiddleware = mutipart();
 ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// SET CONFIGURATONS ////////////////////////////
