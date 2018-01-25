@@ -334,7 +334,7 @@ var insertSupplierSearchDocument = function (roleId, docObj, callback) {
                 if (docObj.POItem) {
                     dataItem.rows.itemNo = docObj.POItem;
                 }
-                if (poItem.PARTSNO) {
+                if (docObj.PARTSNO) {
                     dataItem.rows.partNo = docObj.PARTSNO;
                 }
                 if (vendorNo) {
@@ -393,7 +393,7 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
                 if (docObj.POItem) {
                     dataItem.rows.itemNo = docObj.POItem;
                 }
-                if (poItem.PARTSNO) {
+                if (docObj.PARTSNO) {
                     dataItem.rows.partNo = docObj.PARTSNO;
                 }
                 if (vendorNo) {
