@@ -2,7 +2,7 @@ var log4js = require('log4js');
 var logger = log4js.getLogger('Events');
 require('../config.js');
 var hfc = require('fabric-client');
-var helper = require('./helper');
+var helper = require('../app/helper');
 var httpRequest = require('./httpRequest');
 
 
