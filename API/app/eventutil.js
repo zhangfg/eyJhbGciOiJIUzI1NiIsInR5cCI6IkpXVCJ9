@@ -109,7 +109,7 @@ var prepareCreateIBDNRequestData = function (data) {
     header.PULLDATE = data.PullDate;
 
     item.PRODUCT = data.Product;
-    item.QUANTITY = data.Quantity;
+    item.QUANTITY = data.Quantity+'';
     items.push(item);
     request.header = header;
     request.items = items;
