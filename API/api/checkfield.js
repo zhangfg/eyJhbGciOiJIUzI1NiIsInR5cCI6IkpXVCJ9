@@ -100,9 +100,7 @@ exports.checkField = function (fcn, args) {
                 } else if ((typeof args[i].DlvryDate !== 'string') || (!CheckDate2(args[i].DlvryDate))) {
                     return 'DlveryDate check constraints are not satisfied.';
                 }
-                if (args[i].RequestedDate === '') {
-
-                } else if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
+                 if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
                     return 'RequestedDate check constraints are not satisfied.';
                 }
 
@@ -260,7 +258,7 @@ exports.checkMaterialPulling = function (args, callback) {
             if (args[i].PullType === 'LOI') {
                 eventutil.createMaterialPulling(args[i], function (res) {
                     logger.info('liujiang55555555555555555', res);
-                    if ((res.result.RESULT === 0) && (res.result.SONUMBER !== '')) {
+                    if ((res.result.RESULT === 0)) {
                         valid = true;
                     } else {
                         logger.info('liujiang666666666666666666666', res.result.MESSAGE);
