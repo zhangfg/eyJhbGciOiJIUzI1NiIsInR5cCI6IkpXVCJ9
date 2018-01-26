@@ -264,11 +264,12 @@ exports.checkMaterialPulling = function (args, callback) {
                         logger.info('liujiang666666666666666666666', res.result.MESSAGE);
                         valid = false;
                     }
+                    callback(valid);
                 });
             }
 
         }
-        callback(valid);
+        
     }
 
 }
