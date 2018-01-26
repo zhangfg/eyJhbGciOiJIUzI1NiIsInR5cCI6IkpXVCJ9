@@ -41,6 +41,7 @@ type WareHouseHistory struct {
 	updateDate string `json:"updateDate"` // Update Date  GR Date or Pull Date
 	PullRefNo  string `json:"PullRefNo"`  // Pulling Reference No
 	GRNO       string `json:"GRNO"`       // GR NO
+	GRMaterial ODMLOIMaterial `json:"GRMaterial"`       // GR NO
 }
 
 // new Ledger TODO

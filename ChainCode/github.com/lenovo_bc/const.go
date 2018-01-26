@@ -14,6 +14,8 @@ const PULL_KEY = "PULL"      // Material PULL
 const REF_KEY = "REF"      // Material PULL
 const PULLTYPE_LOI = "LOI"      // LOI PULLING
 const PULLTYPE_SOI = "SOI"      // SOI PULLING
+const ROLE_ID_LENOVO  = "lenovo"
+const ROLE_ID_ODM  = "flex"
 const STAR = "***"
 
 

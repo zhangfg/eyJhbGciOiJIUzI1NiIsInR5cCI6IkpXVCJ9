@@ -203,13 +203,13 @@ function insertSearchDocument(fcn, role, item, vendorNo) {
     cloudant.insertSearchDocument(fcn, role, item, vendorNo, function (err, body) {
         if (err) {
             logger.error('Error creating document - ', err.message);
-            return;
+            // return;
         }
         logger.debug('all records inserted.');
     });
 }
 
-function insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, username, orgname, vendorNo) {
+function insertSupplierSearchDoc(fcn, item, role, peers, channelName, chaincodeName, username, orgname, vendorNo) {
     let queryFcn = 'queryByIds';
     var queryData = [];
 
@@ -234,6 +234,7 @@ function insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, 
             // logger.debug('pomessage', pomessage);
             if (pomessage && typeof pomessage === 'string' && pomessage.includes(
                     'Error:')) {
+                logger.error("queryChaincode--,", pomessage);
                 // res.json(getInvokeErrorMessage(pomessage));
             } else {
                 var respPoObj;
@@ -247,7 +248,7 @@ function insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, 
                     cloudant.insertSearchDocument(fcn, role, item, vendorNo, function (err, body) {
                         if (err) {
                             logger.error('Error creating document - ', err.message);
-                            return;
+                            // return;
                         }
                         logger.debug('all records inserted.');
                     });
@@ -312,16 +313,19 @@ app.post('/users', function (req, res) {
                     response.token = token;
                     response.roleId = company;
                     res.json(response);
+                    return;
                 } else {
                     res.json({
                         success: false,
                         message: response
                     });
+                    return;
                 }
             });
         } else {
             logger.error("login failed");
             res.json(getLoginErrorMessage());
+            return;
         }
     });
 
@@ -359,7 +363,8 @@ app.get('/downloadfile', function (req, res) {
     cloudant.getAttachment(fileId, fileName,
         function (err, data) {
             if (err) {
-                res.json(getErrorMessage(err))
+                res.json(getErrorMessage(err));
+                return;
             } else {
                 res.download(fileId, fileName,
                     function (err) {
@@ -375,6 +380,8 @@ app.get('/downloadfile', function (req, res) {
                             });
                         }
                     });
+
+                return;
             }
         });
 });
@@ -398,6 +405,7 @@ app.post('/channels', function (req, res) {
     channels.createChannel(channelName, channelConfigPath, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Join Channel
@@ -419,6 +427,7 @@ app.post('/channels/:channelName/peers', function (req, res) {
     join.joinChannel(channelName, peers, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Install chaincode on target peers
@@ -452,6 +461,7 @@ app.post('/chaincodes', function (req, res) {
     install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Instantiate chaincode on target peers
@@ -486,6 +496,7 @@ app.post('/channels/:channelName/chaincodes', function (req, res) {
     instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, fcn, args, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Invoke transaction on chaincode on target peers
@@ -501,10 +512,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     var args = req.body.args;
     var str = JSON.stringify(args);
     args = prepareVendor(str, req.vendorNo);
-    // var rstArgs = [];
-    // rstArgs.push(str);
-    // rstArgs.push(req.vendorNo);
-    // args = rstArgs;
+
     logger.debug('channelName  : ' + channelName);
     logger.debug('chaincodeName : ' + chaincodeName);
     logger.debug('req.vendorNo : ' + req.vendorNo);
@@ -530,9 +538,9 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
     if (checkResult !== '') {
         return res.json(getInvokeErrorMessage(checkResult));
     }
-     if(fcn === 'crCMaterialPulling'){
-        checkfield.checkMaterialPulling(req.body.args,function(valid){
-            if(!valid){
+    if (fcn === 'crCMaterialPulling') {
+        checkfield.checkMaterialPulling(req.body.args, function (valid) {
+            if (!valid) {
                 res.json(getInvokeErrorMessage('input material pulling  data dissatisfy'));
                 return;
             }
@@ -546,23 +554,30 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
         .forEach(item => {
             let sec = initSec * 100;
-            setTimeout(insertSearchDocument(fcn, role, item, req.vendorNo), sec);
+
+            setTimeout(function () {
+                insertSearchDocument(fcn, role, item, req.vendorNo);
+            }, sec);
             initSec++;
         });
 
     let initSupSec = 0;
     reqData.filter(item => item.TRANSDOC === 'SUP').forEach(item => {
         let supSec = initSupSec * 100;
-        setTimeout(insertSupplierSearchDoc(item, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo), supSec);
+        setTimeout(function () {
+            insertSupplierSearchDoc(fcn, item, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo);
+        }, supSec);
         initSupSec++;
     });
 
     invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
         .then(function (message) {
             res.json(getInvokeSuccessMessage(message));
+            return;
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage('System Error'));
+            res.json(getInvokeErrorMessage(err));
+            return;
         });
 });
 // Query on chaincode on target peers
@@ -602,6 +617,7 @@ app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req,
     query.queryChaincode(peer, channelName, chaincodeName, args, fcn, req.username, req.orgname)
         .then(function (message) {
             res.json(getInvokeSuccessMessage(message));
+            return;
         });
 });
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multipartMiddleware, function (req, res) {
@@ -633,6 +649,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
             logger.debug('start to insert data to blockchain');
             if (err) {
                 res.json(getErrorMessage(err))
+                return;
             } else {
                 logger.info('file is inserted database successfully!!!');
                 var fcn = 'crSupplierOrderInfo';
@@ -656,15 +673,18 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
                 invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
                     .then(function (message) {
                         res.json(getInvokeSuccessMessage(message));
+                        return;
                     }, (err) => {
                         logger.debug('error is ' + err);
                         res.json(getInvokeErrorMessage('System Error'));
+                        return;
                     });
             }
         });
 
     } else {
         res.json(getInvokeErrorMessage('Upload file failed!!'));
+        return;
     }
 });
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', function (req, res) {
@@ -721,6 +741,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
                 res.json(getInvokeErrorMessage('System Error'));
+                return;
             } else {
                 var respObjects;
                 if (typeof message !== 'string') {
@@ -730,6 +751,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                 }
                 if (respObjects.length === 0) {
                     res.json(getInvokeErrorMessage('ASN NO  or attachment doesn\'t exist!'));
+                    return;
                 }
                 respObjects.forEach(respObj => {
                     if (respObj && respObj.PackingList) {
@@ -738,7 +760,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                             cloudant.getAttachment(respObj.PackingList.FileId, respObj.PackingList.FileName,
                                 function (err, data) {
                                     if (err) {
-                                        res.json(getErrorMessage(err))
+                                        return res.json(getErrorMessage(err))
                                     } else {
                                         res.download(respObj.PackingList.FileId, respObj.PackingList.FileName,
                                             function (err) {
@@ -754,7 +776,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                                                     });
                                                 }
                                             });
-
+                                        return;
 
                                         // res.set({
                                         //     "Content-type": respObj.PackingList.FileType,
@@ -769,6 +791,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
                                 });
                         } else {
                             res.json(getInvokeErrorMessage('PackingList does not exist'));
+                            return;
                         }
 
 
@@ -779,6 +802,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/download', func
         }, (err) => {
             logger.debug('error is ' + err);
             res.json(getInvokeErrorMessage('System Error'));
+            return;
         });
 });
 
@@ -816,14 +840,17 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', functio
         .then(function (message) {
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
-                res.json(getInvokeErrorMessage('System Error'));
+                res.json(getInvokeErrorMessage(message));
+                return;
             } else {
                 res.json(getQuerySuccessMessage(message));
+                return;
             }
 
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage('System Error'));
+            res.json(getInvokeErrorMessage(err));
+            return;
         });
 });
 
@@ -866,6 +893,11 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
     cloudant.queryItemNo(args, req.vendorNo, function (resp) {
         // logger.debug('resp', resp);
         var jsonStr = JSON.stringify(resp);
+        if(jsonStr.length === 0){
+            logger.debug('jsonStr.length: no data in cloudant DB is empty');
+            res.json(getQuerySuccessMessage(jsonStr));
+            return;
+        }
         // logger.debug(jsonStr);
         var argsArr = [];
         argsArr.push(jsonStr);
@@ -875,7 +907,8 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
             .then(function (message) {
                 if (message && typeof message === 'string' && message.includes(
                         'Error:')) {
-                    res.json(getInvokeErrorMessage('System Error'));
+                    res.json(getInvokeErrorMessage(message));
+                    return;
                 } else {
                     var respObj;
 
@@ -892,18 +925,20 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                         response.push(resp);
                     });
                     res.json(getQuerySuccessMessage(response));
+                    return;
                 }
 
             }, (err) => {
                 logger.debug('error is ' + err);
-                res.json(getInvokeErrorMessage('System Error'));
+                res.json(getInvokeErrorMessage(err));
+                return;
             });
     });
 
 });
 
 app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', function (req, res) {
-    logger.debug('==================== query ON CHAINCODE ==================');
+    logger.debug('==================== query Block ON CHAINCODE ==================');
     var channelName = req.params.channelName;
     var chaincodeName = req.params.chaincodeName;
     let peer = req.query.peer;
@@ -956,6 +991,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', functio
                 response.data.push(blockInfo);
             });
             res.json(response);
+            return;
         });
     });
 });
@@ -976,6 +1012,7 @@ app.get('/channels/:channelName/blocks/:blockId', function (req, res) {
     query.getBlockByNumber(peer, blockId, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Query Get Transaction by Transaction ID
@@ -994,6 +1031,7 @@ app.get('/channels/:channelName/transactions/:trxnId', function (req, res) {
     query.getTransactionByID(peer, trxnId, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Query Get Block by Hash
@@ -1010,6 +1048,7 @@ app.get('/channels/:channelName/blocks', function (req, res) {
     query.getBlockByHash(peer, hash, req.username, req.orgname).then(
         function (message) {
             res.send(message);
+            return;
         });
 });
 //Query for Channel Information
@@ -1022,6 +1061,7 @@ app.get('/channels/:channelName', function (req, res) {
     query.getChainInfo(peer, req.username, req.orgname).then(
         function (message) {
             res.send(message);
+            return;
         });
 });
 // Query to fetch all Installed/instantiated chaincodes
@@ -1040,6 +1080,7 @@ app.get('/chaincodes', function (req, res) {
     query.getInstalledChaincodes(peer, installType, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 // Query to fetch channels
@@ -1055,6 +1096,7 @@ app.get('/channels', function (req, res) {
     query.getChannels(peer, req.username, req.orgname)
         .then(function (message) {
             res.send(message);
+            return;
         });
 });
 

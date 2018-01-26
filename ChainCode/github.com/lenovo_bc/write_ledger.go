@@ -191,7 +191,7 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 			if err != nil {
 				return err
 			}
-			whOrder.Quantity = whOrder.Quantity + loiMaterial.Quantity
+			whOrder.Quantity = whOrder.Quantity - loiMaterial.Quantity
 			whHistory := WareHouseHistory{}
 			whHistory.PullRefNo = loiMaterial.RefNo
 			whHistory.qty = loiMaterial.Quantity

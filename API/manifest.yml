@@ -1,10 +1,10 @@
 applications:
 - path: .
-  memory: 512M
+  memory: 2048M
   instances: 1
   domain: mybluemix.net
-  name: LBSTest
-  host: LBSTest
+  name: LenovoBS
+  host: LenovoBS
   disk_quota: 1024M
   services:
   - Cloudant NoSQL DB-gp
