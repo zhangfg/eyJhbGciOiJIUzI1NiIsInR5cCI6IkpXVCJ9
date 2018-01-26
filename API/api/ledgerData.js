@@ -13,7 +13,7 @@ var prepareSearchData = function (keyprefix, respObj) {
         return prepareODMSearchData(respObj);
     } else if (keyprefix === 'SUP') {
         return prepareSupplierSearchData(respObj);
-    } else if (keyprefix === 'PN') {
+    } else if (keyprefix === 'SOI' || keyprefix === 'LOI') {
         return preparePNData(respObj);
     }
 
@@ -133,7 +133,7 @@ var prepareSOSearchData = function (data) {
         }
     } else if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
         var soData = data.SalesOrder;
-        logger.info('data.SalesOrder',data.SalesOrder);
+        logger.info('data.SalesOrder', data.SalesOrder);
         if (soData.GIINFOS) {
             soData.GIINFOS.forEach(giItem => {
                 var item = {};
@@ -215,7 +215,7 @@ var preparePOSearchData = function (data) {
     res.SOITEM = data.SOITEM;
     res.PONO = data.PONO;
     res.POITEM = data.POITEM;
-    if (data.PurchaseOrder  && data.PurchaseOrder.PONO !== "") {
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "") {
         var poData = data.PurchaseOrder;
         res.POTYPE = poData.POTYPE;
         res.PODate = poData.PODate;
@@ -250,7 +250,7 @@ var preparePOSearchData = function (data) {
         res.PRNO = soData.PRNO;
     }
     res.data = [];
-    if (data.PurchaseOrder  && data.PurchaseOrder.PONO !== "") {
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "") {
         var poData = data.PurchaseOrder;
         if (poData.InboundDelivery) {
             poData.InboundDelivery.forEach(indnItem => {
@@ -437,7 +437,7 @@ var prepareSupplierSearchData = function (data) {
     res.PONumber = data.PONumber;
     res.POItem = data.POItem;
     res.PackingList = data.PackingList;
-    if (data.PurchaseOrder  && data.PurchaseOrder.PONO !== "") {
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "") {
         res.POTYPE = data.PurchaseOrder.POTYPE;
         res.PARTSNO = data.PurchaseOrder.PARTSNO;
         res.POQty = data.PurchaseOrder.POQty;
@@ -462,7 +462,7 @@ var prepareSupplierSearchData = function (data) {
 
     res.data = [];
 
-    if (data.PurchaseOrder  && data.PurchaseOrder.PONO !== "" && data.PurchaseOrder.InboundDelivery) {
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "" && data.PurchaseOrder.InboundDelivery) {
         data.PurchaseOrder.InboundDelivery.filter(inbdItem => inbdItem.ASNNO === data.ASNNumber)
             .forEach(inbdItem => {
                 var item = {};
