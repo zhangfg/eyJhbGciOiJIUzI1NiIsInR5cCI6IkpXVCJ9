@@ -23,13 +23,13 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
     if (fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo') {
         insertLOIPNNo(item.PN, callback);
-    }else if (fcn === 'crCMaterialPulling' && item.PullType === 'LOI') {
+    } else if (fcn === 'crCMaterialPulling' && item.PullType === 'LOI') {
         insertLOIPNNo(item.Product, callback);
-    }else if (fcn === 'crCMaterialPulling' && item.PullType === 'SOI') {
+    } else if (fcn === 'crCMaterialPulling' && item.PullType === 'SOI') {
         // insertSOIPNNo(item.Product, callback);
-    }else if (fcn === 'crCSOIInventoryInfo') {
+    } else if (fcn === 'crCSOIInventoryInfo') {
         insertSOIPNNo(item.PN, callback);
-    }else if (fcn === 'crMappingFlexPO') {
+    } else if (fcn === 'crMappingFlexPO') {
         let odmItem = {
             'CPONO': item.CPONO,
             'FLEXPONO': item.FLEXPONO,
@@ -434,13 +434,14 @@ var insertSOIPNNo = function (partNo, callback) {
         if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
-            readDocument(data._id, function (err, dataItem) {
-                let partNoArr = dataItem.rows.SOIPartNo.filter(item => item === partNo);
-                if (partNoArr.length === 0 ){
-                    dataItem.rows.SOIPartNo.push(partNo);
-                }
-                updateDocument(dataItem, callback);
-            });
+            // readDocument(data._id, function (err, dataItem) {
+            var partNoArr = JSON.stringify(data.rows.SOIPartNo);
+            partNoArr = partNoArr.filter(item => item === partNo);
+            if (partNoArr.length === 0) {
+                data.rows.SOIPartNo.push(partNo);
+            }
+            updateDocument(data, callback);
+            // });
 
         } else {
             var parts = [];
@@ -467,13 +468,14 @@ var insertLOIPNNo = function (partNo, callback) {
         if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
-            readDocument(data._id, function (err, dataItem) {
-                let partNoArr = dataItem.rows.LOIPartNo.filter(item => item === partNo);
-                if (partNoArr.length === 0 ){
-                    dataItem.rows.LOIPartNo.push(partNo);
-                }
-                updateDocument(dataItem, callback);
-            });
+            // readDocument(data._id, function (err, dataItem) {
+            var partNoArr = JSON.stringify(data.rows.LOIPartNo);
+            partNoArr = partNoArr.filter(item => item === partNo);
+            if (partNoArr.length === 0) {
+                data.rows.LOIPartNo.push(partNo);
+            }
+            updateDocument(data, callback);
+            // });
 
         } else {
             var parts = [];
@@ -738,7 +740,7 @@ var queryLOIKeyNo = function (query, vendorNo, callback) {
         logger.info('queryLOIKeyNo Data:', data);
         var queryData = [];
         data.docs.forEach(item => {
-            if(item.rows.LOIPartNo){
+            if (item.rows.LOIPartNo) {
                 item.rows.LOIPartNo.forEach(partItem => {
                     var keyObj = {
                         KeyPrefix: 'WH',
@@ -769,7 +771,7 @@ var querySOIKeyNo = function (query, vendorNo, callback) {
         logger.info('querySOIKeyNo Data:', data);
         var queryData = [];
         data.docs.forEach(item => {
-            if(item.rows.SOIPartNo){
+            if (item.rows.SOIPartNo) {
                 item.rows.SOIPartNo.forEach(partItem => {
                     var keyObj = {
                         KeyPrefix: 'SOI',
@@ -928,10 +930,10 @@ var checkIP = function (ip) {
                     var ipTarg = ipMark.split('.');
                     var ipOrg = ip.split('.');
                     if (ipTarg.length === ipOrg.length && ipTarg.length === 4
-                    && (ipTarg[0] === ipOrg[0] || ipTarg[0] === '*')
-                    && (ipTarg[1] === ipOrg[1] || ipTarg[1] === '*')
-                    && (ipTarg[2] === ipOrg[2] || ipTarg[2] === '*')
-                    && (ipTarg[3] === ipOrg[3] || ipTarg[3] === '*')) {
+                        && (ipTarg[0] === ipOrg[0] || ipTarg[0] === '*')
+                        && (ipTarg[1] === ipOrg[1] || ipTarg[1] === '*')
+                        && (ipTarg[2] === ipOrg[2] || ipTarg[2] === '*')
+                        && (ipTarg[3] === ipOrg[3] || ipTarg[3] === '*')) {
                         // resolve(true);
                         flag = true;
                     }

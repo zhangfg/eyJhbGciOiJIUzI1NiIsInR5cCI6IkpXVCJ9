@@ -1,13 +1,13 @@
 applications:
 - path: .
-  memory: 2048M
+  memory: 1024M
   instances: 1
   domain: mybluemix.net
-  name: LenovoBS
-  host: LenovoBS
+  name: ODMTest
+  host: ODMTest
   disk_quota: 1024M
   services:
   - Cloudant NoSQL DB-gp
-  - Blockchain-Lenovo
+  - Blockchain-Flex
   env:
     redacted_message: '[PRIVATE DATA HIDDEN]'

@@ -2,9 +2,9 @@
   "host": "localhost",
   "port": "4000",
   "jwt_expiretime": "36000",
-  "channelName": "dcgbs",
-  "databaseName": "dcgbs",
-  "chaincodeName": "DCGChain",
+  "channelName": "mychannel",
+  "databaseName": "buy_sell",
+  "chaincodeName": "BuySell",
   "lenovoOrg": "org1",
   "CC_SRC_PATH": "../artifacts",
   "keyValueStore": "/tmp/fabric-client-kvs",
@@ -13,7 +13,7 @@
   "admins": [
     {
       "username": "admin",
-      "secret": "88C34F06F2"
+      "secret": "80C9B79DC6"
     }
   ]
 }

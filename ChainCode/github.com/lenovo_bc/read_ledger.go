@@ -363,7 +363,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 	var c []byte
 
 	for _,whHistory := range whOrder.history {
-		if whHistory.GRNO != "" {
+		if whHistory.GRNO != "" && whHistory.GRNO != "Initial" {
 			pullOrder := ODMLOIMaterial{}
 			err, pullKey := generateKey(stub, PULL_KEY, []string{whHistory.GRNO})
 			if err == nil {
