@@ -435,8 +435,10 @@ var insertSOIPNNo = function (partNo, callback) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
             // readDocument(data._id, function (err, dataItem) {
-            var partNoArr = JSON.stringify(data.rows.SOIPartNo);
-            partNoArr = partNoArr.filter(item => item === partNo);
+            if (!data.rows.SOIPartNo) {
+                data.rows.SOIPartNo = [];
+            }
+            let partNoArr = data.rows.SOIPartNo.filter(item => item === partNo);
             if (partNoArr.length === 0) {
                 data.rows.SOIPartNo.push(partNo);
             }
@@ -469,8 +471,10 @@ var insertLOIPNNo = function (partNo, callback) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
             // readDocument(data._id, function (err, dataItem) {
-            var partNoArr = JSON.stringify(data.rows.LOIPartNo);
-            partNoArr = partNoArr.filter(item => item === partNo);
+            if (!data.rows.LOIPartNo) {
+                data.rows.LOIPartNo = [];
+            }
+            let partNoArr = data.rows.LOIPartNo.filter(item => item === partNo);
             if (partNoArr.length === 0) {
                 data.rows.LOIPartNo.push(partNo);
             }
