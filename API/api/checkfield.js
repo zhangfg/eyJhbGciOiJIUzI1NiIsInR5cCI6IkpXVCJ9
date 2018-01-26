@@ -207,7 +207,7 @@ function CheckDate2(strInputDate) {
         if (y > 3000) {
             return false;
         }
-'        var smonth = '01,02,03,04,05,06,07,08,09,10,11,12';
+        var smonth = '01,02,03,04,05,06,07,08,09,10,11,12';
         if (smonth.indexOf(m) === -1) {
             return false;
         }
