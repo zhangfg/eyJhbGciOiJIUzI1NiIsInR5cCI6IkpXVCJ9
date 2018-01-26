@@ -207,7 +207,7 @@ function CheckDate2(strInputDate) {
         if (y > 3000) {
             return false;
         }
-        var smonth = '01,02,03,04,05,06,07,08,09,10,11,12';
+'        var smonth = '01,02,03,04,05,06,07,08,09,10,11,12';
         if (smonth.indexOf(m) === -1) {
             return false;
         }
@@ -258,7 +258,7 @@ exports.checkMaterialPulling = function (args, callback) {
             if (args[i].PullType === 'LOI') {
                 eventutil.createMaterialPulling(args[i], function (res) {
                     logger.info('liujiang55555555555555555', res);
-                    if ((res.result.RESULT === 0)) {
+                    if ((res.result.RESULT === '0')) {
                         valid = true;
                     } else {
                         logger.info('liujiang666666666666666666666', res.result.MESSAGE);
