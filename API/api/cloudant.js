@@ -435,8 +435,8 @@ var insertSOIPNNo = function (partNo, callback) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
             readDocument(data._id, function (err, dataItem) {
-                var index = dataItem.rows.SOIPartNo.indexOf(partNo);
-                if (index < 0 ){
+                let partNoArr = dataItem.rows.SOIPartNo.filter(item => item === partNo);
+                if (partNoArr.length === 0 ){
                     dataItem.rows.SOIPartNo.push(partNo);
                 }
                 updateDocument(dataItem, callback);
@@ -468,8 +468,8 @@ var insertLOIPNNo = function (partNo, callback) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
             readDocument(data._id, function (err, dataItem) {
-                var index = dataItem.rows.LOIPartNo.indexOf(partNo);
-                if (index < 0 ){
+                let partNoArr = dataItem.rows.LOIPartNo.filter(item => item === partNo);
+                if (partNoArr.length === 0 ){
                     dataItem.rows.LOIPartNo.push(partNo);
                 }
                 updateDocument(dataItem, callback);
