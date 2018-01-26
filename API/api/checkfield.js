@@ -100,9 +100,7 @@ exports.checkField = function (fcn, args) {
                 } else if ((typeof args[i].DlvryDate !== 'string') || (!CheckDate2(args[i].DlvryDate))) {
                     return 'DlveryDate check constraints are not satisfied.';
                 }
-                if (args[i].RequestedDate === '') {
-
-                } else if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
+                 if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
                     return 'RequestedDate check constraints are not satisfied.';
                 }
 
