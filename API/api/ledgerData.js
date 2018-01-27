@@ -1,5 +1,5 @@
 'use strict';
-var cfenv = require('cfenv');
+var moment = require('moment');
 var log4js = require('log4js');
 var logger = log4js.getLogger('LedgerData');
 
@@ -13,8 +13,10 @@ var prepareSearchData = function (keyprefix, respObj) {
         return prepareODMSearchData(respObj);
     } else if (keyprefix === 'SUP') {
         return prepareSupplierSearchData(respObj);
-    } else if (keyprefix === 'SOI' || keyprefix === 'LOI') {
-        return preparePNData(respObj);
+    } else if (keyprefix === 'SOI') {
+        return prepareSOIData(respObj);
+    } else if (keyprefix === 'LOI') {
+        return prepareLOIData(respObj);
     }
 
 };
@@ -504,7 +506,44 @@ var prepareSupplierSearchData = function (data) {
     return res;
 };
 
-var preparePNData = function (data) {
-    return data;
-}
+var prepareLOIData = function (data) {
+    logger.debug('prepareLOIData', data);
+    // var now = moment();
+    // moment().day(-7); // last Sunday (0 - 7)
+    // moment().day(-1); // last Saturday (6 - 7)
+    var lastweekStart = moment().day(-7).format('YYYYMMDD');
+    var lastweekEnd = moment().day(-1).format('YYYYMMDD');
+    logger.debug('prepareLOIData lastweek:' + lastweekStart + '-' + lastweekEnd);
+    var res = {};
+    res.PN = data.PN;
+    res.Quantity = data.Quantity;
+    res.lastweekGRTotal = 0;
+    res.data = [];
+    if (data.WHHistory) {
+        data.WHHistory.forEach(history => {
+            let item = {};
+            item.Qty = history.Qty;
+            item.UpdateDate = history.UpdateDate;
+            item.PullRefNo = history.PullRefNo;
+            item.GRNO = history.GRNO;
+            if (history.GRMaterial) {
+                item.Week = history.Week;
+            }
+
+            if (history.UpdateDate >= lastweekStart && history.UpdateDate <= lastweekEnd) {
+                if (history.GRNO && history.GRNO !== '') {
+                    res.lastweekGRTotal = res.lastweekGRTotal + history.Qty;
+                }
+            }
+            res.data.push(history);
+        });
+    }
+    return res;
+};
+var prepareSOIData = function (data) {
+    var res = {};
+    res.PN = data.PN;
+    res.Quantity = data.Qty;
+    return res;
+};
 exports.prepareSearchData = prepareSearchData;

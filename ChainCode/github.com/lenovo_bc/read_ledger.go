@@ -361,11 +361,21 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 		return errors.New(err.Error()), nil
 	}
 	var c []byte
-
-	for _,whHistory := range whOrder.history {
+	for _, whHistory := range whOrder.WHHistory {
 		if whHistory.GRNO != "" && whHistory.GRNO != "Initial" {
+			grOrder := LOIGRInfo{}
+			err, grKey := generateKey(stub, LOI_KEY, []string{whHistory.GRNO})
+			if err == nil {
+				grObjAsbytes, err := stub.GetState(grKey)
+				if err == nil {
+					err = json.Unmarshal(grObjAsbytes, &grOrder)
+					whHistory.LOIGRInfo = grOrder
+				}
+			}
+		}
+		if whHistory.PullRefNo != "" {
 			pullOrder := ODMLOIMaterial{}
-			err, pullKey := generateKey(stub, PULL_KEY, []string{whHistory.GRNO})
+			err, pullKey := generateKey(stub, PULL_KEY, []string{whHistory.PullRefNo})
 			if err == nil {
 				pullObjAsbytes, err := stub.GetState(pullKey)
 				if err == nil {

@@ -30,21 +30,21 @@ type POAndSOOrder struct {
 
 // WareHouse Key : "WH" + PN
 type WareHouseInfo struct {
-	PN       string             `json:"PN"`       // Pull Reference No  KEY
-	TRANSDOC string             `json:"TRANSDOC"` //Trans doc type
-	Quantity int                `json:"Quantity"` // Quantity
-	history  []WareHouseHistory `json:"history"`  // change log
+	PN       string       `json:"PN"`              // Pull Reference No  KEY
+	TRANSDOC string        `json:"TRANSDOC"`       //Trans doc type
+	Quantity int          `json:"Quantity"`        // Quantity
+	WHHistory  []WareHouseHistory `json:"WHHistory"`  // change log
 }
 
 type WareHouseHistory struct {
-	qty        int    `json:"qty"`        // Quantity
-	updateDate string `json:"updateDate"` // Update Date  GR Date or Pull Date
-	PullRefNo  string `json:"PullRefNo"`  // Pulling Reference No
-	GRNO       string `json:"GRNO"`       // GR NO
-	GRMaterial ODMLOIMaterial `json:"GRMaterial"`       // GR NO
+	Qty        int     `json:"Qty"`       // Quantity
+	UpdateDate string  `json:"UpdateDate"` // Update Date  GR Date or Pull Date
+	PullRefNo  string  `json:"PullRefNo"`  // Pulling Reference No
+	GRNO       string   `json:"GRNO"`      // GR NO
+	GRMaterial ODMLOIMaterial  `json:"GRMaterial"`       // GR NO ONLY for search
+	LOIGRInfo LOIGRInfo  `json:"LOIGRInfo"` // GR NO ONLY for search
 }
 
-// new Ledger TODO
 // SOI Inventory Key: "SOI" + PN
 type SOIInventory struct {
 	PN            string `json:"PN"`            //Pull Reference No  KEY
@@ -135,20 +135,12 @@ type ODMLOIMaterial struct {
 	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
 }
 
-// LOI GR Data Key: LOI + PN
+// LOI GR Data Key: LOI + GRNO
 type LOIGRInfo struct {
-	PN        string      `json:"PN"`        //item PN --Key
-	//TRANSDOC  string      `json:"TRANSDOC"`  //Trans doc type
+	PN        string      `json:"PN"`        //item PN
 	Qty       int         `json:"Qty"`       //item Quantity
 	GRNO      string      `json:"GRNO"`      //DN number
 	GRDate    string      `json:"GRDate"`    //GR PO date
-	GRHistory []GRHistory `json:"GRHistory"` //GR History
-}
-
-type GRHistory struct {
-	GRNO   string `json:"GRNO"`   //Lenovo PO number
-	Qty    int    `json:"Qty"`    //item Quantity
-	GRDate string `json:"GRDate"` //GR PO date
 }
 
 //SalesOrder   Key: "SO"+So number + Item_no
