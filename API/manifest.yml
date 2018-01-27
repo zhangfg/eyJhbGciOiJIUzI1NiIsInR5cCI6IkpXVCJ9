@@ -3,11 +3,11 @@ applications:
   memory: 1024M
   instances: 1
   domain: mybluemix.net
-  name: ODMTest
-  host: ODMTest
+  name: LBSTest
+  host: LBSTest
   disk_quota: 1024M
   services:
   - Cloudant NoSQL DB-gp
-  - Blockchain-Flex
+  - Blockchain-Lenovo
   env:
     redacted_message: '[PRIVATE DATA HIDDEN]'

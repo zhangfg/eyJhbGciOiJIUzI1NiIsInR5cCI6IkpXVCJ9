@@ -257,11 +257,11 @@ exports.checkMaterialPulling = function (args, callback) {
         for (var i = 0; i < args.length; i++) {
             if (args[i].PullType === 'LOI') {
                 eventutil.createMaterialPulling(args[i], function (res) {
-                    logger.info('liujiang55555555555555555', res);
+                    // logger.info('liujiang55555555555555555', res);
                     if ((res.result.RESULT === '0')) {
                         valid = true;
                     } else {
-                        logger.info('liujiang666666666666666666666', res.result.MESSAGE);
+                        // logger.info('liujiang666666666666666666666', res.result.MESSAGE);
                         valid = false;
                     }
                     callback(valid);
