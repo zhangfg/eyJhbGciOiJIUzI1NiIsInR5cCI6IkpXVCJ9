@@ -261,6 +261,18 @@ function insertSupplierSearchDoc(fcn, item, role, peers, channelName, chaincodeN
 
 }
 
+function insertSupplierSearchDocs(fcn, reqData, role, peers, channelName, chaincodeName, username, orgname, vendorNo) {
+    let initSupSec = 0;
+    reqData.filter(item => item.TRANSDOC === 'SUP').forEach(item => {
+        let supSec = initSupSec * 100;
+        setTimeout(function () {
+            insertSupplierSearchDoc(fcn, item, role, peers, channelName, chaincodeName, username, orgname, vendorNo);
+        }, supSec);
+        initSupSec++;
+    });
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -534,6 +546,8 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         res.json(getErrorMessage('\'args\''));
         return;
     }
+    var reqData = req.body.args;
+
     var checkResult = checkfield.checkField(fcn, req.body.args);
     if (checkResult !== '') {
         return res.json(getInvokeErrorMessage(checkResult));
@@ -543,42 +557,38 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
             if (!valid) {
                 res.json(getInvokeErrorMessage('input material pulling  data dissatisfy'));
                 return;
+            } else {
+                cloudant.insertSearchDocuments(fcn, role, reqData, req.vendorNo);
+                insertSupplierSearchDocs(fcn, reqData, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo);
+                logger.debug('==================== INSERT DATA TO DATABASE==================');
+
+                invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
+                    .then(function (message) {
+                        res.json(getInvokeSuccessMessage(message));
+                        return;
+                    }, (err) => {
+                        logger.debug('error is ' + err);
+                        res.json(getInvokeErrorMessage(err));
+                        return;
+                    });
             }
         });
+    } else {
+        cloudant.insertSearchDocuments(fcn, role, reqData, req.vendorNo);
+        insertSupplierSearchDocs(fcn, reqData, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo);
+        logger.debug('==================== INSERT DATA TO DATABASE==================');
+
+        invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
+            .then(function (message) {
+                res.json(getInvokeSuccessMessage(message));
+                return;
+            }, (err) => {
+                logger.debug('error is ' + err);
+                res.json(getInvokeErrorMessage(err));
+                return;
+            });
     }
-    logger.debug('==================== INSERT DATA TO DATABASE==================');
-    var reqData = req.body.args;
-    let initSec = 0;
-    reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO' || fcn === 'crMappingFlexPO'
-        || fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo' || fcn === 'crCSOIInventoryInfo'
-        || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
-        .forEach(item => {
-            let sec = initSec * 100;
 
-            setTimeout(function () {
-                insertSearchDocument(fcn, role, item, req.vendorNo);
-            }, sec);
-            initSec++;
-        });
-
-    let initSupSec = 0;
-    reqData.filter(item => item.TRANSDOC === 'SUP').forEach(item => {
-        let supSec = initSupSec * 100;
-        setTimeout(function () {
-            insertSupplierSearchDoc(fcn, item, role, peers, channelName, chaincodeName, req.username, req.orgname, req.vendorNo);
-        }, supSec);
-        initSupSec++;
-    });
-
-    invoke.invokeChaincode(peers, channelName, chaincodeName, fcn, args, req.username, req.orgname)
-        .then(function (message) {
-            res.json(getInvokeSuccessMessage(message));
-            return;
-        }, (err) => {
-            logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage(err));
-            return;
-        });
 });
 // Query on chaincode on target peers
 app.get('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req, res) {
@@ -893,7 +903,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
     cloudant.queryItemNo(args, req.vendorNo, function (resp) {
         // logger.debug('resp', resp);
         var jsonStr = JSON.stringify(resp);
-        if(jsonStr.length === 0){
+        if (jsonStr.length === 0) {
             logger.debug('jsonStr.length: no data in cloudant DB is empty');
             res.json(getQuerySuccessMessage(jsonStr));
             return;

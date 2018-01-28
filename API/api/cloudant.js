@@ -19,6 +19,25 @@ if (dbCreds) {
     logger.error('NO DB!');
 }
 
+var insertSearchDocuments = function (fcn, roleId, reqData, vendorNo) {
+    logger.debug('insertSearchDocument:', insertSearchDocuments);
+    let initSec = 0;
+    reqData.filter(item => item.TRANSDOC === 'SO' || item.TRANSDOC === 'PO' || fcn === 'crMappingFlexPO'
+        || fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo' || fcn === 'crCSOIInventoryInfo'
+        || (fcn === 'crCMaterialPulling' && item.PullType === 'LOI'))
+        .forEach(item => {
+            let sec = initSec * 100;
+
+            setTimeout(function () {
+                insertSearchDocument(fcn, roleId, item, vendorNo);
+            }, sec);
+            initSec++;
+        });
+
+
+
+};
+
 var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
     logger.debug('insertSearchDocument:', roleId);
     if (fcn === 'initWHQty' || fcn === 'crCGoodReceiveInfo') {
@@ -96,23 +115,6 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
     }
 
 };
-var queryItemNo = function (query, vendorNo, callback) {
-    logger.debug('queryItemNo:', query);
-    if (query.keyprefix === 'SO') {
-        querySoKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'PO') {
-        queryPoKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'CPO') {
-        queryODMKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'SUP') {
-        querySupplierKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'LOI') {
-        queryLOIKeyNo(query, vendorNo, callback);
-    } else if (query.keyprefix === 'SOI') {
-        querySOIKeyNo(query, vendorNo, callback);
-    }
-
-}
 var insertSoSearchDocument = function (roleId, docObj, vendorNo, callback) {
     logger.debug('insertSearchDocument--SO--', docObj);
     // var local = this;
@@ -496,6 +498,23 @@ var insertLOIPNNo = function (partNo, callback) {
     });
 };
 
+var queryItemNo = function (query, vendorNo, callback) {
+    logger.debug('queryItemNo:', query);
+    if (query.keyprefix === 'SO') {
+        querySoKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'PO') {
+        queryPoKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'CPO') {
+        queryODMKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'SUP') {
+        querySupplierKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'LOI') {
+        queryLOIKeyNo(query, vendorNo, callback);
+    } else if (query.keyprefix === 'SOI') {
+        querySOIKeyNo(query, vendorNo, callback);
+    }
+
+}
 var querySoKeyNo = function (query, vendorNo, callback) {
     logger.debug('queryItemNo--SO:', query);
     var selector = {
@@ -951,6 +970,7 @@ var checkIP = function (ip) {
 
 exports.login = login;
 exports.queryItemNo = queryItemNo;
+exports.insertSearchDocuments = insertSearchDocuments;
 exports.insertSearchDocument = insertSearchDocument;
 exports.insertNewAttachment = insertNewAttachment;
 exports.insertAttachment = insertAttachment;
