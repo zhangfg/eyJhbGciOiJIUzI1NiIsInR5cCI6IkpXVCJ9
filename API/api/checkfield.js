@@ -248,28 +248,42 @@ function CheckDate2(strInputDate) {
     } else {
         return false;
     }
-}
+};
 
+var createMaterialPulling =function (arg) {
+    return new Promise(function(resolve,reject){
+        eventutil.createMaterialPulling(arg, function (res) {
+            if ((res.result.RESULT === '0')) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
 
+};
 exports.checkMaterialPulling = function (args, callback) {
-    var valid;
+    let promiseList = [];
+    let ret = true;
     if (args.length > 0) {
-        for (var i = 0; i < args.length; i++) {
+        for (let i = 0; i < args.length; i++) {
             if (args[i].PullType === 'LOI') {
-                eventutil.createMaterialPulling(args[i], function (res) {
-                    // logger.info('liujiang55555555555555555', res);
-                    if ((res.result.RESULT === '0')) {
-                        valid = true;
-                    } else {
-                        // logger.info('liujiang666666666666666666666', res.result.MESSAGE);
-                        valid = false;
-                    }
-                    callback(valid);
-                });
+                let promise = createMaterialPulling(args[i]);
+                promiseList.push(promise);
             }
 
         }
-        
     }
 
-}
+    Promise.all(promiseList).then(datas => {
+        datas.forEach(result => {
+            if(!result){
+                ret = false;
+            }
+        });
+        callback(ret);
+    });
+    if (promiseList.length === 0){
+        callback(true);
+    }
+};
