@@ -29,7 +29,9 @@ var insertSearchDocuments = function (fcn, roleId, reqData, vendorNo) {
             let sec = initSec * 100;
 
             setTimeout(function () {
-                insertSearchDocument(fcn, roleId, item, vendorNo);
+                insertSearchDocument(fcn, roleId, item, vendorNo,function (data) {
+                    logger.debug('insertSearchDocument',data);
+                });
             }, sec);
             initSec++;
         });
