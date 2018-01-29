@@ -684,7 +684,7 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
                             keyObj.KeysStart.push(flexPONo);
                             queryData.push(keyObj);
                         }
-                    } else {
+                    } else if(flexPONo !== "") {
                         keyObj.KeysStart.push(flexPONo);
                         queryData.push(keyObj);
                     }

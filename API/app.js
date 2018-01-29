@@ -903,7 +903,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
     cloudant.queryItemNo(args, req.vendorNo, function (resp) {
         // logger.debug('resp', resp);
         var jsonStr = JSON.stringify(resp);
-        if (jsonStr.length === 0) {
+        if (resp.length === 0) {
             logger.debug('jsonStr.length: no data in cloudant DB is empty');
             res.json(getQuerySuccessMessage(jsonStr));
             return;
