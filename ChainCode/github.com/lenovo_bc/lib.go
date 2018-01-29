@@ -93,8 +93,8 @@ type CPONOFLEXPONO struct {
 type ODMPurchaseOrder struct {
 	FLEXPONO      string       	   `json:"FLEXPONO"`         //Customer purchase order number  index
 	TRANSDOC      string           `json:"TRANSDOC"`
-	Payments      []ODMPayment     `json:"Payments"`      //Billing info
-	GRInfos       []ODMGRInfo      `json:"GRInfos"`       //GR info
+	ODMPayments   []ODMPayment  	`json:"ODMPayments"`      //Billing info
+	ODMGRInfos    []ODMGRInfo      `json:"ODMGRInfos"`       //GR info
 	CPONO      	  string       	   `json:"CPONO"`         //Customer purchase order number
 	CPONOFLEXPONO CPONOFLEXPONO    `json:"CPONOFLEXPONO"`    //CPONOFLEXPONO Order info, only for search
 }
@@ -110,7 +110,7 @@ type ODMPayment struct {
 type ODMGRInfo struct {
 	GRNO    string `json:"GRNO"`    //FLEX GR No
 	PARTNUM string `json:"PARTNUM"` //PART No
-	GRQTY   string `json:"GRQTY"`   // received qty
+	GRQTY   int `json:"GRQTY"`   // received qty
 	GRDate  string `json:"GRDate"`   // received Date
 }
 

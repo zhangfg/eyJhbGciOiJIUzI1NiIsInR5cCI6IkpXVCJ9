@@ -78,7 +78,7 @@ func filterCPurchaseOrder(valAsbytes []byte, userRole string) (error, []byte) {
 	}
 	if userRole != ROLE_ID_LENOVO && userRole != ROLE_ID_ODM {
 		//purchaseOrder.POItemChgDate = STAR;
-		for _, cpo := range cPoOrder.Payments {
+		for _, cpo := range cPoOrder.ODMPayments {
 			cpo.INVOICESTATUS = STAR
 		}
 	}
@@ -141,8 +141,8 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 							err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
 							if err == nil {
 								err = json.Unmarshal(flexObjAsbytes, &flexOrder)
-								salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.Payments...)
-								salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.GRInfos...)
+								salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.ODMPayments...)
+								salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.ODMGRInfos...)
 							}
 						}
 					}
@@ -225,8 +225,8 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 									err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
 									if err == nil {
 										err = json.Unmarshal(flexObjAsbytes, &flexOrder)
-										salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.Payments...)
-										salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.GRInfos...)
+										salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.ODMPayments...)
+										salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.ODMGRInfos...)
 									}
 								}
 							}

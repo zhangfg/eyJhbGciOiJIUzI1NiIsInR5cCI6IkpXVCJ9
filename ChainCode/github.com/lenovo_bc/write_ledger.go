@@ -536,33 +536,33 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 					return shim.Error(err.Error())
 				}
 				if order.TRANSDOC == "GR" {
-					for _, subObject := range order.GRInfos {
+					for _, subObject := range order.ODMGRInfos {
 						//cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
 						var exist = false
-						for i, child := range cPOOrder.GRInfos {
+						for i, child := range cPOOrder.ODMGRInfos {
 							if child.GRNO == subObject.GRNO {
-								cPOOrder.GRInfos[i] = subObject
+								cPOOrder.ODMGRInfos[i] = subObject
 								exist = true
 							}
 						}
 						if (exist == false) {
-							cPOOrder.GRInfos = append(cPOOrder.GRInfos, subObject)
+							cPOOrder.ODMGRInfos = append(cPOOrder.ODMGRInfos, subObject)
 						}
 
 					}
 				} else if order.TRANSDOC == "PY" {
 
-					for _, subObject := range order.Payments {
+					for _, subObject := range order.ODMPayments {
 						//cPOOrder.Payments = append(cPOOrder.Payments, subObject)
 						var exist = false
-						for i, child := range cPOOrder.Payments {
+						for i, child := range cPOOrder.ODMPayments {
 							if child.FlexInvoiceNO == subObject.FlexInvoiceNO {
-								cPOOrder.Payments[i] = subObject
+								cPOOrder.ODMPayments[i] = subObject
 								exist = true
 							}
 						}
 						if (!exist) {
-							cPOOrder.Payments = append(cPOOrder.Payments, subObject)
+							cPOOrder.ODMPayments = append(cPOOrder.ODMPayments, subObject)
 						}
 					}
 				}
@@ -573,9 +573,9 @@ func crCPurchaseOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Re
 				var c []byte
 				cPOOrder := ODMPurchaseOrder{}
 				if order.TRANSDOC == "GR" {
-					cPOOrder.GRInfos = order.GRInfos
+					cPOOrder.ODMGRInfos = order.ODMGRInfos
 				} else if order.TRANSDOC == "PY" {
-					cPOOrder.Payments = order.Payments
+					cPOOrder.ODMPayments = order.ODMPayments
 				}
 				c, _ = json.Marshal(cPOOrder)
 				stub.PutState(flexKey, c)

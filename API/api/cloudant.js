@@ -35,7 +35,6 @@ var insertSearchDocuments = function (fcn, roleId, reqData, vendorNo) {
         });
 
 
-
 };
 
 var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
@@ -52,6 +51,7 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
         let odmItem = {
             'CPONO': item.CPONO,
             'FLEXPONO': item.FLEXPONO,
+            'CPOFLEX': 'TRUE',
             'SOCDATE': '',
             'SONUMBER': '',
             'SOITEM': '',
@@ -80,7 +80,8 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
             'CPONO': item.CPONO,
             'PARTSNO': item.PARTSNO,
             'VENDORNO': item.VENDORNO,
-            'FLEXPONO': ['']
+            'CPOFLEX': 'FALSE',
+            'FLEXPONO': []
         };
         insertODMSearchDocument(roleId, odmItem, vendorNo, callback);
     } else if (item.TRANSDOC === 'PO') {
@@ -282,8 +283,10 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
                 if (docObj.VENDORNO) {
                     dataItem.rows.vendorNo = docObj.VENDORNO;
                 }
-
-                if (docObj.FLEXPONO) {
+                if (docObj.CPOFLEX) {
+                    dataItem.rows.CPOFLEX = docObj.CPOFLEX;
+                }
+                if (docObj.FLEXPONO && docObj.FLEXPONO.length > 0) {
                     dataItem.rows.FLEXPONO = docObj.FLEXPONO;
                 }
 
@@ -300,7 +303,8 @@ var insertODMSearchDocument = function (roleId, docObj, vendorNo, callback) {
                     'itemNo': docObj.SOITEM,
                     'partNo': docObj.PARTSNO,
                     'vendorNo': docObj.VENDORNO,
-                    'FLEXPONO': docObj.FLEXPONO
+                    'FLEXPONO': docObj.FLEXPONO,
+                    'CPOFLEX': docObj.CPOFLEX
                 }
             };
             logger.info('insert the information of the ODM', insertObject);
@@ -654,9 +658,9 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
     if (query.cPoNo) {
         selector.rows.cPoNo = {"$eq": query.cPoNo};
     }
-    // if (query.flexPONo) {
-    //     selector.rows.FLEXPONO = {"$in": query.flexPONo};
-    // }
+    if (query.flexPONo) {
+        selector.rows.CPOFLEX = {"$eq": 'TRUE'};
+    }
     if (query.partNo) {
         selector.rows.partNo = {"$eq": query.partNo};
     }
@@ -684,7 +688,7 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
                             keyObj.KeysStart.push(flexPONo);
                             queryData.push(keyObj);
                         }
-                    } else if(flexPONo !== "") {
+                    } else if (flexPONo !== "") {
                         keyObj.KeysStart.push(flexPONo);
                         queryData.push(keyObj);
                     }
