@@ -261,7 +261,6 @@ type PurchaseOrder struct {
 	Confirmation    []Confirmation    `json:"Confirmation"`    //Confirmation
 	InboundDelivery []InboundDelivery `json:"InboundDelivery"` //Inbound Delivery
 	Invoice         []Invoice         `json:"Invoice"`         //Invoice
-	SupplierOrders  []SupplierOrder   `json:"SupplierOrders"`  //SupplierOrder
 }
 
 type GRInfo struct {
@@ -311,6 +310,7 @@ type InboundDelivery struct {
 	UPDATEDAY  string `json:"UPDATEDAY"`  // InboundDelivery UPDATEDAY
 	UPTIME     string `json:"UPTIME"`     // InboundDelivery UPTIME
 	UPNAME     string `json:"UPNAME"`     // InboundDelivery UPNAME
+	SupplierOrder  SupplierOrder   `json:"SupplierOrder"`  //SupplierOrder ONLY for search
 }
 
 type Invoice  struct {
@@ -321,7 +321,7 @@ type Invoice  struct {
 	PostDate    string `json:"PostDate"`   //Posting Date
 	BaseDate  string `json:"BaseDate"`     //Baseline Date
 	VenInvNO  string `json:"VenInvNO"`     //Vendor Invoice Number
-	comCode   string `json:"comCode"`      //Company Code
+	ComCode   string `json:"comCode"`      //Company Code
 	VendorNO  string `json:"VendorNO"`     //Vendor Number
 	InvStatus string `json:"InvStatus"`    //Inv. Status
 	InvItemNO string `json:"InvItemNO"`    //Item Number

@@ -3,7 +3,7 @@ package main
 import (
 	// "bytes"
 	"fmt"
-	"errors"
+	//"errors"
 	//"strconv"
 	// "encoding/pem"
 	// "crypto/x509"
@@ -282,55 +282,6 @@ func updateWarehouse(stub shim.ChaincodeStubInterface, valAsbytes []byte, Objtyp
 		}
 	}
 	return nil
-}
-
-// update PO
-func updatePurchaseOrderBySupplier(stub shim.ChaincodeStubInterface, valAsbytes []byte) (error, string, []byte) {
-	supOrder := SupplierOrder{}
-	err := json.Unmarshal(valAsbytes, &supOrder)
-	if err != nil {
-		return err, "", valAsbytes
-	}
-	err, key := generateKey(stub, PO_KEY, []string{supOrder.PONumber, supOrder.POItem})
-	if err != nil {
-		return err, "", valAsbytes
-	}
-	fmt.Println("write data,SUP - PO for - " + key)
-	//business control
-	//get SO object from ledger
-	poAsbytes, err := stub.GetState(key)
-	var b []byte
-	if err == nil && poAsbytes != nil {
-		var oldPoObj = PurchaseOrder{}
-		err = json.Unmarshal(poAsbytes, &oldPoObj)
-		if err != nil {
-			return err, "", valAsbytes
-		}
-		exist := false
-		for _, order := range oldPoObj.SupplierOrders {
-			if order.ASNNumber == supOrder.ASNNumber && order.VendorNO == supOrder.VendorNO {
-				exist = true
-				fmt.Println("update data,SUP - PO for - " + key)
-				order.ShippedQty = supOrder.ShippedQty
-				order.ASNDate = supOrder.ASNDate
-				order.PromisedDate = supOrder.PromisedDate
-				order.CarrierID = supOrder.CarrierID
-				order.CarrierTrackID = supOrder.CarrierTrackID
-				order.TransporatationMode = supOrder.TransporatationMode
-				order.CountryOfOrigin = supOrder.CountryOfOrigin
-				order.PackingList = supOrder.PackingList
-			}
-		}
-		if !exist {
-			fmt.Println("insert data,SUP - PO for - " + key)
-			oldPoObj.SupplierOrders = append(oldPoObj.SupplierOrders, supOrder)
-		}
-		b, _ = json.Marshal(oldPoObj)
-		return nil, key, b
-	} else {
-		return errors.New(err.Error()), "", nil
-	}
-
 }
 
 //创建，修改SO信息
@@ -674,16 +625,16 @@ func crSupplierOrderInfo(stub shim.ChaincodeStubInterface, args []string) pb.Res
 			} else {
 				c, _ = json.Marshal(order)
 			}
-			if (order.PONumber != "" && order.POItem != "") {
-				err, poKey, b := updatePurchaseOrderBySupplier(stub, c)
-				if err != nil {
-					return shim.Error(err.Error())
-				}
-				if b == nil {
-					return shim.Error("PO item NO is not correct")
-				}
-				stub.PutState(poKey, b)
-			}
+			//if (order.PONumber != "" && order.POItem != "") {
+			//	err, poKey, b := updatePurchaseOrderBySupplier(stub, c)
+			//	if err != nil {
+			//		return shim.Error(err.Error())
+			//	}
+			//	if b == nil {
+			//		return shim.Error("PO item NO is not correct")
+			//	}
+			//	stub.PutState(poKey, b)
+			//}
 
 			stub.PutState(sup_key, c)
 

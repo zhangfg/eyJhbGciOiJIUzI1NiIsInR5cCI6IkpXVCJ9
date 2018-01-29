@@ -127,6 +127,7 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 		fmt.Println("get CPO object in SO,CPO key:" + cpoKey)
 		if err == nil {
 			cpoObjAsbytes, err := stub.GetState(cpoKey)
+			err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
 			if err == nil {
 				cpoOrder := CPONOFLEXPONO{}
 				err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
@@ -161,6 +162,21 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 			if err == nil {
 				err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 				err = json.Unmarshal(poObjAsbytes, &POOrder)
+				for _,inbdItem := range POOrder.InboundDelivery {
+					supOrder := SupplierOrder{}
+					err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
+					fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
+					if err == nil {
+						supObjAsbytes, err := stub.GetState(supKey)
+						err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+						if err == nil {
+							err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+							err = json.Unmarshal(supObjAsbytes, &supOrder)
+							inbdItem.SupplierOrder = supOrder
+						}
+					}
+				}
+
 				order.PurchaseOrder = POOrder
 			}
 		}
@@ -195,6 +211,7 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 				fmt.Println("get CPO object in SO,CPO key:" + cpoKey)
 				if err == nil {
 					cpoObjAsbytes, err := stub.GetState(cpoKey)
+					err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
 					if err == nil {
 						cpoOrder := CPONOFLEXPONO{}
 						err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
@@ -223,7 +240,19 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 			}
 		}
 	}
-
+	for _,inbdItem := range purchaseOrder.InboundDelivery {
+		supOrder := SupplierOrder{}
+		err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
+		fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
+		if err == nil {
+			supObjAsbytes, err := stub.GetState(supKey)
+			if err == nil {
+				err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+				err = json.Unmarshal(supObjAsbytes, &supOrder)
+				inbdItem.SupplierOrder = supOrder
+			}
+		}
+	}
 	order.PurchaseOrder = purchaseOrder
 	c, _ = json.Marshal(order)
 	return nil, c
@@ -241,6 +270,7 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 		fmt.Println("get CPO object in Flex Object, cpokey:" + cpoKey)
 		if err == nil {
 			cpoObjAsbytes, err := stub.GetState(cpoKey)
+			err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
 			if err == nil {
 				cPoOrder := CPONOFLEXPONO{}
 				err := json.Unmarshal(cpoObjAsbytes, &cPoOrder)
@@ -268,6 +298,19 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 							if err == nil {
 								err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 								err = json.Unmarshal(poObjAsbytes, &poOrder)
+								for _,inbdItem := range poOrder.InboundDelivery {
+									supOrder := SupplierOrder{}
+									err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
+									fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
+									if err == nil {
+										supObjAsbytes, err := stub.GetState(supKey)
+										if err == nil {
+											err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+											err = json.Unmarshal(supObjAsbytes, &supOrder)
+											inbdItem.SupplierOrder = supOrder
+										}
+									}
+								}
 								cPoOrder.PurchaseOrder = poOrder
 							}
 						}
@@ -313,6 +356,19 @@ func integrateCustomerPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valA
 			if err == nil {
 				err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 				err = json.Unmarshal(poObjAsbytes, &poOrder)
+				for _,inbdItem := range poOrder.InboundDelivery {
+					supOrder := SupplierOrder{}
+					err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
+					fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
+					if err == nil {
+						supObjAsbytes, err := stub.GetState(supKey)
+						if err == nil {
+							err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+							err = json.Unmarshal(supObjAsbytes, &supOrder)
+							inbdItem.SupplierOrder = supOrder
+						}
+					}
+				}
 				cPoOrder.PurchaseOrder = poOrder
 			}
 		}
@@ -373,6 +429,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 			err, grKey := generateKey(stub, LOI_KEY, []string{whHistory.GRNO})
 			if err == nil {
 				grObjAsbytes, err := stub.GetState(grKey)
+				err, grObjAsbytes = filterByUserRole(grObjAsbytes, LOI_KEY, userRole)
 				if err == nil {
 					err = json.Unmarshal(grObjAsbytes, &grOrder)
 					whHistory.LOIGRInfo = grOrder
@@ -384,6 +441,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 			err, pullKey := generateKey(stub, PULL_KEY, []string{whHistory.PullRefNo})
 			if err == nil {
 				pullObjAsbytes, err := stub.GetState(pullKey)
+				err, pullObjAsbytes = filterByUserRole(pullObjAsbytes, PULL_KEY, userRole)
 				if err == nil {
 					err = json.Unmarshal(pullObjAsbytes, &pullOrder)
 
@@ -393,6 +451,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 						if err == nil {
 							cpoObject := CPONOFLEXPONO{}
 							cpoObjAsbytes, err := stub.GetState(cpoKey)
+							err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
 							if err == nil {
 								err = json.Unmarshal(cpoObjAsbytes, &cpoObject)
 

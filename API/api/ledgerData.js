@@ -86,12 +86,10 @@ var prepareSOSearchData = function (data) {
                         }
                     });
                 }
-                if (poData.SupplierOrders) {
-                    poData.SupplierOrders.filter(supItem => supItem.ASNNumber === indnItem.ASNNO).forEach(supItem => {
-                        item.PackingList = supItem.PackingList;
-                    });
-                }
 
+                if (indnItem.SupplierOrder) {
+                    item.PackingList = indnItem.SupplierOrder.PackingList;
+                }
                 if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
                     var soData = data.SalesOrder;
                     item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;
@@ -194,11 +192,8 @@ var prepareSOSearchData = function (data) {
                                             }
                                         });
                                 }
-                                if (poData.SupplierOrders) {
-                                    poData.SupplierOrders.filter(supItem => supItem.ASNNumber === inbdItem.ASNNO)
-                                        .forEach(supItem => {
-                                            item.PackingList = supItem.PackingList;
-                                        });
+                                if (inbdItem.SupplierOrder) {
+                                    item.PackingList = inbdItem.SupplierOrder.PackingList;
                                 }
                             });
                     }
@@ -277,10 +272,8 @@ var preparePOSearchData = function (data) {
                         }
                     });
                 }
-                if (poData.SupplierOrders) {
-                    poData.SupplierOrders.filter(supItem => supItem.ASNNumber === indnItem.ASNNO).forEach(supItem => {
-                        item.PackingList = supItem.PackingList;
-                    });
+                if (indnItem.SupplierOrder) {
+                    item.PackingList = indnItem.SupplierOrder.PackingList;
                 }
 
                 if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
@@ -411,11 +404,9 @@ var prepareODMSearchData = function (data) {
                                                         item.GRNO = grItem.GRNO;
                                                     });
                                             }
-                                            if (odmData.PurchaseOrder && odmData.PurchaseOrder.SupplierOrders) {
-                                                odmData.PurchaseOrder.SupplierOrders.filter(supItem => inbdItem.ASNNO === supItem.ASNNumber)
-                                                    .forEach(supItem => {
-                                                        item.PackingList = supItem.PackingList;
-                                                    });
+
+                                            if (inbdItem.SupplierOrder) {
+                                                item.PackingList = inbdItem.SupplierOrder.PackingList;
                                             }
                                         });
                                 }
