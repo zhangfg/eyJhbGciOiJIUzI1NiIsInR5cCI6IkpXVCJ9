@@ -508,34 +508,55 @@ var prepareSupplierSearchData = function (data) {
 
 var prepareLOIData = function (data) {
     logger.debug('prepareLOIData', data);
-    // var now = moment();
+    var today = moment().format('YYYYMMDD');
     // moment().day(-7); // last Sunday (0 - 7)
     // moment().day(-1); // last Saturday (6 - 7)
     var lastweekStart = moment().day(-7).format('YYYYMMDD');
     var lastweekEnd = moment().day(-1).format('YYYYMMDD');
+    var thisweekStart = moment().day(0).format('YYYYMMDD');
+    var thisweekEnd = moment().day(6).format('YYYYMMDD');
     logger.debug('prepareLOIData lastweek:' + lastweekStart + '-' + lastweekEnd);
     var res = {};
     res.PN = data.PN;
-    res.Quantity = data.Quantity;
-    res.lastweekGRTotal = 0;
+    res.total = data.Quantity;
+    res.lastweekTotal = 0;
+    res.todayTotal = 0;
+    res.thisweekTotal = 0;
+
     res.data = [];
     if (data.WHHistory) {
         data.WHHistory.forEach(history => {
             let item = {};
+            item.PN = data.PN;
             item.Qty = history.Qty;
             item.UpdateDate = history.UpdateDate;
             item.PullRefNo = history.PullRefNo;
             item.GRNO = history.GRNO;
             if (history.GRMaterial) {
-                item.Week = history.Week;
+                item.Week = history.GRMaterial.Week;
+                item.FLEXPONO = history.GRMaterial.FLEXPONO;
+                if (history.GRMaterial.CPONOFLEXPONO) {
+                    let cpoObject = history.GRMaterial.CPONOFLEXPONO;
+                    item.SONUMBER = cpoObject.SONUMBER;
+                }
             }
 
             if (history.UpdateDate >= lastweekStart && history.UpdateDate <= lastweekEnd) {
                 if (history.GRNO && history.GRNO !== '') {
-                    res.lastweekGRTotal = res.lastweekGRTotal + history.Qty;
+                    res.lastweekTotal = res.lastweekTotal + history.Qty;
                 }
             }
-            res.data.push(history);
+            if (history.UpdateDate === today) {
+                if (history.GRNO && history.GRNO !== '') {
+                    res.todayTotal = res.todayTotal + history.Qty;
+                }
+            }
+            if (history.UpdateDate >= thisweekStart && history.UpdateDate <= thisweekEnd) {
+                if (history.GRNO && history.GRNO !== '') {
+                    res.thisweekTotal = res.thisweekTotal + history.Qty;
+                }
+            }
+            res.data.push(item);
         });
     }
     return res;
@@ -543,7 +564,9 @@ var prepareLOIData = function (data) {
 var prepareSOIData = function (data) {
     var res = {};
     res.PN = data.PN;
-    res.Quantity = data.Qty;
+    res.total = data.Qty;
+    res.PartDesc = data.PartDesc;
+    res.SupplierName = data.SupplierName;
     return res;
 };
 exports.prepareSearchData = prepareSearchData;

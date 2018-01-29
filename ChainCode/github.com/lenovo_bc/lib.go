@@ -96,7 +96,7 @@ type ODMPurchaseOrder struct {
 	Payments      []ODMPayment     `json:"Payments"`      //Billing info
 	GRInfos       []ODMGRInfo      `json:"GRInfos"`       //GR info
 	CPONO      	  string       	   `json:"CPONO"`         //Customer purchase order number
-	CPONOFLEXPONO CPONOFLEXPONO    `json:"SalesOrder"`    //Sales Order info, only for search
+	CPONOFLEXPONO CPONOFLEXPONO    `json:"CPONOFLEXPONO"`    //CPONOFLEXPONO Order info, only for search
 }
 
 
@@ -123,7 +123,7 @@ type FLEXPONOREF struct {
 // Upload  LOI Pull Data TRANSDOC: "PULL" + Ref No
 type ODMLOIMaterial struct {
 	RefNo               string `json:"RefNo"`               //Pull Reference No
-	//TRANSDOC      		string `json:"TRANSDOC"`
+	FLEXPONO      		string `json:"FLEXPONO"`
 	PullType            string `json:"PullType"`            //Pull type
 	Week                string `json:"Week"`                //Week
 	PullDate            string `json:"PullDate"`            //Actual Pull Date
@@ -133,6 +133,7 @@ type ODMLOIMaterial struct {
 	DlvryDate           string `json:"DlvryDate"`           //RequestedDeliveryDate
 	RequestedDate       string `json:"RequestedDate"`       //RequestedDate
 	ShipmentInstruction string `json:"ShipmentInstruction"` //ShipmentInstruction
+	CPONOFLEXPONO CPONOFLEXPONO    `json:"CPONOFLEXPONO"`    //CPONOFLEXPONO Order info, only for search
 }
 
 // LOI GR Data Key: LOI + GRNO

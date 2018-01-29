@@ -245,28 +245,34 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 				cPoOrder := CPONOFLEXPONO{}
 				err := json.Unmarshal(cpoObjAsbytes, &cPoOrder)
 				if err == nil {
-					soOrder := SalesOrder{}
-					err, soKey := generateKey(stub, SO_KEY, []string{cPoOrder.SONUMBER, cPoOrder.SOITEM})
-					fmt.Println("get SO object in Flex Object, sokey:" + soKey)
-					if err == nil {
-						soObjAsbytes, err := stub.GetState(soKey)
+					if cPoOrder.SONUMBER != "" && cPoOrder.SOITEM != "" {
+						soOrder := SalesOrder{}
+						err, soKey := generateKey(stub, SO_KEY, []string{cPoOrder.SONUMBER, cPoOrder.SOITEM})
+						fmt.Println("get SO object in Flex Object, sokey:" + soKey)
 						if err == nil {
-							err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
-							err = json.Unmarshal(soObjAsbytes, &soOrder)
-							cPoOrder.SalesOrder = soOrder
+							soObjAsbytes, err := stub.GetState(soKey)
+							if err == nil {
+								err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
+								err = json.Unmarshal(soObjAsbytes, &soOrder)
+								cPoOrder.SalesOrder = soOrder
+							}
 						}
 					}
-					poOrder := PurchaseOrder{}
-					err, poKey := generateKey(stub, PO_KEY, []string{cPoOrder.PONO, cPoOrder.POITEM})
-					fmt.Println("get PO object in Flex Object, poKey:" + poKey)
-					if err == nil {
-						poObjAsbytes, err := stub.GetState(poKey)
+
+					if cPoOrder.PONO != "" && cPoOrder.POITEM != "" {
+						poOrder := PurchaseOrder{}
+						err, poKey := generateKey(stub, PO_KEY, []string{cPoOrder.PONO, cPoOrder.POITEM})
+						fmt.Println("get PO object in Flex Object, poKey:" + poKey)
 						if err == nil {
-							err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
-							err = json.Unmarshal(poObjAsbytes, &poOrder)
-							cPoOrder.PurchaseOrder = poOrder
+							poObjAsbytes, err := stub.GetState(poKey)
+							if err == nil {
+								err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
+								err = json.Unmarshal(poObjAsbytes, &poOrder)
+								cPoOrder.PurchaseOrder = poOrder
+							}
 						}
 					}
+
 				}
 				flexOrder.CPONOFLEXPONO = cPoOrder
 			}
@@ -380,9 +386,51 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 				pullObjAsbytes, err := stub.GetState(pullKey)
 				if err == nil {
 					err = json.Unmarshal(pullObjAsbytes, &pullOrder)
+
+					if pullOrder.FLEXPONO != "" {
+						// GET CPONO
+						err, cpoKey := generateKey(stub, CPO_KEY, []string{pullOrder.FLEXPONO})
+						if err == nil {
+							cpoObject := CPONOFLEXPONO{}
+							cpoObjAsbytes, err := stub.GetState(cpoKey)
+							if err == nil {
+								err = json.Unmarshal(cpoObjAsbytes, &cpoObject)
+
+								//if cpoObject.SONUMBER != "" && cpoObject.SOITEM != "" {
+								//	soOrder := SalesOrder{}
+								//	err, soKey := generateKey(stub, SO_KEY, []string{cpoObject.SONUMBER, cpoObject.SOITEM})
+								//	fmt.Println("get SO object in Flex Object, sokey:" + soKey)
+								//	if err == nil {
+								//		soObjAsbytes, err := stub.GetState(soKey)
+								//		if err == nil {
+								//			err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
+								//			err = json.Unmarshal(soObjAsbytes, &soOrder)
+								//			cpoObject.SalesOrder = soOrder
+								//		}
+								//	}
+								//}
+								//
+								//if cpoObject.PONO != "" && cpoObject.POITEM != "" {
+								//	poOrder := PurchaseOrder{}
+								//	err, poKey := generateKey(stub, PO_KEY, []string{cpoObject.PONO, cpoObject.POITEM})
+								//	fmt.Println("get PO object in Flex Object, poKey:" + poKey)
+								//	if err == nil {
+								//		poObjAsbytes, err := stub.GetState(poKey)
+								//		if err == nil {
+								//			err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
+								//			err = json.Unmarshal(poObjAsbytes, &poOrder)
+								//			cpoObject.PurchaseOrder = poOrder
+								//		}
+								//	}
+								//}
+								pullOrder.CPONOFLEXPONO = cpoObject
+							}
+						}
+					}
 					whHistory.GRMaterial = pullOrder
 				}
 			}
+
 		}
 	}
 	c, _ = json.Marshal(whOrder)

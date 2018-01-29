@@ -85,6 +85,26 @@ func crMappingRefPO(stub shim.ChaincodeStubInterface, args []string) pb.Response
 			c, _ = json.Marshal(refMapping)
 			stub.PutState(ref_key, c)
 
+			for _,refNo :=range refMapping.RefNos {
+				err, pull_key := generateKey(stub, PULL_KEY, []string{refNo})
+				if err != nil {
+					return shim.Error(err.Error())
+				}
+				pullObjAsbytes, err := stub.GetState(pull_key)
+				if err == nil && pullObjAsbytes != nil {
+					odmLoiMapping := ODMLOIMaterial{}
+					err = json.Unmarshal(pullObjAsbytes, &odmLoiMapping)
+					if err != nil {
+						return shim.Error(err.Error())
+					}
+					odmLoiMapping.FLEXPONO = refMapping.FLEXPONO
+					var d []byte
+					d, _ = json.Marshal(odmLoiMapping)
+					stub.PutState(pull_key, d)
+				}
+			}
+
+
 		} else {
 			return shim.Error("Flex PO number is required")
 		}
