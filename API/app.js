@@ -932,10 +932,16 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                     logger.debug('get response', respObj);
                     // var response = ledgerData.prepareSearchData(keyprefix, respObj, args.ASNNumber);
                     var response = [];
+                    keyprefix = keyprefix.toUpperCase();
                     respObj.forEach(item => {
-                        var resp = ledgerData.prepareSearchData(keyprefix, item,args.ASNNumber);
+                        var resp = ledgerData.prepareSearchData(keyprefix, item, args.ASNNumber);
                         logger.debug('get--- response', resp);
-                        response.push(resp);
+                        if (keyprefix === 'SUP' && resp.data && resp.data.length > 0) {
+                            response.push(resp);
+                        } else if (keyprefix !== 'SUP') {
+                            response.push(resp);
+                        }
+
                     });
                     res.json(getQuerySuccessMessage(response));
                     return;

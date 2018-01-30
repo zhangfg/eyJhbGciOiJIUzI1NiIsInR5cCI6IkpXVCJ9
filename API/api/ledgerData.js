@@ -3,7 +3,7 @@ var moment = require('moment');
 var log4js = require('log4js');
 var logger = log4js.getLogger('LedgerData');
 
-var prepareSearchData = function (keyprefix, respObj,asnNO) {
+var prepareSearchData = function (keyprefix, respObj, asnNO) {
     keyprefix = keyprefix.toUpperCase();
     if (keyprefix === 'SO') {
         return prepareSOSearchData(respObj);
@@ -12,7 +12,7 @@ var prepareSearchData = function (keyprefix, respObj,asnNO) {
     } else if (keyprefix === 'CPO') {
         return prepareODMSearchData(respObj);
     } else if (keyprefix === 'SUP') {
-        return prepareSupplierPOSearchData(respObj,asnNO);
+        return prepareSupplierPOSearchData(respObj, asnNO);
     } else if (keyprefix === 'SOI') {
         return prepareSOIData(respObj);
     } else if (keyprefix === 'LOI') {
@@ -565,11 +565,15 @@ var prepareSupplierPOSearchData = function (data, asnNO) {
                             });
                     }
                 }
-                res.data.push(item);
+
+                if (asnNO !== '' && item.ASNNO === asnNO) {
+                    res.data.push(item);
+                } else if (asnNO === '') {
+                    res.data.push(item);
+                }
             });
         }
     }
-
     return res;
 };
 
