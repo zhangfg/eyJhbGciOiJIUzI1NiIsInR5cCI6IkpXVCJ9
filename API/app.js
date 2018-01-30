@@ -55,11 +55,13 @@ var multipartMiddleware = mutipart();
 app.options('*', cors());
 app.use(cors());
 //support parsing of application/json type post data
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
+// app.use(bodyParser.urlencoded({
+//     extended: true
+// }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 // set secret variable
 app.set('secret', 'thisismysecret');
 app.use(expressJWT({
