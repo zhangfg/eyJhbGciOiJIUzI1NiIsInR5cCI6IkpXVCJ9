@@ -930,9 +930,10 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                         respObj = JSON.parse(message);
                     }
                     logger.debug('get response', respObj);
+                    // var response = ledgerData.prepareSearchData(keyprefix, respObj, args.ASNNumber);
                     var response = [];
-                    respObj.forEach(soItem => {
-                        var resp = ledgerData.prepareSearchData(keyprefix, soItem);
+                    respObj.forEach(item => {
+                        var resp = ledgerData.prepareSearchData(keyprefix, item,args.ASNNumber);
                         logger.debug('get--- response', resp);
                         response.push(resp);
                     });

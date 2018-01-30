@@ -3,7 +3,7 @@ var moment = require('moment');
 var log4js = require('log4js');
 var logger = log4js.getLogger('LedgerData');
 
-var prepareSearchData = function (keyprefix, respObj) {
+var prepareSearchData = function (keyprefix, respObj,asnNO) {
     keyprefix = keyprefix.toUpperCase();
     if (keyprefix === 'SO') {
         return prepareSOSearchData(respObj);
@@ -12,7 +12,7 @@ var prepareSearchData = function (keyprefix, respObj) {
     } else if (keyprefix === 'CPO') {
         return prepareODMSearchData(respObj);
     } else if (keyprefix === 'SUP') {
-        return prepareSupplierSearchData(respObj);
+        return prepareSupplierPOSearchData(respObj,asnNO);
     } else if (keyprefix === 'SOI') {
         return prepareSOIData(respObj);
     } else if (keyprefix === 'LOI') {
@@ -58,6 +58,7 @@ var prepareSOSearchData = function (data) {
         // res.Unit = poData.Unit;
         res.OANO = poData.OANO;
         res.OAName = poData.OAName;
+        res.OA = poData.OANO + ' ' + poData.OAName;
         res.ContractNO = poData.ContractNO;
         res.ContractItemNO = poData.ContractItemNO;
     }
@@ -70,6 +71,7 @@ var prepareSOSearchData = function (data) {
                 var item = {};
                 item.OAName = poData.OAName;
                 item.OANO = poData.OANO;
+                item.OA = poData.OANO + ' ' + poData.OAName;
                 item.PONO = data.PONO;
                 item.DlvyQty = indnItem.DlvyQty;
                 item.ASNNO = indnItem.ASNNO;
@@ -100,15 +102,18 @@ var prepareSOSearchData = function (data) {
 
                     item.CGRInfos = [];
                     if (soData.ODMGRInfos) {
+                        let GRNOs = [];
                         soData.ODMGRInfos.forEach(odmgr => {
-                            item.GRQty = odmgr.GRQTY;
-                            item.CGRNO = odmgr.GRNO;
+                            // item.GRQty = odmgr.GRQTY;
+                            // item.CGRNO = odmgr.GRNO;
                             let grInfo = {
                                 CGRNO: odmgr.GRNO,
                                 GRQty: odmgr.GRQTY
                             };
                             item.CGRInfos.push(grInfo);
+                            GRNOs.push(odmgr.GRNO);
                         });
+                        item.CGRNO = GRNOs.join(',');
                     }
 
                     if (soData.GIINFOS) {
@@ -162,15 +167,18 @@ var prepareSOSearchData = function (data) {
 
                 item.CGRInfos = [];
                 if (soData.ODMGRInfos) {
+                    let GRNOs = [];
                     soData.ODMGRInfos.forEach(odmgr => {
-                        item.GRQty = odmgr.GRQTY;
-                        item.CGRNO = odmgr.GRNO;
+                        // item.GRQty = odmgr.GRQTY;
+                        // item.CGRNO = odmgr.GRNO;
                         let grInfo = {
                             CGRNO: odmgr.GRNO,
                             GRQty: odmgr.GRQTY
                         };
                         item.CGRInfos.push(grInfo);
+                        GRNOs.push(odmgr.GRNO);
                     });
+                    item.CGRNO = GRNOs.join(',');
                 }
                 if (soData.BILLINFOS) {
                     soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER).forEach(blItem => {
@@ -198,6 +206,7 @@ var prepareSOSearchData = function (data) {
                     var poData = data.PurchaseOrder;
                     item.OAName = poData.OAName;
                     item.OANO = poData.OANO;
+                    item.OA = poData.OANO + ' ' + poData.OAName;
                     item.PONO = data.PONO;
                     if (poData.InboundDelivery) {
                         poData.InboundDelivery.filter(inbdItem => giItem.IBDNNUMBER === inbdItem.IBDNNUMBER)
@@ -243,7 +252,6 @@ var preparePOSearchData = function (data) {
         var poData = data.PurchaseOrder;
         res.POTYPE = poData.POTYPE;
         res.PODate = poData.PODate;
-        res.PARTSNO = poData.PARTSNO;
         res.POQty = poData.POQty;
         res.Unit = poData.Unit;
         res.PARTSDESC = poData.PARTSDESC;
@@ -252,6 +260,7 @@ var preparePOSearchData = function (data) {
         res.VENDORNAME = poData.VendorName;
         res.OANO = poData.OANO;
         res.OAName = poData.OAName;
+        res.OA = poData.OANO + ' ' + poData.OAName;
         res.ContractNO = poData.ContractNO;
         res.ContractItemNO = poData.ContractItemNO;
     }
@@ -281,6 +290,7 @@ var preparePOSearchData = function (data) {
                 var item = {};
                 item.OAName = poData.OAName;
                 item.OANO = poData.OANO;
+                item.OA = poData.OANO + ' ' + poData.OAName;
                 item.PONO = data.PONO;
                 item.PARTSDESC = poData.PARTSDESC;
                 item.PARTSNO = poData.PARTSNO;
@@ -314,15 +324,18 @@ var preparePOSearchData = function (data) {
 
                     item.CGRInfos = [];
                     if (soData.ODMGRInfos) {
+                        let GRNOs = [];
                         soData.ODMGRInfos.forEach(odmgr => {
-                            item.GRQty = odmgr.GRQTY;
-                            item.CGRNO = odmgr.GRNO;
+                            // item.GRQty = odmgr.GRQTY;
+                            // item.CGRNO = odmgr.GRNO;
                             let grInfo = {
                                 CGRNO: odmgr.GRNO,
                                 GRQty: odmgr.GRQTY
                             };
                             item.CGRInfos.push(grInfo);
+                            GRNOs.push(odmgr.GRNO);
                         });
+                        item.CGRNO = GRNOs.join(',');
                     }
 
                     if (soData.GIINFOS) {
@@ -393,6 +406,7 @@ var prepareODMSearchData = function (data) {
             var poData = odmData.PurchaseOrder;
             res.OANO = poData.OANO; // PO
             res.OAName = poData.OAName; // PO
+            res.OA = poData.OANO + ' ' + poData.OAName;
         }
     }
 
@@ -464,6 +478,101 @@ var prepareODMSearchData = function (data) {
     return res;
 };
 
+var prepareSupplierPOSearchData = function (data, asnNO) {
+
+    var res = {};
+    res.SONUMBER = data.SONUMBER;
+    res.SOITEM = data.SOITEM;
+    res.PONO = data.PONO;
+    res.POITEM = data.POITEM;
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "") {
+        var poData = data.PurchaseOrder;
+        res.POTYPE = poData.POTYPE;
+        res.PODate = poData.PODate;
+        res.PARTSNO = poData.PARTSNO;
+        res.POQty = poData.POQty;
+        res.Unit = poData.Unit;
+        res.PARTSDESC = poData.PARTSDESC;
+        res.ContractNO = poData.ContractNO;
+        res.ContractItemNO = poData.ContractItemNO;
+    }
+
+    if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
+        var soData = data.SalesOrder;
+        res.CRAD = soData.CRAD;
+        res.NAME_AG = soData.NAME1_AG + ' ' + soData.NAME2_AG;
+        res.CPONO = soData.CPONO;
+        res.CITY_WE = soData.CITY_WE;
+        res.SONUMBER = soData.SONUMBER;
+        res.SOITEM = soData.SOITEM;
+        res.SOTYPE = soData.SOTYPE;
+    }
+    res.data = [];
+    if (data.PurchaseOrder && data.PurchaseOrder.PONO !== "") {
+        var poData = data.PurchaseOrder;
+        if (poData.InboundDelivery) {
+            poData.InboundDelivery.forEach(indnItem => {
+                var item = {};
+                item.OAName = poData.OAName;
+                item.OANO = poData.OANO;
+                item.OA = poData.OANO + ' ' + poData.OAName;
+                item.PONO = data.PONO;
+                item.PARTSDESC = poData.PARTSDESC;
+                item.PARTSNO = poData.PARTSNO;
+                item.DlvyQty = indnItem.DlvyQty;
+                item.ASNNO = indnItem.ASNNO;
+                item.IBDNNUMBER = indnItem.IBDNNUMBER;
+                item.TrackID = indnItem.TrackID;
+                item.MOT = indnItem.MOT;
+                item.IDDlvyDate = indnItem.IDDlvyDate;
+                if (poData.GRInfos) {
+                    poData.GRInfos.filter(grItem => indnItem.ASNNO === grItem.SupDeliveryNote).forEach(grItem => {
+                        item.GRNO = grItem.GRNO;
+                    });
+                }
+                if (indnItem.SupplierOrder) {
+                    item.PackingList = indnItem.SupplierOrder.PackingList;
+                }
+
+                if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
+                    var soData = data.SalesOrder;
+                    if (soData.SOLDTO) {
+                        item.Customer = soData.SOLDTO + '/' + soData.NAME1_AG + ' ' + soData.NAME2_AG;   /////
+                    }
+                    item.SONUMBER = data.SONUMBER;
+
+                    item.CRAD = soData.CRAD;
+
+                    item.CGRInfos = [];
+                    if (soData.ODMGRInfos) {
+                        let GRNOs = [];
+                        soData.ODMGRInfos.forEach(odmgr => {
+                            let grInfo = {
+                                CGRNO: odmgr.GRNO,
+                                GRQty: odmgr.GRQTY
+                            };
+                            item.CGRInfos.push(grInfo);
+                            GRNOs.push(odmgr.GRNO);
+                        });
+                        item.CGRNO = GRNOs.join(',');
+                    }
+
+                    if (soData.GIINFOS) {
+                        soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)
+                            .forEach(giItem => {
+                                item.DNNUMBER = giItem.DNNUMBER;
+                                item.DNDATE = giItem.DNDATE;
+                            });
+                    }
+                }
+                res.data.push(item);
+            });
+        }
+    }
+
+    return res;
+};
+
 var prepareSupplierSearchData = function (data) {
     var res = {};
     res.ASNNumber = data.ASNNumber;
@@ -483,6 +592,7 @@ var prepareSupplierSearchData = function (data) {
         res.OAName = data.PurchaseOrder.OAName;
         res.SONUMBER = data.PurchaseOrder.SONUMBER;
         res.SOITEM = data.PurchaseOrder.SOITEM;
+        res.OA = data.PurchaseOrder.OANO + ' ' + data.PurchaseOrder.OAName;
     }
     if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
         res.CRAD = data.SalesOrder.CRAD;

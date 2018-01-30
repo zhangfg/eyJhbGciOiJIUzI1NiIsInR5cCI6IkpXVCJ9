@@ -529,7 +529,7 @@ func queryById(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 func getQueryResultById(stub shim.ChaincodeStubInterface, queryKey string) (error, []byte) {
 	valAsbytes, err := stub.GetState(queryKey)
 	fmt.Println("query data, key - " + queryKey)
-	if err != nil {
+	if err != nil || valAsbytes == nil{
 		return errors.New("\"Error\":\"Failed to get state for " + queryKey + "\""), nil
 	}
 	//fmt.Println("query data, data - " + string(valAsbytes))

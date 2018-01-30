@@ -29,8 +29,8 @@ var insertSearchDocuments = function (fcn, roleId, reqData, vendorNo) {
             let sec = initSec * 100;
 
             setTimeout(function () {
-                insertSearchDocument(fcn, roleId, item, vendorNo,function (data) {
-                    logger.debug('insertSearchDocument',data);
+                insertSearchDocument(fcn, roleId, item, vendorNo, function (data) {
+                    logger.debug('insertSearchDocument', data);
                 });
             }, sec);
             initSec++;
@@ -101,7 +101,25 @@ var insertSearchDocument = function (fcn, roleId, item, vendorNo, callback) {
             'PONumber': item.PONO,
             'POItem': item.POItemNO,
             'PARTSNO': item.PARTSNO,
-            'vendorNo': item.VendorNO
+            'vendorNo': item.VendorNO,
+            'ASNNOFLAG': 'FALSE',
+            'ASNNO': []
+        };
+        insertSupplierSearchDocumentByPO(roleId, supItem, callback);
+    } else if (item.TRANSDOC === 'INDN') {
+        let asnNO = [];
+        if (item.InboundDelivery) {
+            item.InboundDelivery.forEach(ibdItem => {
+                asnNO.push(ibdItem.ASNNO);
+            });
+        }
+
+        let supItem = {
+            'PODate': '',
+            'PONumber': item.PONO,
+            'POItem': item.POItemNO,
+            'ASNNOFLAG': 'TRUE',
+            'ASNNO': asnNO
         };
         insertSupplierSearchDocumentByPO(roleId, supItem, callback);
     } else if (item.TRANSDOC === 'SUP') {
@@ -409,6 +427,12 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
                 if (docObj.PARTSNO) {
                     dataItem.rows.partNo = docObj.PARTSNO;
                 }
+                if (docObj.ASNNOFLAG) {
+                    dataItem.rows.ASNNOFLAG = docObj.ASNNOFLAG;
+                }
+                if (docObj.ASNNO && docObj.ASNNO.length > 0) {
+                    dataItem.rows.ASNNO = docObj.ASNNO;
+                }
                 if (docObj.vendorNo) {
                     dataItem.rows.vendorNo = docObj.vendorNo;
                 }
@@ -423,7 +447,9 @@ var insertSupplierSearchDocumentByPO = function (roleId, docObj, callback) {
                     'poNo': docObj.PONumber,
                     'itemNo': docObj.POItem,
                     'partNo': docObj.PARTSNO,
-                    'vendorNo': docObj.vendorNo
+                    'vendorNo': docObj.vendorNo,
+                    'ASNNOFLAG': docObj.ASNNOFLAG,
+                    'ASNNO': docObj.ASNNO
                 }
             };
             logger.info('insert the information of the Supplier Object ', insertObject);
@@ -513,7 +539,7 @@ var queryItemNo = function (query, vendorNo, callback) {
     } else if (query.keyprefix === 'CPO') {
         queryODMKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'SUP') {
-        querySupplierKeyNo(query, vendorNo, callback);
+        querySupplierPOKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'LOI') {
         queryLOIKeyNo(query, vendorNo, callback);
     } else if (query.keyprefix === 'SOI') {
@@ -573,11 +599,16 @@ var querySoKeyNo = function (query, vendorNo, callback) {
                 KeysStart: [],
                 KeysEnd: []
             };
-            keyObj.KeysStart.push(item.rows.soNo);
-            keyObj.KeysStart.push(item.rows.itemNo);
-            queryData.push(keyObj);
-            logger.info('Return item:', keyObj);
+            if (item.rows.soNo !== '' && item.rows.itemNo !== ''){
+                keyObj.KeysStart.push(item.rows.soNo);
+                keyObj.KeysStart.push(item.rows.itemNo);
+                if(!existObjectInArray(queryData,keyObj)){
+                    queryData.push(keyObj);
+                }
+            }
+
         });
+        logger.info('Return SO item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -626,11 +657,15 @@ var queryPoKeyNo = function (query, vendorNo, callback) {
                 KeysStart: [],
                 KeysEnd: []
             };
-            keyObj.KeysStart.push(item.rows.poNo);
-            keyObj.KeysStart.push(item.rows.itemNo);
-            queryData.push(keyObj);
-            logger.info('Return item:', keyObj);
+            if (item.rows.poNo !== '' && item.rows.itemNo !== ''){
+                keyObj.KeysStart.push(item.rows.poNo);
+                keyObj.KeysStart.push(item.rows.itemNo);
+                if(!existObjectInArray(queryData,keyObj)){
+                    queryData.push(keyObj);
+                }
+            }
         });
+        logger.info('Return PO item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -688,16 +723,77 @@ var queryODMKeyNo = function (query, vendorNo, callback) {
                     if (query.flexPONo) {
                         if (query.flexPONo === flexPONo) {
                             keyObj.KeysStart.push(flexPONo);
-                            queryData.push(keyObj);
+                            if(!existObjectInArray(queryData,keyObj)){
+                                queryData.push(keyObj);
+                            }
                         }
                     } else if (flexPONo !== "") {
                         keyObj.KeysStart.push(flexPONo);
-                        queryData.push(keyObj);
+                        if(!existObjectInArray(queryData,keyObj)){
+                            queryData.push(keyObj);
+                        }
                     }
                 });
             }
         });
-        logger.info('Return item:', queryData);
+        logger.info('Return ODM item:'+ JSON.stringify(queryData));
+        callback(queryData);
+    });
+
+};
+var querySupplierPOKeyNo = function (query, vendorNo, callback) {
+    logger.debug('queryItemNo--Supplier:', query);
+    var selector = {
+        "type": "supplierkey",
+        "rows": {}
+    };
+    if (query.startDate) {
+        query.startDate = query.startDate.replace(/-/g, '');
+        selector.rows.orderCreateDate = {};
+        selector.rows.orderCreateDate["$gte"] = query.startDate;
+    }
+    if (query.endDate) {
+        query.endDate = query.endDate.replace(/-/g, '');
+        if (!selector.rows.orderCreateDate) {
+            selector.rows.orderCreateDate = {};
+        }
+        selector.rows.orderCreateDate["$lte"] = query.endDate;
+    }
+    if (query.poNo) {
+        selector.rows.poNo = {"$eq": query.poNo};
+    }
+    if (query.ASNNumber) {
+        selector.rows.ASNNOFLAG = {"$eq": 'TRUE'};
+    }
+    if (query.partNo) {
+        selector.rows.partNo = {"$eq": query.partNo};
+    }
+    if (vendorNo) {
+        selector.rows.vendorNo = {"$eq": vendorNo};
+    }
+
+    db.find({
+        selector: selector
+    }, function (err, data) {
+        // db.get('users', function (err, data) {
+        logger.debug('querySupplierKeyNo Error:', err);
+        logger.info('querySupplierKeyNo Data:', data);
+        var queryData = [];
+        data.docs.forEach(item => {
+            var keyObj = {
+                KeyPrefix: 'PO',
+                KeysStart: [],
+                KeysEnd: []
+            };
+            if (item.rows.poNo !== '' && item.rows.itemNo !== ''){
+                keyObj.KeysStart.push(item.rows.poNo);
+                keyObj.KeysStart.push(item.rows.itemNo);
+                if(!existObjectInArray(queryData,keyObj)){
+                    queryData.push(keyObj);
+                }
+            }
+        });
+        logger.info('Return Supperlier item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -724,7 +820,7 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
         selector.rows.poNo = {"$eq": query.poNo};
     }
     if (query.ASNNumber) {
-        selector.rows.ASNNumber = {"$eq": query.ASNNumber};
+        selector.rows.ASNNOFLAG = {"$eq": 'TRUE'};
     }
     if (query.partNo) {
         selector.rows.partNo = {"$eq": query.partNo};
@@ -746,11 +842,34 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
                 KeysStart: [],
                 KeysEnd: []
             };
-            keyObj.KeysStart.push(item.rows.vendorNo);
-            keyObj.KeysStart.push(item.rows.ASNNumber);
-            queryData.push(keyObj);
-            logger.info('Return item:', keyObj);
+
+            if (item.rows.ASNNO) {
+                item.rows.ASNNO.forEach(asnNo => {
+                    var keyObj = {
+                        KeyPrefix: 'SUP',
+                        KeysStart: [],
+                        KeysEnd: []
+                    };
+                    if (query.ASNNumber) {
+                        if (query.ASNNumber === asnNo) {
+                            keyObj.KeysStart.push(item.rows.vendorNo);
+                            keyObj.KeysStart.push(asnNo);
+                            if(!existObjectInArray(queryData,keyObj)){
+                                queryData.push(keyObj);
+                            }
+                        }
+                    } else if (asnNo !== "") {
+                        keyObj.KeysStart.push(item.rows.vendorNo);
+                        keyObj.KeysStart.push(asnNo);
+                        if(!existObjectInArray(queryData,keyObj)){
+                            queryData.push(keyObj);
+                        }
+                    }
+                });
+            }
+            // logger.info('Return Supperlier item:', keyObj);
         });
+        logger.info('Return Supperlier item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -776,12 +895,18 @@ var queryLOIKeyNo = function (query, vendorNo, callback) {
                         KeysStart: [],
                         KeysEnd: []
                     };
-                    keyObj.KeysStart.push(partItem);
-                    queryData.push(keyObj);
+                    if (partItem !== ''){
+                        keyObj.KeysStart.push(partItem);
+                        if(!existObjectInArray(queryData,keyObj)){
+                            queryData.push(keyObj);
+                        }
+                    }
+
                 });
             }
 
         });
+        logger.info('Return LOI item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -807,12 +932,16 @@ var querySOIKeyNo = function (query, vendorNo, callback) {
                         KeysStart: [],
                         KeysEnd: []
                     };
-                    keyObj.KeysStart.push(partItem);
-                    queryData.push(keyObj);
+                    if (partItem !== ''){
+                        keyObj.KeysStart.push(partItem);
+                        if(!existObjectInArray(queryData,keyObj)){
+                            queryData.push(keyObj);
+                        }
+                    }
                 });
             }
-
         });
+        logger.info('Return SOI item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -974,6 +1103,39 @@ var checkIP = function (ip) {
 
 }
 
+var existObjectInArray = function (list, obj) {
+    // logger.debug('list::' + JSON.stringify(list));
+    // logger.debug('obj::' + JSON.stringify(obj));
+    let ret = false;
+    if (list.length === 0) {
+        return false;
+    }
+    list.forEach(item => {
+        // logger.debug('item::' + JSON.stringify(item));
+        if(compareKeyObj(item,obj)){
+            ret = true;
+        }
+    });
+    return ret;
+};
+var compareKeyObj = function (item, obj) {
+    if (item.KeyPrefix !== obj.KeyPrefix) {
+        return false;
+    }
+    let itemStart = item.KeysStart.join(',');
+    let objStart = obj.KeysStart.join(',');
+    if (itemStart !== objStart){
+        return false;
+    }
+    let itemEnd = item.KeysEnd.join(',');
+    let objEnd = obj.KeysEnd.join(',');
+    // logger.debug('objEnd::' + JSON.stringify(objEnd));
+    // logger.debug('itemEnd::' + JSON.stringify(itemEnd));
+    if (itemEnd !== objEnd){
+        return false;
+    }
+    return true;
+};
 exports.login = login;
 exports.queryItemNo = queryItemNo;
 exports.insertSearchDocuments = insertSearchDocuments;
