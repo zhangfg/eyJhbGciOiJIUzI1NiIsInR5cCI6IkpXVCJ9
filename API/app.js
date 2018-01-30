@@ -553,9 +553,9 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
         return res.json(getInvokeErrorMessage(checkResult));
     }
     if (fcn === 'crCMaterialPulling') {
-        checkfield.checkMaterialPulling(req.body.args, function (valid) {
-            if (!valid) {
-                res.json(getInvokeErrorMessage('input material pulling  data dissatisfy'));
+        checkfield.checkMaterialPulling(req.body.args, function (message) {
+            if (message !== '') {
+                res.json(getInvokeErrorMessage(message));
                 return;
             } else {
                 cloudant.insertSearchDocuments(fcn, role, reqData, req.vendorNo);

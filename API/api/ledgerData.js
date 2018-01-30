@@ -97,6 +97,20 @@ var prepareSOSearchData = function (data) {
                     item.PARTSNO = soData.PARTSNO;
                     item.PARTSDESC = soData.PARTSDESC;
                     item.CRAD = soData.CRAD;
+
+                    item.CGRInfos = [];
+                    if (soData.ODMGRInfos) {
+                        soData.ODMGRInfos.forEach(odmgr => {
+                            item.GRQty = odmgr.GRQTY;
+                            item.CGRNO = odmgr.GRNO;
+                            let grInfo = {
+                                CGRNO: odmgr.GRNO,
+                                GRQty: odmgr.GRQTY
+                            };
+                            item.CGRInfos.push(grInfo);
+                        });
+                    }
+
                     if (soData.GIINFOS) {
                         soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)
                             .forEach(giItem => {
@@ -113,14 +127,14 @@ var prepareSOSearchData = function (data) {
                                                 .forEach(odmItem => {
                                                     item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                                     item.PAYMENTDATE = odmItem.PAYMENTDATE;
-                                                    item.CGRNO = odmItem.GRNO;
-                                                    item.GRQty = 0;
-                                                    if (soData.ODMGRInfos) {
-                                                        soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
-                                                            .forEach(odmgr => {
-                                                                item.GRQty += parseInt(odmgr.GRQTY);
-                                                            });
-                                                    }
+                                                    // item.CGRNO = odmItem.GRNO;
+                                                    // item.GRQty = 0;
+                                                    // if (soData.ODMGRInfos) {
+                                                    //     soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                                    //         .forEach(odmgr => {
+                                                    //             item.GRQty += parseInt(odmgr.GRQTY);
+                                                    //         });
+                                                    // }
                                                 });
                                         }
                                     });
@@ -145,6 +159,19 @@ var prepareSOSearchData = function (data) {
 
                 item.DNNUMBER = giItem.DNNUMBER;
                 item.DNDATE = giItem.DNDATE;
+
+                item.CGRInfos = [];
+                if (soData.ODMGRInfos) {
+                    soData.ODMGRInfos.forEach(odmgr => {
+                        item.GRQty = odmgr.GRQTY;
+                        item.CGRNO = odmgr.GRNO;
+                        let grInfo = {
+                            CGRNO: odmgr.GRNO,
+                            GRQty: odmgr.GRQTY
+                        };
+                        item.CGRInfos.push(grInfo);
+                    });
+                }
                 if (soData.BILLINFOS) {
                     soData.BILLINFOS.filter(blItem => blItem.DNNUMBER === giItem.DNNUMBER).forEach(blItem => {
                         item.PROINV = blItem.PROINV;
@@ -155,14 +182,14 @@ var prepareSOSearchData = function (data) {
                             soData.ODMPayments.filter(odmItem => blItem.BILLINGNO === odmItem.BILLINGNO).forEach(odmItem => {
                                 item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                 item.PAYMENTDATE = odmItem.PAYMENTDATE;
-                                item.CGRNO = odmItem.GRNO;
-                                item.GRQty = 0;
-                                if (soData.ODMGRInfos) {
-                                    soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
-                                        .forEach(odmgr => {
-                                            item.GRQty += parseInt(odmgr.GRQTY);
-                                        });
-                                }
+                                // item.CGRNO = odmItem.GRNO;
+                                // item.GRQty = 0;
+                                // if (soData.ODMGRInfos) {
+                                //     soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                //         .forEach(odmgr => {
+                                //             item.GRQty += parseInt(odmgr.GRQTY);
+                                //         });
+                                // }
                             });
                         }
                     });
@@ -284,6 +311,20 @@ var preparePOSearchData = function (data) {
                     item.SONUMBER = data.SONUMBER;
 
                     item.CRAD = soData.CRAD;
+
+                    item.CGRInfos = [];
+                    if (soData.ODMGRInfos) {
+                        soData.ODMGRInfos.forEach(odmgr => {
+                            item.GRQty = odmgr.GRQTY;
+                            item.CGRNO = odmgr.GRNO;
+                            let grInfo = {
+                                CGRNO: odmgr.GRNO,
+                                GRQty: odmgr.GRQTY
+                            };
+                            item.CGRInfos.push(grInfo);
+                        });
+                    }
+
                     if (soData.GIINFOS) {
                         soData.GIINFOS.filter(giItem => giItem.IBDNNUMBER === indnItem.IBDNNUMBER)
                             .forEach(giItem => {
@@ -301,14 +342,14 @@ var preparePOSearchData = function (data) {
                                                     .forEach(odmItem => {
                                                         item.INVOICESTATUS = odmItem.INVOICESTATUS;
                                                         item.PAYMENTDATE = odmItem.PAYMENTDATE;
-                                                        item.CGRNO = odmItem.GRNO;
-                                                        item.GRQty = 0;
-                                                        if (soData.ODMGRInfos) {
-                                                            soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
-                                                                .forEach(odmgr => {
-                                                                    item.GRQty += parseInt(odmgr.GRQTY);
-                                                                });
-                                                        }
+                                                        // item.CGRNO = odmItem.GRNO;
+                                                        // item.GRQty = 0;
+                                                        // if (soData.ODMGRInfos) {
+                                                        //     soData.ODMGRInfos.filter(odmgr => odmgr.GRNO === odmItem.GRNO)
+                                                        //         .forEach(odmgr => {
+                                                        //             item.GRQty += parseInt(odmgr.GRQTY);
+                                                        //         });
+                                                        // }
                                                     });
                                             }
                                         });

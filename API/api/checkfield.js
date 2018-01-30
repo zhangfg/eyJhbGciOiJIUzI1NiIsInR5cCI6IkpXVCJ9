@@ -100,7 +100,7 @@ exports.checkField = function (fcn, args) {
                 } else if ((typeof args[i].DlvryDate !== 'string') || (!CheckDate2(args[i].DlvryDate))) {
                     return 'DlveryDate check constraints are not satisfied.';
                 }
-                 if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
+                if ((typeof args[i].RequestedDate !== 'string') || (!CheckDate2(args[i].RequestedDate))) {
                     return 'RequestedDate check constraints are not satisfied.';
                 }
 
@@ -242,7 +242,6 @@ function CheckDate2(strInputDate) {
             default:
 
 
-
         }
         return true;
     } else {
@@ -250,13 +249,13 @@ function CheckDate2(strInputDate) {
     }
 };
 
-var createMaterialPulling =function (arg) {
-    return new Promise(function(resolve,reject){
+var createMaterialPulling = function (arg) {
+    return new Promise(function (resolve, reject) {
         eventutil.createMaterialPulling(arg, function (res) {
             if ((res.result.RESULT === '0')) {
-                resolve(true);
+                resolve('');
             } else {
-                resolve(false);
+                resolve(arg.RefNo + ':' + res.result.MESSAGE);
             }
         });
     });
@@ -264,7 +263,7 @@ var createMaterialPulling =function (arg) {
 };
 exports.checkMaterialPulling = function (args, callback) {
     let promiseList = [];
-    let ret = true;
+    let ret = '';
     if (args.length > 0) {
         for (let i = 0; i < args.length; i++) {
             if (args[i].PullType === 'LOI') {
@@ -277,13 +276,11 @@ exports.checkMaterialPulling = function (args, callback) {
 
     Promise.all(promiseList).then(datas => {
         datas.forEach(result => {
-            if(!result){
-                ret = false;
-            }
+            ret = ret + result;
         });
         callback(ret);
     });
-    if (promiseList.length === 0){
-        callback(true);
+    if (promiseList.length === 0) {
+        callback('');
     }
 };
