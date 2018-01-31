@@ -793,7 +793,7 @@ var querySupplierPOKeyNo = function (query, vendorNo, callback) {
                 }
             }
         });
-        logger.info('Return Supperlier item:'+ JSON.stringify(queryData));
+        logger.info('Return Supplier item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 
@@ -867,9 +867,9 @@ var querySupplierKeyNo = function (query, vendorNo, callback) {
                     }
                 });
             }
-            // logger.info('Return Supperlier item:', keyObj);
+            // logger.info('Return Supplier item:', keyObj);
         });
-        logger.info('Return Supperlier item:'+ JSON.stringify(queryData));
+        logger.info('Return Supplier item:'+ JSON.stringify(queryData));
         callback(queryData);
     });
 

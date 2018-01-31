@@ -178,7 +178,7 @@ type SalesOrder struct {
 	UPTIME     string        `json:"UPTIME"`       //Changed time
 	UPNAME      string        `json:"UPNAME"`      //Changed name
 	DELFLAG     string        `json:"DELETEFLAG"`  //DELETEFLAG
-	PRNO        string        `json:"PRNO"`        //PR No ---Search condition
+	PRNO        string        `json:"PRNO"`        //PR No
 	PRITEM      string        `json:"PRITEM"`      //PR Item NO
 	BILLINFOS   []BillingInfo `json:"BILLINFOS"`   //Billing info
 	GIINFOS     []GIInfo      `json:"GIINFOS"`     //GIINFOS
