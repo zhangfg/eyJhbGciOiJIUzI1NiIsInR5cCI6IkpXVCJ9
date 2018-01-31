@@ -57,7 +57,7 @@ exports.checkField = function (fcn, args) {
                                     || (args[i].ODMPayments[j].BILLINGNO.length !== 10)) {
                                     return 'BILLINGNO check constraints are not satisfied.';
                                 }
-                                if ((typeof args[i].ODMPayments[j].INVOICESTATUS !== 'string') || (args[i].ODMPayments[j].INVOICESTATUS !== 'A' || args[i].ODMPayments[j].INVOICESTATUS !== 'P')) {
+                                if ((typeof args[i].ODMPayments[j].INVOICESTATUS !== 'string') || (args[i].ODMPayments[j].INVOICESTATUS !== 'A' && args[i].ODMPayments[j].INVOICESTATUS !== 'P')) {
                                     return 'INVOICESTATUS check constraints are not satisfied.';
                                 }
                                 if (args[i].ODMPayments[j].PAYMENTDATE === '') {
