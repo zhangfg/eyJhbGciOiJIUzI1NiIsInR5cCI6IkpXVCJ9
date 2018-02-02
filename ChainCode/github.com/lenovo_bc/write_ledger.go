@@ -767,14 +767,14 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 			history := WareHouseHistory{}
 			history.Qty = warehouse.Qty
 			history.UpdateDate = warehouse.GRDate
-			history.GRNO = "Initial"
+			history.GRNO = "Reverse"
 			if err == nil && whObjAsbytes != nil {
 				whOrder := WareHouseInfo{}
 				err = json.Unmarshal(whObjAsbytes, &whOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				whOrder.Quantity = warehouse.Qty
+				whOrder.Quantity = warehouse.Qty + warehouse.Qty
 				whOrder.WHHistory = append(whOrder.WHHistory, history)
 				c, _ = json.Marshal(whOrder)
 			} else {

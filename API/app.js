@@ -997,11 +997,11 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/block', functio
             data: []
         };
         Promise.all(promiseList).then(datas => {
-            logger.debug('block datas:', datas);
+            // logger.debug('block datas:', datas);
             datas.forEach(item => {
-                logger.debug('block item:' + JSON.stringify(item));
+                // logger.debug('block item:' + JSON.stringify(item));
                 let blockInfo = {};
-                blockInfo.blockNo = item.header.number.low;
+                blockInfo.blockNo = item.header.number.low + 1;
                 if (item.data.data.length > 0) {
                     let blockData = item.data.data[0];
                     blockInfo.timestamp = blockData.payload.header.channel_header.timestamp;

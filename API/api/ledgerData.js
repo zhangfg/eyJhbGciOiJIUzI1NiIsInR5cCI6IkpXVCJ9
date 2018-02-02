@@ -657,8 +657,8 @@ var prepareLOIData = function (data) {
     var ystd = moment().subtract(1, 'days').format('YYYYMMDD');
     // moment().day(-7); // last Sunday (0 - 7)
     // moment().day(-1); // last Saturday (6 - 7)
-    var lastweekStart = moment().day(-7).format('YYYYMMDD');
-    var lastweekEnd = moment().day(-1).format('YYYYMMDD');
+    var lastweekStart = moment().day(-6).format('YYYYMMDD');
+    var lastweekEnd = moment().day(0).format('YYYYMMDD');
     // var thisweekStart = moment().day(0).format('YYYYMMDD');
     // var thisweekEnd = moment().day(6).format('YYYYMMDD');
     logger.debug('prepareLOIData lastweek:' + lastweekStart + '-' + lastweekEnd);

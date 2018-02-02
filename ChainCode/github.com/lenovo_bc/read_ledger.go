@@ -128,7 +128,7 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 		if err == nil {
 			cpoObjAsbytes, err := stub.GetState(cpoKey)
 			err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
-			if err == nil {
+			if err == nil && cpoObjAsbytes != nil {
 				cpoOrder := CPONOFLEXPONO{}
 				err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
 				if err == nil {
@@ -139,7 +139,7 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 						if err == nil {
 							flexObjAsbytes, err := stub.GetState(flexKey)
 							err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
-							if err == nil {
+							if err == nil && flexObjAsbytes != nil {
 								err = json.Unmarshal(flexObjAsbytes, &flexOrder)
 								salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.ODMPayments...)
 								salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.ODMGRInfos...)
@@ -161,23 +161,28 @@ func integrateSalesOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes []by
 			poObjAsbytes, err := stub.GetState(poKey)
 			if err == nil {
 				err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
-				err = json.Unmarshal(poObjAsbytes, &POOrder)
-				for _,inbdItem := range POOrder.InboundDelivery {
-					supOrder := SupplierOrder{}
-					err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
-					fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
-					if err == nil {
-						supObjAsbytes, err := stub.GetState(supKey)
-						err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+				if err == nil && poObjAsbytes != nil {
+					err = json.Unmarshal(poObjAsbytes, &POOrder)
+					for _, inbdItem := range POOrder.InboundDelivery {
+						supOrder := SupplierOrder{}
+						err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
+						fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
 						if err == nil {
+							supObjAsbytes, err := stub.GetState(supKey)
 							err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
-							err = json.Unmarshal(supObjAsbytes, &supOrder)
-							inbdItem.SupplierOrder = supOrder
+							if err == nil {
+								err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
+								if err == nil && supObjAsbytes != nil {
+									err = json.Unmarshal(supObjAsbytes, &supOrder)
+									inbdItem.SupplierOrder = supOrder
+								}
+							}
 						}
 					}
+
+					order.PurchaseOrder = POOrder
 				}
 
-				order.PurchaseOrder = POOrder
 			}
 		}
 	}
@@ -203,7 +208,7 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 		fmt.Println("get SO object in PO,SO key:" + soKey)
 		if err == nil {
 			soObjAsbytes, err := stub.GetState(soKey)
-			if err == nil {
+			if err == nil && soObjAsbytes != nil {
 				err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
 				err = json.Unmarshal(soObjAsbytes, &salesOrder)
 
@@ -212,7 +217,7 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 				if err == nil {
 					cpoObjAsbytes, err := stub.GetState(cpoKey)
 					err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
-					if err == nil {
+					if err == nil && cpoObjAsbytes != nil {
 						cpoOrder := CPONOFLEXPONO{}
 						err := json.Unmarshal(cpoObjAsbytes, &cpoOrder)
 						if err == nil {
@@ -223,7 +228,7 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 								if err == nil {
 									flexObjAsbytes, err := stub.GetState(flexKey)
 									err, flexObjAsbytes = filterByUserRole(flexObjAsbytes, FLEX_KEY, userRole)
-									if err == nil {
+									if err == nil && flexObjAsbytes != nil {
 										err = json.Unmarshal(flexObjAsbytes, &flexOrder)
 										salesOrder.ODMPayments = append(salesOrder.ODMPayments, flexOrder.ODMPayments...)
 										salesOrder.ODMGRInfos = append(salesOrder.ODMGRInfos, flexOrder.ODMGRInfos...)
@@ -240,7 +245,7 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 			}
 		}
 	}
-	for _,inbdItem := range purchaseOrder.InboundDelivery {
+	for _, inbdItem := range purchaseOrder.InboundDelivery {
 		supOrder := SupplierOrder{}
 		err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
 		fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
@@ -248,8 +253,11 @@ func integratePurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 			supObjAsbytes, err := stub.GetState(supKey)
 			if err == nil {
 				err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
-				err = json.Unmarshal(supObjAsbytes, &supOrder)
-				inbdItem.SupplierOrder = supOrder
+				if err == nil && supObjAsbytes != nil {
+					err = json.Unmarshal(supObjAsbytes, &supOrder)
+					inbdItem.SupplierOrder = supOrder
+				}
+
 			}
 		}
 	}
@@ -271,7 +279,7 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 		if err == nil {
 			cpoObjAsbytes, err := stub.GetState(cpoKey)
 			err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
-			if err == nil {
+			if err == nil && cpoObjAsbytes != nil {
 				cPoOrder := CPONOFLEXPONO{}
 				err := json.Unmarshal(cpoObjAsbytes, &cPoOrder)
 				if err == nil {
@@ -281,7 +289,7 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 						fmt.Println("get SO object in Flex Object, sokey:" + soKey)
 						if err == nil {
 							soObjAsbytes, err := stub.GetState(soKey)
-							if err == nil {
+							if err == nil && soObjAsbytes != nil {
 								err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
 								err = json.Unmarshal(soObjAsbytes, &soOrder)
 								cPoOrder.SalesOrder = soOrder
@@ -295,16 +303,16 @@ func integrateFlexPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valAsbyt
 						fmt.Println("get PO object in Flex Object, poKey:" + poKey)
 						if err == nil {
 							poObjAsbytes, err := stub.GetState(poKey)
-							if err == nil {
+							if err == nil && poObjAsbytes != nil {
 								err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 								err = json.Unmarshal(poObjAsbytes, &poOrder)
-								for _,inbdItem := range poOrder.InboundDelivery {
+								for _, inbdItem := range poOrder.InboundDelivery {
 									supOrder := SupplierOrder{}
 									err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
 									fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
 									if err == nil {
 										supObjAsbytes, err := stub.GetState(supKey)
-										if err == nil {
+										if err == nil && supObjAsbytes != nil {
 											err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
 											err = json.Unmarshal(supObjAsbytes, &supOrder)
 											inbdItem.SupplierOrder = supOrder
@@ -339,7 +347,7 @@ func integrateCustomerPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valA
 		fmt.Println("get SO object in CPO, sokey:" + soKey)
 		if err == nil {
 			soObjAsbytes, err := stub.GetState(soKey)
-			if err == nil {
+			if err == nil && soObjAsbytes != nil {
 				err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
 				err = json.Unmarshal(soObjAsbytes, &soOrder)
 				cPoOrder.SalesOrder = soOrder
@@ -353,16 +361,16 @@ func integrateCustomerPurchaseOrderLedger(stub shim.ChaincodeStubInterface, valA
 		fmt.Println("get PO object in CPO, poKey:" + poKey)
 		if err == nil {
 			poObjAsbytes, err := stub.GetState(poKey)
-			if err == nil {
+			if err == nil && poObjAsbytes != nil {
 				err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 				err = json.Unmarshal(poObjAsbytes, &poOrder)
-				for _,inbdItem := range poOrder.InboundDelivery {
+				for _, inbdItem := range poOrder.InboundDelivery {
 					supOrder := SupplierOrder{}
 					err, supKey := generateKey(stub, SUPPLIER_KEY, []string{inbdItem.VendorNO, inbdItem.ASNNO})
 					fmt.Println("get Supplier object in SO,Supplier key:" + supKey)
 					if err == nil {
 						supObjAsbytes, err := stub.GetState(supKey)
-						if err == nil {
+						if err == nil && supObjAsbytes != nil {
 							err, supObjAsbytes = filterByUserRole(supObjAsbytes, SUPPLIER_KEY, userRole)
 							err = json.Unmarshal(supObjAsbytes, &supOrder)
 							inbdItem.SupplierOrder = supOrder
@@ -392,7 +400,7 @@ func integrateSupplierOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 		fmt.Println("get PO object in Supplier, poKey:" + poKey)
 		if err == nil {
 			poObjAsbytes, err := stub.GetState(poKey)
-			if err == nil {
+			if err == nil && poObjAsbytes != nil {
 				err, poObjAsbytes = filterByUserRole(poObjAsbytes, PO_KEY, userRole)
 				err = json.Unmarshal(poObjAsbytes, &poOrder)
 				supOrder.PurchaseOrder = poOrder
@@ -402,7 +410,7 @@ func integrateSupplierOrderLedger(stub shim.ChaincodeStubInterface, valAsbytes [
 				fmt.Println("get SO object in Supplier, sokey:" + soKey)
 				if err == nil {
 					soObjAsbytes, err := stub.GetState(soKey)
-					if err == nil {
+					if err == nil && soObjAsbytes != nil {
 						err, soObjAsbytes = filterByUserRole(soObjAsbytes, SO_KEY, userRole)
 						err = json.Unmarshal(soObjAsbytes, &soOrder)
 						supOrder.SalesOrder = soOrder
@@ -424,13 +432,13 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 	}
 	var c []byte
 	for _, whHistory := range whOrder.WHHistory {
-		if whHistory.GRNO != "" && whHistory.GRNO != "Initial" {
+		if whHistory.GRNO != "" {
 			grOrder := LOIGRInfo{}
 			err, grKey := generateKey(stub, LOI_KEY, []string{whHistory.GRNO})
 			if err == nil {
 				grObjAsbytes, err := stub.GetState(grKey)
 				err, grObjAsbytes = filterByUserRole(grObjAsbytes, LOI_KEY, userRole)
-				if err == nil {
+				if err == nil && grObjAsbytes != nil {
 					err = json.Unmarshal(grObjAsbytes, &grOrder)
 					whHistory.LOIGRInfo = grOrder
 				}
@@ -442,7 +450,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 			if err == nil {
 				pullObjAsbytes, err := stub.GetState(pullKey)
 				err, pullObjAsbytes = filterByUserRole(pullObjAsbytes, PULL_KEY, userRole)
-				if err == nil {
+				if err == nil && pullObjAsbytes != nil {
 					err = json.Unmarshal(pullObjAsbytes, &pullOrder)
 
 					if pullOrder.FLEXPONO != "" {
@@ -452,7 +460,7 @@ func integrateWareHouseLedger(stub shim.ChaincodeStubInterface, valAsbytes []byt
 							cpoObject := CPONOFLEXPONO{}
 							cpoObjAsbytes, err := stub.GetState(cpoKey)
 							err, cpoObjAsbytes = filterByUserRole(cpoObjAsbytes, CPO_KEY, userRole)
-							if err == nil {
+							if err == nil && cpoObjAsbytes != nil {
 								err = json.Unmarshal(cpoObjAsbytes, &cpoObject)
 
 								//if cpoObject.SONUMBER != "" && cpoObject.SOITEM != "" {
@@ -529,7 +537,7 @@ func queryById(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 func getQueryResultById(stub shim.ChaincodeStubInterface, queryKey string) (error, []byte) {
 	valAsbytes, err := stub.GetState(queryKey)
 	fmt.Println("query data, key - " + queryKey)
-	if err != nil || valAsbytes == nil{
+	if err != nil || valAsbytes == nil {
 		return errors.New("\"Error\":\"Failed to get state for " + queryKey + "\""), nil
 	}
 	//fmt.Println("query data, data - " + string(valAsbytes))

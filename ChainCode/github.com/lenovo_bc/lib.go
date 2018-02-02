@@ -52,10 +52,10 @@ type SOIInventory struct {
 	Qty           int `json:"Qty"`           //inventory Quantity
 	InventoryType string `json:"InventoryType"` //inventory type(SOI)
 	SupplierName  string `json:"SupplierName"`  //supplier name
-	COO           string `json:"COO"`           //COO
-	Plant         string `json:"Plant"`         //part
-	PurchasingOrg string `json:"PurchasingOrg"` //Purchasing org
-	Location      string `json:"Location"`      //storage location
+	//COO           string `json:"COO"`           //COO -- Removed
+	//Plant         string `json:"Plant"`         //part-- Removed
+	//PurchasingOrg string `json:"PurchasingOrg"` //Purchasing org-- Removed
+	//Location      string `json:"Location"`      //storage location-- Removed
 }
 
 //Supplier PO   Key: "SUP"+ Vendor No + ASNNumber
@@ -64,14 +64,14 @@ type SupplierOrder struct {
 	VendorNO            string        `json:"VendorNO"`            //Vendor Number
 	TRANSDOC            string        `json:"TRANSDOC"`            //Trans doc type
 	PONumber            string        `json:"PONumber"`            //PO Number
-	POItem              string        `json:"POItem"`              //PO Number
-	ShippedQty          string        `json:"ShippedQty"`          //PO Number
-	ASNDate             string        `json:"ASNDate"`             //PO Number
-	PromisedDate        string        `json:"PromisedDate"`        //PO Number
-	CarrierID           string        `json:"CarrierID"`           //PO Number
-	CarrierTrackID      string        `json:"CarrierTrackID"`      //PO Number
-	TransporatationMode string        `json:"TransporatationMode"` //PO Number
-	CountryOfOrigin     string        `json:"CountryOfOrigin"`     //PO Number
+	POItem              string        `json:"POItem"`              //PO Item Number
+	ShippedQty          string        `json:"ShippedQty"`          //Shipped Quantity
+	ASNDate             string        `json:"ASNDate"`             //ASN Date
+	PromisedDate        string        `json:"PromisedDate"`        //Promised Date
+	CarrierID           string        `json:"CarrierID"`           //Carrier ID
+	CarrierTrackID      string        `json:"CarrierTrackID"`      //Carrier Track ID
+	TransporatationMode string        `json:"TransporatationMode"` //Transporatation Mode
+	CountryOfOrigin     string        `json:"CountryOfOrigin"`     //CountryOfOrigin
 	PackingList         Attachment    `json:"PackingList"`         //Attachments
 	SalesOrder          SalesOrder    `json:"SalesOrder"`          //Sales Order info, only for search
 	PurchaseOrder       PurchaseOrder `json:"PurchaseOrder"`       //Purchase Order info,only for search
@@ -136,7 +136,7 @@ type ODMLOIMaterial struct {
 	CPONOFLEXPONO CPONOFLEXPONO    `json:"CPONOFLEXPONO"`    //CPONOFLEXPONO Order info, only for search
 }
 
-// LOI GR Data Key: LOI + GRNO
+// LOI GR Data Key: LOI + PN
 type LOIGRInfo struct {
 	PN        string      `json:"PN"`        //item PN
 	Qty       int         `json:"Qty"`       //item Quantity
