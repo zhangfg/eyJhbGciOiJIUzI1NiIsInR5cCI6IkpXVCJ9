@@ -53,7 +53,7 @@ var prepareSOSearchData = function (data) {
         var poData = data.PurchaseOrder;
         res.POTYPE = poData.POTYPE;
         res.PODate = poData.PODate;
-        res.PARTSNO = poData.PARTSNO;
+        // res.PARTSNO = poData.PARTSNO;
         res.POQty = poData.POQty;
         // res.Unit = poData.Unit;
         res.OANO = poData.OANO;
@@ -267,8 +267,8 @@ var preparePOSearchData = function (data) {
 
     if (data.SalesOrder && data.SalesOrder.SONUMBER !== "") {
         var soData = data.SalesOrder;
-        res.SONUMBER = soData.SONUMBER;
-        res.SOITEM = soData.SOITEM;
+        // res.SONUMBER = soData.SONUMBER;
+        // res.SOITEM = soData.SOITEM;
         res.SOTYPE = soData.SOTYPE;
         res.SOCDATE = soData.SOCDATE;
         res.SOQTY = soData.SOQTY;
@@ -503,8 +503,8 @@ var prepareSupplierPOSearchData = function (data, asnNO) {
         res.NAME_AG = soData.NAME1_AG + ' ' + soData.NAME2_AG;
         res.CPONO = soData.CPONO;
         res.CITY_WE = soData.CITY_WE;
-        res.SONUMBER = soData.SONUMBER;
-        res.SOITEM = soData.SOITEM;
+        // res.SONUMBER = soData.SONUMBER;
+        // res.SOITEM = soData.SOITEM;
         res.SOTYPE = soData.SOTYPE;
     }
     res.data = [];

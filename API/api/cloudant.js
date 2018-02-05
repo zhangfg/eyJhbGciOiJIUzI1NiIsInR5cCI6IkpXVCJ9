@@ -473,16 +473,16 @@ var insertSOIPNNo = function (partNo, callback) {
         if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
-            // readDocument(data._id, function (err, dataItem) {
-            if (!data.rows.SOIPartNo) {
-                data.rows.SOIPartNo = [];
-            }
-            let partNoArr = data.rows.SOIPartNo.filter(item => item === partNo);
-            if (partNoArr.length === 0) {
-                data.rows.SOIPartNo.push(partNo);
-            }
-            updateDocument(data, callback);
-            // });
+            readDocument(data._id, function (err, dataItem) {
+                if (!dataItem.rows.SOIPartNo) {
+                    dataItem.rows.SOIPartNo = [];
+                }
+                let partNoArr = dataItem.rows.SOIPartNo.filter(item => item === partNo);
+                if (partNoArr.length === 0) {
+                    dataItem.rows.SOIPartNo.push(partNo);
+                }
+                updateDocument(dataItem, callback);
+            });
 
         } else {
             var parts = [];
@@ -509,16 +509,16 @@ var insertLOIPNNo = function (partNo, callback) {
         if (result && result.docs && result.docs.length > 0) {
             var data = result.docs[0];
             logger.debug('update the information of the PN', data);
-            // readDocument(data._id, function (err, dataItem) {
-            if (!data.rows.LOIPartNo) {
-                data.rows.LOIPartNo = [];
-            }
-            let partNoArr = data.rows.LOIPartNo.filter(item => item === partNo);
-            if (partNoArr.length === 0) {
-                data.rows.LOIPartNo.push(partNo);
-            }
-            updateDocument(data, callback);
-            // });
+            readDocument(data._id, function (err, dataItem) {
+                if (!dataItem.rows.LOIPartNo) {
+                    dataItem.rows.LOIPartNo = [];
+                }
+                let partNoArr = dataItem.rows.LOIPartNo.filter(item => item === partNo);
+                if (partNoArr.length === 0) {
+                    dataItem.rows.LOIPartNo.push(partNo);
+                }
+                updateDocument(dataItem, callback);
+            });
 
         } else {
             var parts = [];
