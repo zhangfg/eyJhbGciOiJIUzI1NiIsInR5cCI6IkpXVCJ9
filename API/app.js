@@ -907,7 +907,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
         var jsonStr = JSON.stringify(resp);
         if (resp.length === 0) {
             logger.debug('jsonStr.length: no data in cloudant DB is empty');
-            res.json(getQuerySuccessMessage(jsonStr));
+            res.json(getQuerySuccessMessage(resp));
             return;
         }
         // logger.debug(jsonStr);
