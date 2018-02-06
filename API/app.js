@@ -347,29 +347,29 @@ app.post('/users', function (req, res) {
 
 // app.get('/:role/channels/:channelName/chaincodes/:chaincodeName/downloadfile', function (req, res) {
 app.get('/downloadfile', function (req, res) {
-    // var fileId = req.query.fileId;
+    var fileId = req.query.fileId;
     // var vendorNo = req.query.vendorNo;
-    // var fileName = req.query.fileName;
+    var fileName = req.query.fileName;
 
-    var file = req.query.file.split('-');
+    // var file = req.query.file.split('-');
     // logger.debug('channelName  : ' + channelName);
     // logger.debug('chaincodeName : ' + chaincodeName);
-    logger.debug('req.query.file : ' + req.query.file);
+    // logger.debug('req.query.file : ' + req.query.file);
 
-    // if (!chaincodeName) {
-    //     res.json(getErrorMessage('\'chaincodeName\''));
-    //     return;
-    // }
-    // if (!channelName) {
-    //     res.json(getErrorMessage('\'channelName\''));
-    //     return;
-    // }
-    if (!file || file.length < 2) {
-        res.json(getErrorMessage('\'file\''));
+    if (!fileId) {
+        res.json(getErrorMessage('\'fileId\''));
         return;
     }
-    var fileId = file[0];
-    var fileName = file[1];
+    if (!fileName) {
+        res.json(getErrorMessage('\'fileName\''));
+        return;
+    }
+    // if (!file || file.length < 2) {
+    //     res.json(getErrorMessage('\'file\''));
+    //     return;
+    // }
+    // var fileId = file[0];
+    // var fileName = file[1];
     logger.debug('fileId  : ' + fileId);
     logger.debug('fileName  : ' + fileName);
 
@@ -943,7 +943,9 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
                         }
 
                     });
+                    logger.debug('search data success111111!!!! ');
                     res.json(getQuerySuccessMessage(response));
+                    logger.debug('search data success!!!! ');
                     return;
                 }
 

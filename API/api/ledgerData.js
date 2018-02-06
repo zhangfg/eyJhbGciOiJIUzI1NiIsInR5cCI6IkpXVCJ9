@@ -287,6 +287,7 @@ var preparePOSearchData = function (data) {
         var poData = data.PurchaseOrder;
         if (poData.InboundDelivery) {
             poData.InboundDelivery.forEach(indnItem => {
+                // logger.debug("INBD item"+json.stringify(indnItem));
                 var item = {};
                 item.OAName = poData.OAName;
                 item.OANO = poData.OANO;
@@ -310,6 +311,7 @@ var preparePOSearchData = function (data) {
                     });
                 }
                 if (indnItem.SupplierOrder) {
+                    logger.debug("INBD SupplierOrder", indnItem.SupplierOrder.PackingList);
                     item.PackingList = indnItem.SupplierOrder.PackingList;
                 }
 
