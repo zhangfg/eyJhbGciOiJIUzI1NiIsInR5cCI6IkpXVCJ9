@@ -85,7 +85,7 @@ func crMappingRefPO(stub shim.ChaincodeStubInterface, args []string) pb.Response
 			c, _ = json.Marshal(refMapping)
 			stub.PutState(ref_key, c)
 
-			for _,refNo :=range refMapping.RefNos {
+			for _, refNo := range refMapping.RefNos {
 				err, pull_key := generateKey(stub, PULL_KEY, []string{refNo})
 				if err != nil {
 					return shim.Error(err.Error())
@@ -103,7 +103,6 @@ func crMappingRefPO(stub shim.ChaincodeStubInterface, args []string) pb.Response
 					stub.PutState(pull_key, d)
 				}
 			}
-
 
 		} else {
 			return shim.Error("Flex PO number is required")
@@ -767,14 +766,19 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 			history := WareHouseHistory{}
 			history.Qty = warehouse.Qty
 			history.UpdateDate = warehouse.GRDate
-			history.GRNO = "Reverse"
+			if warehouse.GRNO == "" {
+				history.GRNO = "Reverse"
+			} else {
+				history.GRNO = warehouse.GRNO
+			}
+
 			if err == nil && whObjAsbytes != nil {
 				whOrder := WareHouseInfo{}
 				err = json.Unmarshal(whObjAsbytes, &whOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				whOrder.Quantity = warehouse.Qty + warehouse.Qty
+				whOrder.Quantity = warehouse.Qty
 				whOrder.WHHistory = append(whOrder.WHHistory, history)
 				c, _ = json.Marshal(whOrder)
 			} else {
