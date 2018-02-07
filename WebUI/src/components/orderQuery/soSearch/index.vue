@@ -19,7 +19,7 @@
           </div>
           <div>
             <label>SO Order Type</label>
-            <el-input v-model="searchData.soOrder" placeholder="Please Enter Content"></el-input>
+            <el-input v-model="searchData.soType" placeholder="Please Enter Content"></el-input>
           </div>
         </div>
         <div class="condition-group">
@@ -34,8 +34,8 @@
         </div>
         <div class="condition-group">
           <div>
-            <label>Customer PO No.</label>
-            <el-input v-model="searchData.customerPoNo" placeholder="Please Enter Content"></el-input>
+            <label>ODM PO No.</label>
+            <el-input v-model="searchData.cPoNo" placeholder="Please Enter Content"></el-input>
           </div>
           <div>
             <label>Lenovo PR No.</label>
@@ -63,9 +63,9 @@ export default {
         startDate: '',
         endDate: '',
         soNo: '',
-        soOrder: '',
+        soType: '',
         partNo: '',
-        customerPoNo: '',
+        cPoNo: '',
         prNo: '',
         vendorNo: ''
       }
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     search () {
-      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.soNo === '' && this.searchData.soOrder === '' && this.searchData.partNo === '' && this.searchData.customerPoNo === '' && this.searchData.prNo === '' && this.searchData.vendorNo === '') {
+      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.soNo === '' && this.searchData.soType === '' && this.searchData.partNo === '' && this.searchData.cPoNo === '' && this.searchData.prNo === '' && this.searchData.vendorNo === '') {
         this.$message({
           showClose: true,
           message: 'Please enter a search condition at least!',
@@ -85,7 +85,7 @@ export default {
       } else {
         const loading = this.$loading({
           lock: true,
-          text: 'Searching From Block Chain',
+          text: 'Searching From Blockchain',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         })
@@ -94,7 +94,7 @@ export default {
           args: this.searchData
         }).then((res) => {
           loading.close()
-          if (res.body.success) {
+          if (res.body.success && res.body.data.length > 0) {
             this.searchInfo = this.searchSoData.body
           } else {
             this.$message({
@@ -102,16 +102,6 @@ export default {
               message: 'No Data',
               type: 'error'
             })
-          }
-          this.searchData = {
-            startDate: '',
-            endDate: '',
-            soNo: '',
-            soOrder: '',
-            partNo: '',
-            customerPoNo: '',
-            prNo: '',
-            vendorNo: ''
           }
         }).then((error) => error)
       }

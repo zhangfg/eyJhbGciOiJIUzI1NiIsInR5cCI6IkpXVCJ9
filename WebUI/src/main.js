@@ -9,6 +9,17 @@ import VueResource from 'vue-resource'
 import store from './vuex/store'
 import './assets/common.less'
 import Icon from 'vue-svg-icon/Icon.vue'
+import VueProgressBar from 'vue-progressbar'
+
+const options = {
+  color: '#ccc',
+  failedColor: '#874b4b',
+  thickness: '5px',
+  transition: {
+    speed: '0.1s',
+    opacity: '0.2s'
+  }
+}
 
 Vue.config.productionTip = false
 
@@ -17,6 +28,8 @@ Vue.use(ElementUI)
 Vue.use(VueResource)
 
 Vue.component('icon', Icon)
+
+Vue.use(VueProgressBar, options)
 
 router.beforeEach((to, from, next) => {
   if (to.path === '/login') {
@@ -30,6 +43,17 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
+})
+
+Vue.http.interceptors.push((request, next) => {
+  next((response) => {
+    if (response.status === 401) {
+      router.push({
+        name: 'login'
+      })
+    }
+    return response
+  })
 })
 
 /* eslint-disable no-new */

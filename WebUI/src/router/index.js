@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import layout from '@/components/layout/index'
 import search from '@/components/orderQuery/index'
 import upload from '@/components/upload/index'
+import Inventory from '@/components/Inventory/index'
 import login from '@/components/login/index'
 
 Vue.use(Router)
@@ -16,16 +17,23 @@ export default new Router({
       path: 'search',
       name: 'search',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: search
     }, {
       path: 'upload',
       name: 'upload',
       meta: {
-        requireAuth: true // 添加该字段，表示进入这个路由是需要登录的
+        requireAuth: true
       },
       component: upload
+    }, {
+      path: 'Inventory',
+      name: 'Inventory',
+      meta: {
+        requireAuth: true
+      },
+      component: Inventory
     }],
     redirect: '/layout/search'
   }, {

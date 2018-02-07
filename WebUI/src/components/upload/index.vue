@@ -16,7 +16,7 @@
 export default {
   data () {
     return {
-      importFileUrl: 'https://supplier1bs.mybluemix.net/' + sessionStorage.getItem('roleId') + '/channels/mychannel/chaincodes/BuySell/upload',
+      importFileUrl: 'https://suptest.mybluemix.net/' + sessionStorage.getItem('roleId') + '/channels/mychannel/chaincodes/BuySell/upload',
       uploadData: {
         ASNNO: ''
       },
@@ -26,7 +26,6 @@ export default {
     }
   },
   methods: {
-    // 上传成功后的回调
     uploadSuccess (response, file, fileList) {
       this.$message({
         showClose: true,
@@ -35,7 +34,6 @@ export default {
       console.log(response, file, fileList)
       this.uploadData.ASNNO = ''
     },
-    // 上传错误
     uploadError (response, file, fileList) {
       this.$message({
         showClose: true,
@@ -43,7 +41,6 @@ export default {
         type: 'error'
       })
     },
-    // 上传前对文件的大小的判断
     beforeAvatarUpload (file) {
       const xlsFormat = file.name.split('.')[1] === 'xls'
       const xlsxFormat = file.name.split('.')[1] === 'xlsx'

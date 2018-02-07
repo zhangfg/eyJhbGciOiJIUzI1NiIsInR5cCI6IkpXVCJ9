@@ -66,7 +66,7 @@ export default {
       } else {
         const loading = this.$loading({
           lock: true,
-          text: 'Searching From Block Chain',
+          text: 'Searching From Blockchain',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         })
@@ -75,7 +75,7 @@ export default {
           args: this.searchData
         }).then((res) => {
           loading.close()
-          if (res.body.success) {
+          if (res.body.success && res.body.data.length > 0) {
             this.searchInfo = this.searchSupplierData.body
           } else {
             this.$message({
@@ -83,13 +83,6 @@ export default {
               message: 'No Data',
               type: 'error'
             })
-          }
-          this.searchData = {
-            startDate: '',
-            endDate: '',
-            poNo: '',
-            ASNNumber: '',
-            partNo: ''
           }
         })
       }

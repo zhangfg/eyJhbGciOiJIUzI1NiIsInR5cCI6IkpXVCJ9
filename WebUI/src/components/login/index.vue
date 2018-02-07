@@ -1,6 +1,6 @@
 <template>
 	<div class="login">
-		<div class="logo">BlockChain</div>
+		<div class="logo">Buy&Sell Blockchain</div>
 		<div class="login-content">
 			<el-form ref="loginForm" :model="loginForm" label-width="0px" :rules="loginRules">
 				<el-form-item prop="username">
@@ -17,7 +17,11 @@
 		    <input v-model="checkCode" type="button" @click="createCode()"/>  
 		  </div> 
 			<p class="button" @click="login">Login</p>
+			<div class="progress">
+  			<vue-progress-bar></vue-progress-bar>
+			</div>
 		</div>
+		<img src="../../assets/image/right-logo.png" class="logoin-logo" alt="">
 	</div>
 </template>
 <script>
@@ -75,12 +79,13 @@ export default {
             this.inputCode = ''
             this.createCode()
           } else {
+            this.$Progress.start()
             this.$store.dispatch('getUserInfo', {
               username: this.loginForm.username,
               password: this.loginForm.password
             }).then((response) => {
-            // 这里在isLogin方法中先判断一下后台返回的是否为空值，如果不是然后提交后台返回的值。
               if (response.body.success) {
+                this.$Progress.finish()
                 this.loginForm.username = ''
                 this.loginForm.password = ''
                 sessionStorage.setItem('accessToken', response.body.token)
@@ -104,9 +109,18 @@ export default {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	background-image: url(../../assets/image/block.jpeg);
+	background-image: url(../../assets/image/login.jpeg);
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
+
+	.logoin-logo {
+		position: absolute;
+		right: 0;
+		bottom: 100px;
+    width: 60px;
+    height: 180px;
+
+	}
 
 	.logo {
 		position: absolute;
@@ -128,6 +142,13 @@ export default {
 
 		.el-input {
 			width: 83%;
+		}
+		
+		.progress {
+			margin-top: 10px;
+			.__cov-progress {
+				position: static;
+			}
 		}
 
 		.title {

@@ -1,7 +1,7 @@
 <template>
 	<div class="header-wrap">
-	    <p></p>
-	    <img v-if="customer === 'lenovo'" src="../../assets/image/lenovo.jpg" alt="">
+	    <p><img v-if="customer === 'lenovo'" src="../../assets/image/logo.png" alt=""><span>Lenovo Buy&Sell Blockchain</span></p>
+	    <img class="lenovo-word" v-if="customer === 'lenovo'" src="../../assets/image/lenovo.png" alt="">
 	</div>
 </template>
 <script>
@@ -21,30 +21,28 @@
 		position: relative;
 		background: #fefefe;
 		padding: 8px 15px;
-		font-weight: bold;
-		font-size: 24px;
 
 		>p {
-	    width: 240px;
-    	height: 45px;
-			background: url(../../assets/image/lenovoBlock.png);
-			background-size:  100% 100%;
+			height: 40px;
+			img {
+				width: 35px;
+				margin-top: 2px;
+			}
+			span {   
+			 	font-weight: bold;
+		    font-size: 30px;
+		    display: inline-block;
+		    position: absolute;
+		    top: 14px;
+		    left: 60px;
+			}
 		}
-
-		img, div {
+		
+		.lenovo-word {
 			position: absolute;
 			right: 15px;
-		}
-		>img {
-			top: 14px;
+			top: 13px;
 			width: 100px;
-			display: inline-block;
-		}
-		>div {
-			background: #f00;
-			padding: 5px 10px;
-			top: 10px;
-			color: #fff;
 		}
 	}
 </style>

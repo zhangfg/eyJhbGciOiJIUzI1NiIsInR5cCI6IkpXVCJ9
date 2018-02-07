@@ -2,7 +2,7 @@
 	<div class="search-wrap">
     <div class="search-form">
       <div class="timer">
-        <label>Lenovo Po Create Date</label>
+        <label>Lenovo PO Create Date</label>
         <p>
           <el-date-picker v-model="searchData.startDate" type="date" @change="getStartTime" value-format="yyyy-MM-dd" placeholder="Please Enter startDate">
           </el-date-picker>
@@ -19,7 +19,7 @@
           </div>
           <div>
             <label>PO Order Type</label>
-            <el-input v-model="searchData.poOrder" placeholder="Please Enter Content"></el-input>
+            <el-input v-model="searchData.poType" placeholder="Please Enter Content"></el-input>
           </div>
         </div>
         <div class="condition-group">
@@ -53,7 +53,7 @@ export default {
         startDate: '',
         endDate: '',
         poNo: '',
-        poOrder: '',
+        poType: '',
         vendorNo: '',
         partNo: ''
       }
@@ -64,7 +64,7 @@ export default {
   },
   methods: {
     search () {
-      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.vendorNo === '' && this.searchData.poNo === '' && this.searchData.poOrder === '' && this.searchData.partNo === '') {
+      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.vendorNo === '' && this.searchData.poNo === '' && this.searchData.poType === '' && this.searchData.partNo === '') {
         this.$message({
           showClose: true,
           message: 'Please enter a search condition at least!',
@@ -73,7 +73,7 @@ export default {
       } else {
         const loading = this.$loading({
           lock: true,
-          text: 'Searching From Block Chain',
+          text: 'Searching From Blockchain',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         })
@@ -82,7 +82,7 @@ export default {
           args: this.searchData
         }).then((res) => {
           loading.close()
-          if (res.body.success) {
+          if (res.body.success && res.body.data.length > 0) {
             this.searchInfo = this.searchPoData.body
           } else {
             this.$message({
@@ -90,14 +90,6 @@ export default {
               message: 'No Data',
               type: 'error'
             })
-          }
-          this.searchData = {
-            startDate: '',
-            endDate: '',
-            poNo: '',
-            poOrder: '',
-            vendorNo: '',
-            partNo: ''
           }
         })
       }

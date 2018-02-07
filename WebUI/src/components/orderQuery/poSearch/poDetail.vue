@@ -1,21 +1,21 @@
 <template>
 	<div v-if="searchInfo" class="document-header-wrap">
 		<div v-if="searchInfo.data">
-			<el-table :data="searchInfo.data" empty-text="No Data" border>
-				<el-table-column prop="SOTYPE" label="SOTYPE">
+			<el-table :data="searchInfo.data.slice((currentPage-1)*pagesize,currentPage*pagesize)" empty-text="No Data" border>
+				<el-table-column prop="SOTYPE" label="SO Type">
 				</el-table-column>
 				<el-table-column prop="SONUMBER" label="SO" width="120">
 				</el-table-column>
-				<el-table-column prop="SOITEM" label="SOITEM">
+				<el-table-column prop="SOITEM" label="SO Item">
 					<template slot-scope="scope">
 						<el-button @click="soitemClick(scope.row)" type="text" size="small">{{scope.row.SOITEM}}</el-button>
 					</template>
 				</el-table-column>
-        <el-table-column prop="POTYPE" label="POTYPE">
+        <el-table-column prop="POTYPE" label="PO Type">
         </el-table-column>
 				<el-table-column prop="PONO" label="PO" width="120">
 				</el-table-column>
-				<el-table-column prop="POITEM" label="POITEM">
+				<el-table-column prop="POITEM" label="PO Item">
 					<template slot-scope="scope">
 						<el-button @click="poitemClick(scope.row)" type="text" size="small">{{scope.row.POITEM}}</el-button>
 					</template>
@@ -28,13 +28,13 @@
 				</el-table-column>
 				<el-table-column prop="PARTSDESC" label="Description" width="120">
 				</el-table-column>
-				<el-table-column prop="CRAD" label="Customer Required Schedule" width="120">
+				<el-table-column prop="CRAD" label-class-name="blue" label="ODM Required Schedule" width="120">
 				</el-table-column>
-				<el-table-column prop="SOLDTO" label="Customer No." width="120">
+				<el-table-column prop="SOLDTO" label-class-name="blue" label="ODM No." width="120">
 				</el-table-column>
-				<el-table-column prop="NAME_AG" label="Customer Name" width="130">
+				<el-table-column prop="NAME_AG" label-class-name="blue" label="ODM Name" width="130">
         </el-table-column>
-        <el-table-column prop="CPONO" label="Customer Po No." width="130">
+        <el-table-column prop="CPONO" label-class-name="blue" label="ODM PO No." width="140">
         </el-table-column>
         <el-table-column prop="VENDORNO" label="Vendor No." width="120">
         </el-table-column>
@@ -51,6 +51,7 @@
         <el-table-column prop="PRNO" label="PR No." width="120">
         </el-table-column>
 			</el-table>
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" background layout="prev, pager, next" :current-page="currentPage" :page-size="pagesize" :total="searchInfo.data.length"></el-pagination>
 		</div>
 		<el-dialog :visible.sync="soitemTableVisible" width="100%">
 			<so-item :giData="giData" :searchInfoData="searchInfo.data"></so-item>
@@ -76,7 +77,9 @@ export default {
       grData: {
         PONO: '',
         POITEM: ''
-      }
+      },
+      pagesize: 5,
+      currentPage: 1
     }
   },
   components: {
@@ -102,6 +105,12 @@ export default {
         POITEM: row.POITEM
       }
       this.poitemTableVisible = true
+    },
+    handleSizeChange (size) {
+      this.pagesize = size
+    },
+    handleCurrentChange (currentPage) {
+      this.currentPage = currentPage
     }
   }
 }

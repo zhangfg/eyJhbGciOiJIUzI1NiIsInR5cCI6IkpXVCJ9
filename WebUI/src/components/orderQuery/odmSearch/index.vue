@@ -18,18 +18,24 @@
             <el-input v-model="searchData.soNo" placeholder="Please Enter Content"></el-input>
           </div>
           <div>
-            <label>PO No.</label>
+            <label>Dummy PO No.</label>
             <el-input v-model="searchData.cPoNo" placeholder="Please Enter Content"></el-input>
           </div>
         </div>
         <div class="condition-group">
           <div>
             <label>Vendor No.</label>
-            <el-input v-model="searchData.VendorNo" placeholder="Please Enter Content"></el-input>
+            <el-input v-model="searchData.vendorNo" placeholder="Please Enter Content"></el-input>
           </div>
           <div>
             <label>Lenovo Part No.</label>
             <el-input v-model="searchData.partNo" placeholder="Please Enter Content"></el-input>
+          </div>
+        </div>
+        <div class="condition-group">
+          <div>
+            <label>ODM PO No.</label>
+            <el-input v-model="searchData.flexPONo" placeholder="Please Enter Content"></el-input>
           </div>
         </div>
       </div>
@@ -54,8 +60,9 @@ export default {
         endDate: '',
         soNo: '',
         cPoNo: '',
-        VendorNo: '',
-        partNo: ''
+        vendorNo: '',
+        partNo: '',
+        flexPONo: ''
       }
     }
   },
@@ -64,7 +71,7 @@ export default {
   },
   methods: {
     search () {
-      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.soNo === '' && this.searchData.cPoNo === '' && this.searchData.VendorNo === '' && this.searchData.partNo === '') {
+      if (this.searchData.startDate === '' && this.searchData.endDate === '' && this.searchData.soNo === '' && this.searchData.cPoNo === '' && this.searchData.vendorNo === '' && this.searchData.partNo === '' && this.searchData.flexPONo === '') {
         this.$message({
           showClose: true,
           message: 'Please enter a search condition at least!',
@@ -73,7 +80,7 @@ export default {
       } else {
         const loading = this.$loading({
           lock: true,
-          text: 'Searching From Block Chain',
+          text: 'Searching From Blockchain',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         })
@@ -82,7 +89,7 @@ export default {
           args: this.searchData
         }).then((res) => {
           loading.close()
-          if (res.body.success) {
+          if (res.body.success && res.body.data.length > 0) {
             this.searchInfo = this.searchOdmData.body
           } else {
             this.$message({
@@ -90,14 +97,6 @@ export default {
               message: 'No Data',
               type: 'error'
             })
-          }
-          this.searchData = {
-            startDate: '',
-            endDate: '',
-            soNo: '',
-            cPoNo: '',
-            VendorNo: '',
-            partNo: ''
           }
         })
       }
@@ -116,7 +115,7 @@ export default {
   overflow: hidden;
   .condition-group {
     float: left;
-    margin-right: 160px;
+    margin-right: 100px;
   }
 }
 

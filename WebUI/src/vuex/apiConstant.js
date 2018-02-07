@@ -1,5 +1,5 @@
 export const CHAINCODE_NAME = 'mychannel'
 export const CHANNEL_NAME = 'BuySell'
 export const LENOVO_URL = 'https://lbstest.mybluemix.net/'
-export const ODM_URL = 'https://odm1bs.mybluemix.net/'
-export const SUPPLIER_URL = 'https://supplier1bs.mybluemix.net/'
+export const ODM_URL = 'https://odmtest.mybluemix.net/'
+export const SUPPLIER_URL = 'https://suptest.mybluemix.net/'
