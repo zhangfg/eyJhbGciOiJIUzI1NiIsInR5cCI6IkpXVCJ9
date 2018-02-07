@@ -451,10 +451,13 @@ var prepareODMSearchData = function (data) {
                         item.PROINV = blItem.PROINV;
                         if (odmData.SalesOrder.GIInfo) {
                             odmData.SalesOrder.GIInfo.filter(giItem => giItem.DNNUMBER === blItem.DNNUMBER).forEach(giItem => {
+                                item.DNNUMBER = giItem.DNNUMBER;
+                                item.DNDATE = giItem.DNDATE;
                                 if (odmData.PurchaseOrder && odmData.PurchaseOrder.PONO !== "" && data.PurchaseOrder.InboundDelivery) {
                                     odmData.PurchaseOrder.InboundDelivery.filter(inbdItem => inbdItem.IBDNNUMBER === giItem.IBDNNUMBER)
                                         .forEach(inbdItem => {
                                             item.IDDlvyDate = inbdItem.IDDlvyDate;
+                                            item.ASNNO = inbdItem.ASNNO;
                                             if (odmData.PurchaseOrder.GRInfos) {
                                                 odmData.PurchaseOrder.GRInfos.filter(grItem => inbdItem.ASNNO === grItem.SupDeliveryNote)
                                                     .forEach(grItem => {
