@@ -136,7 +136,7 @@ type ODMLOIMaterial struct {
 	CPONOFLEXPONO CPONOFLEXPONO    `json:"CPONOFLEXPONO"`    //CPONOFLEXPONO Order info, only for search
 }
 
-// LOI GR Data Key: LOI + PN
+// LOI GR Data Key: LOI + GRNO
 type LOIGRInfo struct {
 	PN        string      `json:"PN"`        //item PN
 	Qty       int         `json:"Qty"`       //item Quantity

@@ -116,6 +116,14 @@ server.timeout = 240000;
 
 eventUtil.triggerEvent();
 
+function getCommonErrorMessage(message) {
+    var response = {
+        success: false,
+        message: ' Something is wrong, please concat your administrator'
+    };
+    return response;
+}
+
 function getNoAccessMessage() {
     var response = {
         success: false,
@@ -377,7 +385,7 @@ app.get('/downloadfile', function (req, res) {
     cloudant.getAttachment(fileId, fileName,
         function (err, data) {
             if (err) {
-                res.json(getErrorMessage(err));
+                res.json(getCommonErrorMessage(''));
                 return;
             } else {
                 res.download(fileId, fileName,
@@ -570,7 +578,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
                         return;
                     }, (err) => {
                         logger.debug('error is ' + err);
-                        res.json(getInvokeErrorMessage(err));
+                        res.json(getCommonErrorMessage(err));
                         return;
                     });
             }
@@ -586,7 +594,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName', function (req
                 return;
             }, (err) => {
                 logger.debug('error is ' + err);
-                res.json(getInvokeErrorMessage(err));
+                res.json(getCommonErrorMessage(err));
                 return;
             });
     }
@@ -660,7 +668,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
         cloudant.insertNewAttachment(fileId, attachment, function (err, data) {
             logger.debug('start to insert data to blockchain');
             if (err) {
-                res.json(getErrorMessage(err))
+                res.json(getCommonErrorMessage(err))
                 return;
             } else {
                 logger.info('file is inserted database successfully!!!');
@@ -688,7 +696,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/upload', multip
                         return;
                     }, (err) => {
                         logger.debug('error is ' + err);
-                        res.json(getInvokeErrorMessage('System Error'));
+                        res.json(getCommonErrorMessage('System Error'));
                         return;
                     });
             }
@@ -852,7 +860,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', functio
         .then(function (message) {
             if (message && typeof message === 'string' && message.includes(
                     'Error:')) {
-                res.json(getInvokeErrorMessage(message));
+                res.json(getCommonErrorMessage(message));
                 return;
             } else {
                 res.json(getQuerySuccessMessage(message));
@@ -861,7 +869,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/query', functio
 
         }, (err) => {
             logger.debug('error is ' + err);
-            res.json(getInvokeErrorMessage(err));
+            res.json(getCommonErrorMessage(err));
             return;
         });
 });
@@ -919,7 +927,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
             .then(function (message) {
                 if (message && typeof message === 'string' && message.includes(
                         'Error:')) {
-                    res.json(getInvokeErrorMessage(message));
+                    res.json(getCommonErrorMessage(message));
                     return;
                 } else {
                     var respObj;
@@ -951,7 +959,7 @@ app.post('/:role/channels/:channelName/chaincodes/:chaincodeName/:keyprefix/sear
 
             }, (err) => {
                 logger.debug('error is ' + err);
-                res.json(getInvokeErrorMessage(err));
+                res.json(getCommonErrorMessage(err));
                 return;
             });
     });
