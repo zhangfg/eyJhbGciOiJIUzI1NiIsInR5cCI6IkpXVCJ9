@@ -67,7 +67,7 @@ app.set('secret', 'thisismysecret');
 app.use(expressJWT({
     secret: 'thisismysecret'
 }).unless({
-    path: ['/users', '/downloadfile']
+    path: ['/users', '/downloadfile', '/checkuser']
 }));
 app.use(bearerToken());
 app.use(function (req, res, next) {
@@ -78,7 +78,9 @@ app.use(function (req, res, next) {
     if (req.originalUrl.indexOf('/downloadfile') >= 0) {
         return next();
     }
-
+    if (req.originalUrl.indexOf('/checkuser') >= 0) {
+        return next();
+    }
     var token = req.token;
     jwt.verify(token, app.get('secret'), function (err, decoded) {
         if (err) {
@@ -286,6 +288,45 @@ function insertSupplierSearchDocs(fcn, reqData, role, peers, channelName, chainc
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+//check user
+app.post('/checkuser', function (req, res) {
+    var username = req.body.username;
+    var orgName = req.body.orgName;
+    var flag = req.body.flag;
+    logger.debug('End point : /checkuser');
+    logger.debug('User name : ' + username);
+    logger.debug('flag : ' + flag);
+    if (flag && flag === 'true') {
+        logger.debug('getRegisteredUsers');
+        helper.getRegisteredUsers(username, orgName, true).then(function (response) {
+            if (response && typeof response !== 'string') {
+                res.json(response);
+                return;
+            } else {
+                res.json({
+                    success: false,
+                    message: response
+                });
+                return;
+            }
+        });
+    }else{
+        logger.debug('checkUsers');
+        helper.checkUsers(username, orgName).then(function (response) {
+            if (response && typeof response !== 'string') {
+                res.json(response);
+                return;
+            } else {
+                res.json({
+                    success: false,
+                    message: response
+                });
+                return;
+            }
+        });
+    }
+
+});
 // Register and enroll user
 app.post('/users', function (req, res) {
     var username = req.body.username;

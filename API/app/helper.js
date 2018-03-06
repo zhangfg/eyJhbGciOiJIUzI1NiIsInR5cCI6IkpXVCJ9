@@ -174,7 +174,8 @@ var getAdminUser = function (userOrg) {
         client._userContext = null;
         return client.getUserContext(username, true).then((user) => {
             if (user && user.isEnrolled()) {
-                logger.info('Successfully loaded member from persistence');
+                // logger.info('Successfully loaded member from persistence');
+                logger.info(util.format('getAdminUser Successfully loaded member  %s from persistence', username));
                 return user;
             } else {
                 let caClient = caClients[userOrg];
@@ -200,7 +201,48 @@ var getAdminUser = function (userOrg) {
         });
     });
 };
-
+var checkUsers = function (username, userOrg) {
+    var member;
+    var client = getClientForOrg(userOrg);
+    var enrollmentSecret = null;
+    logger.info("checkUsers=======" + getKeyStoreForOrg(getOrgName(userOrg)));
+    return hfc.newDefaultKeyValueStore({
+        path: getKeyStoreForOrg(getOrgName(userOrg))
+    }).then((store) => {
+        client.setStateStore(store);
+        logger.info('checkUsers:store,',store);
+        // clearing the user context before switching
+        client._userContext = null;
+        return client.getUserContext(username, true).then((user) => {
+            if (user && user.isEnrolled()) {
+                logger.info('checkUsers: Successfully loaded member from persistence');
+                return user;
+            } else {
+                logger.info(util.format('checkUsers: user %s was not  found.', username));
+                return null;
+            }
+        });
+    }).then((user) => {
+        if (user) {
+            var response = {
+                success: true,
+                secret: user._enrollmentSecret,
+                message: username + ' enrolled Successfully',
+            };
+            return response;
+        }else {
+            var response = {
+                success: true,
+                secret: '',
+                message: util.format('Failed to get registered user: %s.', username)
+            };
+            return response;
+        }
+    }, (err) => {
+        logger.error(util.format('Failed to get registered user: %s, error: %s', username, err.stack ? err.stack : err));
+        return '' + err;
+    });
+};
 var getRegisteredUsers = function (username, userOrg, isJson) {
     var member;
     var client = getClientForOrg(userOrg);
@@ -213,10 +255,12 @@ var getRegisteredUsers = function (username, userOrg, isJson) {
         // clearing the user context before switching
         client._userContext = null;
         return client.getUserContext(username, true).then((user) => {
+            logger.info('getRegisteredUsers:user,',user);
             if (user && user.isEnrolled()) {
-                logger.info('Successfully loaded member from persistence');
+                logger.info(util.format('getRegisteredUser Successfully loaded member  %s from persistence', username));
                 return user;
             } else {
+                logger.info(util.format('getRegisteredUsers: user %s was not  found.', username));
                 let caClient = caClients[userOrg];
                 return getAdminUser(userOrg).then(function (adminUserObj) {
                     member = adminUserObj;
@@ -322,3 +366,4 @@ exports.newPeers = newPeers;
 exports.newEventHubs = newEventHubs;
 exports.getRegisteredUsers = getRegisteredUsers;
 exports.getOrgAdmin = getOrgAdmin;
+exports.checkUsers = checkUsers;

@@ -753,44 +753,39 @@ func initWHQty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(err.Error())
 	}
 	for _, warehouse := range warehouses {
-		wareHouseInfo := WareHouseInfo{}
-		if warehouse.PN != "" {
+		if warehouse.GRNO == "" {
+			warehouse.GRNO = "stocktaking"
+		}
+		if warehouse.PN != "" && warehouse.GRNO != ""{
 			err, warehouse_key := generateKey(stub, WAREHOUSE_KEY, []string{warehouse.PN})
 			fmt.Println("write data, WareHouse part for - " + warehouse_key)
 			if err != nil {
 				return shim.Error(err.Error())
 			}
 			whObjAsbytes, err := stub.GetState(warehouse_key)
-			var c []byte
-			var histories []WareHouseHistory
-			history := WareHouseHistory{}
-			history.Qty = warehouse.Qty
-			history.UpdateDate = warehouse.GRDate
-			if warehouse.GRNO == "" {
-				history.GRNO = "Reverse"
-			} else {
-				history.GRNO = warehouse.GRNO
+			if err != nil {
+				return shim.Error(err.Error())
 			}
-
-			if err == nil && whObjAsbytes != nil {
-				whOrder := WareHouseInfo{}
+			whOrder := WareHouseInfo{}
+			if whObjAsbytes != nil {
 				err = json.Unmarshal(whObjAsbytes, &whOrder)
 				if err != nil {
 					return shim.Error(err.Error())
 				}
-				whOrder.Quantity = warehouse.Qty
-				whOrder.WHHistory = append(whOrder.WHHistory, history)
-				c, _ = json.Marshal(whOrder)
-			} else {
-				histories = append(histories, history)
-				wareHouseInfo.WHHistory = histories
-				wareHouseInfo.Quantity = warehouse.Qty
-				wareHouseInfo.PN = warehouse.PN
-				c, _ = json.Marshal(wareHouseInfo)
+				warehouse.Qty = warehouse.Qty - whOrder.Quantity
 			}
-
-			stub.PutState(warehouse_key, c)
-
+			err, loi_key := generateKey(stub, LOI_KEY, []string{warehouse.GRNO})
+			fmt.Println("write data, LOI GR part for - " + loi_key)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			var c []byte
+			c, _ = json.Marshal(warehouse)
+			stub.PutState(loi_key, c)
+			err = updateWarehouse(stub, c, "LG")
+			if err != nil {
+				return shim.Error(err.Error())
+			}
 		} else {
 			return shim.Error(" Fields (PN and Quantity) are required")
 		}
